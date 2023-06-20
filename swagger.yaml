@@ -1,0 +1,2297 @@
+openapi: 3.0.3
+info:
+  title: EPOS Backoffice RESTful APIs
+  description: This is the Backoffice RESTful APIs Swagger page.
+  contact:
+    email: apis@lists.epos-ip.org
+  license:
+    name: MIT License
+    url: https://epos-ci.brgm.fr/epos/WebApi/raw/master/LICENSE
+  version: 2.0.0
+servers:
+  - url: http://localhost:8080/api/backoffice/v1
+    description: Inferred Url
+paths:
+  /user:
+    post:
+      tags:
+        - V3 - User
+      summary: "Create User instance"
+      description: ""
+      operationId: "userpost"
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/user'
+      responses:
+        '200':
+          description: ok.
+        '201':
+          description: Created.
+        '204':
+          description: No content.
+        '400':
+          description: Bad request.
+        '401':
+          description: Token is missing or invalid
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '405':
+          description: 'Invalid input'
+        '500':
+          description: 'Internal Server Error'
+        '501':
+          description: 'Not Implemented'
+      security:
+        - aai: []
+    put:
+      tags:
+        - V3 - User
+      summary: "Update Data Product"
+      description: ""
+      operationId: "userputstate"
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/user'
+      responses:
+        '200':
+          description: ok.
+        '204':
+          description: No content.
+        '301':
+          description: Moved Permanently.
+        '400':
+          description: Bad request.
+        '401':
+          description: Token is missing or invalid
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '405':
+          description: 'Invalid input'
+        '500':
+          description: 'Internal Server Error'
+        '501':
+          description: 'Not Implemented'
+      security:
+        - aai: []
+  /user/{instance_id}:
+    get:
+      tags:
+        - V3 - User
+      summary: "Retrive Data Product"
+      description: ""
+      operationId: "userget"
+      parameters:
+        - in: "query"
+          name: "userId"
+          description: "eduIdentifier"
+          required: false
+          schema:
+            type: string
+        - in: "path"
+          name: "instance_id"
+          description: "Id of the object"
+          required: true
+          schema:
+            type: string
+        - in: "query"
+          name: "available_section"
+          description: "If it is flagged as true, returns the user (or the list of users) populated with the set of section accessible that user"
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: ok.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userList'
+        '204':
+          description: No content.
+        '301':
+          description: Moved Permanently.
+        '400':
+          description: Bad request.
+        '401':
+          description: Token is missing or invalid
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '405':
+          description: 'Invalid input'
+        '500':
+          description: 'Internal Server Error'
+        '501':
+          description: 'Not Implemented'
+      security:
+        - aai: []
+    delete:
+      tags:
+        - V3 - User
+      summary: "Delete Data Product"
+      description: ""
+      operationId: "userdelete"
+      parameters:
+        - in: "path"
+          name: "instance_id"
+          description: "instanceId of the object"
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+        '204':
+          description: No content.
+        '301':
+          description: Moved Permanently.
+        '400':
+          description: Bad request.
+        '401':
+          description: Token is missing or invalid
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '405':
+          description: 'Invalid input'
+        '500':
+          description: 'Internal Server Error'
+        '501':
+          description: 'Not Implemented'
+      security:
+        - aai: []
+
+  /dataproduct:
+    post:
+      tags:
+        - V3 - DataProduct
+      summary: "Create DataProduct instance"
+      description: ""
+      operationId: "dataproductpost"
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/dataproduct'
+      responses:
+        '201':
+          description: Created.
+        '204':
+          description: No content.
+        '400':
+          description: Bad request.
+        '401':
+          description: Token is missing or invalid
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '405':
+          description: 'Invalid input'
+        '500':
+          description: 'Internal Server Error'
+        '501':
+          description: 'Not Implemented'
+      security:
+        - aai: []
+    put:
+      tags:
+        - V3 - DataProduct
+      summary: "Update DataProduct"
+      description: ""
+      operationId: "dataproductputstate"
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/dataproduct'
+      responses:
+        '200':
+          description: ok.
+        '204':
+          description: No content.
+        '301':
+          description: Moved Permanently.
+        '400':
+          description: Bad request.
+        '401':
+          description: Token is missing or invalid
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '405':
+          description: 'Invalid input'
+        '500':
+          description: 'Internal Server Error'
+        '501':
+          description: 'Not Implemented'
+      security:
+        - aai: []
+  /dataproduct/{instance_id}:
+    get:
+      tags:
+        - V3 - DataProduct
+      summary: "Retrive DataProduct"
+      description: ""
+      operationId: "dataproductget"
+      parameters:
+        - in: "path"
+          name: "instance_id"
+          description: "Instance Id of the object"
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/dataproduct'
+        '204':
+          description: No content.
+        '301':
+          description: Moved Permanently.
+        '400':
+          description: Bad request.
+        '401':
+          description: Token is missing or invalid
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '405':
+          description: 'Invalid input'
+        '500':
+          description: 'Internal Server Error'
+        '501':
+          description: 'Not Implemented'
+      security:
+        - aai: []
+    delete:
+      tags:
+        - V3 - DataProduct
+      summary: "Delete DataProduct"
+      description: ""
+      operationId: "dataproductdelete"
+      parameters:
+        - in: "path"
+          name: "instance_id"
+          description: "Id of the object"
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/dataproduct'
+        '204':
+          description: No content.
+        '301':
+          description: Moved Permanently.
+        '400':
+          description: Bad request.
+        '401':
+          description: Token is missing or invalid
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '405':
+          description: 'Invalid input'
+        '500':
+          description: 'Internal Server Error'
+        '501':
+          description: 'Not Implemented'
+      security:
+        - aai: []
+  /distribution:
+    post:
+      tags:
+        - V3 - Distribution
+      summary: "Create Distribution instance"
+      description: ""
+      operationId: "distributionpost"
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/distribution'
+      responses:
+        '201':
+          description: Created.
+        '204':
+          description: No content.
+        '400':
+          description: Bad request.
+        '401':
+          description: Token is missing or invalid
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '405':
+          description: 'Invalid input'
+        '500':
+          description: 'Internal Server Error'
+        '501':
+          description: 'Not Implemented'
+      security:
+        - aai: []
+    put:
+      tags:
+        - V3 - Distribution
+      summary: "Update Distribution"
+      description: ""
+      operationId: "distributionputstate"
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/distribution'
+      responses:
+        '200':
+          description: ok.
+        '204':
+          description: No content.
+        '301':
+          description: Moved Permanently.
+        '400':
+          description: Bad request.
+        '401':
+          description: Token is missing or invalid
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '405':
+          description: 'Invalid input'
+        '500':
+          description: 'Internal Server Error'
+        '501':
+          description: 'Not Implemented'
+      security:
+        - aai: []
+  /distribution/{instance_id}:
+    get:
+      tags:
+        - V3 - Distribution
+      summary: "Retrive Distribution"
+      description: ""
+      operationId: "distributionget"
+      parameters:
+        - in: "path"
+          name: "instance_id"
+          description: "Instance Id of the object"
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/distribution'
+        '204':
+          description: No content.
+        '301':
+          description: Moved Permanently.
+        '400':
+          description: Bad request.
+        '401':
+          description: Token is missing or invalid
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '405':
+          description: 'Invalid input'
+        '500':
+          description: 'Internal Server Error'
+        '501':
+          description: 'Not Implemented'
+      security:
+        - aai: []
+    delete:
+      tags:
+        - V3 - Distribution
+      summary: "Delete Distribution"
+      description: ""
+      operationId: "distributiondelete"
+      parameters:
+        - in: "path"
+          name: "instance_id"
+          description: "Id of the object"
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/distribution'
+        '204':
+          description: No content.
+        '301':
+          description: Moved Permanently.
+        '400':
+          description: Bad request.
+        '401':
+          description: Token is missing or invalid
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '405':
+          description: 'Invalid input'
+        '500':
+          description: 'Internal Server Error'
+        '501':
+          description: 'Not Implemented'
+      security:
+        - aai: []
+  /webservice:
+    post:
+      tags:
+        - V3 - WebService
+      summary: "Create WebService instance"
+      description: ""
+      operationId: "webservicepost"
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/webservice'
+      responses:
+        '201':
+          description: Created.
+        '204':
+          description: No content.
+        '400':
+          description: Bad request.
+        '401':
+          description: Token is missing or invalid
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '405':
+          description: 'Invalid input'
+        '500':
+          description: 'Internal Server Error'
+        '501':
+          description: 'Not Implemented'
+      security:
+        - aai: []
+    put:
+      tags:
+        - V3 - WebService
+      summary: "Update WebService"
+      description: ""
+      operationId: "webserviceputstate"
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/webservice'
+      responses:
+        '200':
+          description: ok.
+        '204':
+          description: No content.
+        '301':
+          description: Moved Permanently.
+        '400':
+          description: Bad request.
+        '401':
+          description: Token is missing or invalid
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '405':
+          description: 'Invalid input'
+        '500':
+          description: 'Internal Server Error'
+        '501':
+          description: 'Not Implemented'
+      security:
+        - aai: []
+  /webservice/{instance_id}:
+    get:
+      tags:
+        - V3 - WebService
+      summary: "Retrive WebService"
+      description: ""
+      operationId: "webserviceget"
+      parameters:
+        - in: "path"
+          name: "instance_id"
+          description: "Instance Id of the object"
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/webservice'
+        '204':
+          description: No content.
+        '301':
+          description: Moved Permanently.
+        '400':
+          description: Bad request.
+        '401':
+          description: Token is missing or invalid
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '405':
+          description: 'Invalid input'
+        '500':
+          description: 'Internal Server Error'
+        '501':
+          description: 'Not Implemented'
+      security:
+        - aai: []
+    delete:
+      tags:
+        - V3 - WebService
+      summary: "Delete WebService"
+      description: ""
+      operationId: "webservicedelete"
+      parameters:
+        - in: "path"
+          name: "instance_id"
+          description: "Id of the object"
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/webservice'
+        '204':
+          description: No content.
+        '301':
+          description: Moved Permanently.
+        '400':
+          description: Bad request.
+        '401':
+          description: Token is missing or invalid
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '405':
+          description: 'Invalid input'
+        '500':
+          description: 'Internal Server Error'
+        '501':
+          description: 'Not Implemented'
+      security:
+        - aai: []
+  /operation:
+    post:
+      tags:
+        - V3 - Operation
+      summary: "Create Operation instance"
+      description: ""
+      operationId: "operationpost"
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/operation'
+      responses:
+        '201':
+          description: Created.
+        '204':
+          description: No content.
+        '400':
+          description: Bad request.
+        '401':
+          description: Token is missing or invalid
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '405':
+          description: 'Invalid input'
+        '500':
+          description: 'Internal Server Error'
+        '501':
+          description: 'Not Implemented'
+      security:
+        - aai: []
+    put:
+      tags:
+        - V3 - Operation
+      summary: "Update Operation"
+      description: ""
+      operationId: "operationputstate"
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/operation'
+      responses:
+        '200':
+          description: ok.
+        '204':
+          description: No content.
+        '301':
+          description: Moved Permanently.
+        '400':
+          description: Bad request.
+        '401':
+          description: Token is missing or invalid
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '405':
+          description: 'Invalid input'
+        '500':
+          description: 'Internal Server Error'
+        '501':
+          description: 'Not Implemented'
+      security:
+        - aai: []
+  /operation/{instance_id}:
+    get:
+      tags:
+        - V3 - Operation
+      summary: "Retrive Operation"
+      description: ""
+      operationId: "operationget"
+      parameters:
+        - in: "path"
+          name: "instance_id"
+          description: "Instance Id of the object"
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/operation'
+        '204':
+          description: No content.
+        '301':
+          description: Moved Permanently.
+        '400':
+          description: Bad request.
+        '401':
+          description: Token is missing or invalid
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '405':
+          description: 'Invalid input'
+        '500':
+          description: 'Internal Server Error'
+        '501':
+          description: 'Not Implemented'
+      security:
+        - aai: []
+    delete:
+      tags:
+        - V3 - Operation
+      summary: "Delete Operation"
+      description: ""
+      operationId: "operationdelete"
+      parameters:
+        - in: "path"
+          name: "instance_id"
+          description: "Id of the object"
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/operation'
+        '204':
+          description: No content.
+        '301':
+          description: Moved Permanently.
+        '400':
+          description: Bad request.
+        '401':
+          description: Token is missing or invalid
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '405':
+          description: 'Invalid input'
+        '500':
+          description: 'Internal Server Error'
+        '501':
+          description: 'Not Implemented'
+      security:
+        - aai: []
+  /contactpoint:
+    post:
+      tags:
+        - V3 - ContactPoint
+      summary: "Create ContactPoint instance"
+      description: ""
+      operationId: "contactpointpost"
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/contactpoint'
+      responses:
+        '201':
+          description: Created.
+        '204':
+          description: No content.
+        '400':
+          description: Bad request.
+        '401':
+          description: Token is missing or invalid
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '405':
+          description: 'Invalid input'
+        '500':
+          description: 'Internal Server Error'
+        '501':
+          description: 'Not Implemented'
+      security:
+        - aai: []
+    put:
+      tags:
+        - V3 - ContactPoint
+      summary: "Update ContactPoint"
+      description: ""
+      operationId: "contactpointputstate"
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/contactpoint'
+      responses:
+        '200':
+          description: ok.
+        '204':
+          description: No content.
+        '301':
+          description: Moved Permanently.
+        '400':
+          description: Bad request.
+        '401':
+          description: Token is missing or invalid
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '405':
+          description: 'Invalid input'
+        '500':
+          description: 'Internal Server Error'
+        '501':
+          description: 'Not Implemented'
+      security:
+        - aai: []
+  /contactpoint/{instance_id}:
+    get:
+      tags:
+        - V3 - ContactPoint
+      summary: "Retrive ContactPoint"
+      description: ""
+      operationId: "contactpointget"
+      parameters:
+        - in: "path"
+          name: "instance_id"
+          description: "Instance Id of the object"
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/contactpoint'
+        '204':
+          description: No content.
+        '301':
+          description: Moved Permanently.
+        '400':
+          description: Bad request.
+        '401':
+          description: Token is missing or invalid
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '405':
+          description: 'Invalid input'
+        '500':
+          description: 'Internal Server Error'
+        '501':
+          description: 'Not Implemented'
+      security:
+        - aai: []
+    delete:
+      tags:
+        - V3 - ContactPoint
+      summary: "Delete ContactPoint"
+      description: ""
+      operationId: "contactpointdelete"
+      parameters:
+        - in: "path"
+          name: "instance_id"
+          description: "Id of the object"
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/contactpoint'
+        '204':
+          description: No content.
+        '301':
+          description: Moved Permanently.
+        '400':
+          description: Bad request.
+        '401':
+          description: Token is missing or invalid
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '405':
+          description: 'Invalid input'
+        '500':
+          description: 'Internal Server Error'
+        '501':
+          description: 'Not Implemented'
+      security:
+        - aai: []
+  /person:
+    post:
+      tags:
+        - V3 - Person
+      summary: "Create Person instance"
+      description: ""
+      operationId: "personpost"
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/person'
+      responses:
+        '201':
+          description: Created.
+        '204':
+          description: No content.
+        '400':
+          description: Bad request.
+        '401':
+          description: Token is missing or invalid
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '405':
+          description: 'Invalid input'
+        '500':
+          description: 'Internal Server Error'
+        '501':
+          description: 'Not Implemented'
+      security:
+        - aai: []
+    put:
+      tags:
+        - V3 - Person
+      summary: "Update Person"
+      description: ""
+      operationId: "personputstate"
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/person'
+      responses:
+        '200':
+          description: ok.
+        '204':
+          description: No content.
+        '301':
+          description: Moved Permanently.
+        '400':
+          description: Bad request.
+        '401':
+          description: Token is missing or invalid
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '405':
+          description: 'Invalid input'
+        '500':
+          description: 'Internal Server Error'
+        '501':
+          description: 'Not Implemented'
+      security:
+        - aai: []
+  /person/{instance_id}:
+    get:
+      tags:
+        - V3 - Person
+      summary: "Retrive Person"
+      description: ""
+      operationId: "personget"
+      parameters:
+        - in: "path"
+          name: "instance_id"
+          description: "Instance Id of the object"
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/person'
+        '204':
+          description: No content.
+        '301':
+          description: Moved Permanently.
+        '400':
+          description: Bad request.
+        '401':
+          description: Token is missing or invalid
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '405':
+          description: 'Invalid input'
+        '500':
+          description: 'Internal Server Error'
+        '501':
+          description: 'Not Implemented'
+      security:
+        - aai: []
+    delete:
+      tags:
+        - V3 - Person
+      summary: "Delete Person"
+      description: ""
+      operationId: "persondelete"
+      parameters:
+        - in: "path"
+          name: "instance_id"
+          description: "Id of the object"
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/person'
+        '204':
+          description: No content.
+        '301':
+          description: Moved Permanently.
+        '400':
+          description: Bad request.
+        '401':
+          description: Token is missing or invalid
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '405':
+          description: 'Invalid input'
+        '500':
+          description: 'Internal Server Error'
+        '501':
+          description: 'Not Implemented'
+      security:
+        - aai: []
+  /organization:
+    post:
+      tags:
+        - V3 - Organization
+      summary: "Create Organization instance"
+      description: ""
+      operationId: "organizationpost"
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/organization'
+      responses:
+        '201':
+          description: Created.
+        '204':
+          description: No content.
+        '400':
+          description: Bad request.
+        '401':
+          description: Token is missing or invalid
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '405':
+          description: 'Invalid input'
+        '500':
+          description: 'Internal Server Error'
+        '501':
+          description: 'Not Implemented'
+      security:
+        - aai: []
+    put:
+      tags:
+        - V3 - Organization
+      summary: "Update Organization"
+      description: ""
+      operationId: "organizationputstate"
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/organization'
+      responses:
+        '200':
+          description: ok.
+        '204':
+          description: No content.
+        '301':
+          description: Moved Permanently.
+        '400':
+          description: Bad request.
+        '401':
+          description: Token is missing or invalid
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '405':
+          description: 'Invalid input'
+        '500':
+          description: 'Internal Server Error'
+        '501':
+          description: 'Not Implemented'
+      security:
+        - aai: []
+  /organization/{instance_id}:
+    get:
+      tags:
+        - V3 - Organization
+      summary: "Retrive Organization"
+      description: ""
+      operationId: "organizationget"
+      parameters:
+        - in: "path"
+          name: "instance_id"
+          description: "Instance Id of the object"
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/organization'
+        '204':
+          description: No content.
+        '301':
+          description: Moved Permanently.
+        '400':
+          description: Bad request.
+        '401':
+          description: Token is missing or invalid
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '405':
+          description: 'Invalid input'
+        '500':
+          description: 'Internal Server Error'
+        '501':
+          description: 'Not Implemented'
+      security:
+        - aai: []
+    delete:
+      tags:
+        - V3 - Organization
+      summary: "Delete Organization"
+      description: ""
+      operationId: "organizationdelete"
+      parameters:
+        - in: "path"
+          name: "instance_id"
+          description: "Id of the object"
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/organization'
+        '204':
+          description: No content.
+        '301':
+          description: Moved Permanently.
+        '400':
+          description: Bad request.
+        '401':
+          description: Token is missing or invalid
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '405':
+          description: 'Invalid input'
+        '500':
+          description: 'Internal Server Error'
+        '501':
+          description: 'Not Implemented'
+      security:
+        - aai: []
+
+  /{entity_type}/{instance_id}/{status}:
+    put:
+      tags:
+        - V3 - Status
+      summary: "Retrive Data Product"
+      description: ""
+      operationId: "changestatus"
+      parameters:
+        - in: "path"
+          name: "entity_type"
+          description: "Entity Type of the instance"
+          required: true
+          schema:
+            "$ref": "#/components/schemas/EntityType"
+        - in: "path"
+          name: "instance_id"
+          description: "instanceId of the instance"
+          required: true
+          schema:
+            type: string
+        - in: "path"
+          name: "status"
+          description: "Id of the object"
+          required: true
+          schema:
+            "$ref": "#/components/schemas/Status"
+      responses:
+        '200':
+          description: ok.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+        '204':
+          description: No content.
+        '301':
+          description: Moved Permanently.
+        '400':
+          description: Bad request.
+        '401':
+          description: Token is missing or invalid
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '405':
+          description: 'Invalid input'
+        '500':
+          description: 'Internal Server Error'
+        '501':
+          description: 'Not Implemented'
+      security:
+        - aai: []
+
+components:
+  schemas:
+    EntityType:
+      enum:
+        - DataProduct
+        - Distribution
+        - WebService
+        - Operation
+        - ContactPoint
+        - Person
+        - Organization
+      type: string
+    Status:
+      enum:
+        - Draft
+        - Submitted
+        - Discarded
+        - Published
+        - Archived
+      type: string
+    contactpoint:
+      required:
+        - UID
+      properties:
+        UID:
+          type: string
+          example: uid
+          description: 'This property contains the main identifier for the Contact Point'
+        email:
+          type: array
+          items:
+            type: string
+            example: 'email'
+          description: 'This property refers to the Contact Point Email.'
+        language:
+          type: array
+          items:
+            type: string
+            example: 'language'
+          description: 'This property contains information about the language used by the ContactPoint. Please use one of the language codes from the IETF BCP 47 standard.'
+        role:
+          type: string
+          example: 'role'
+          description: 'This property refers to the Contact Point role.'
+        person:
+          type: string
+          example: 'person UID'
+          description: 'This property refers to the person who is the Contact Point.'
+        telephone:
+          type: array
+          items:
+            type: string
+            example: 'telephone'
+          description: 'This property refers to the Contact Point Telephone.'
+    user:
+      required:
+        - UID
+      type: object
+      properties:
+        UID:
+          type: string
+          example: uid
+          description: 'This property contains the main identifier for the Data Product, e.g. the URI or other unique identifier in the context of the Catalogue.'
+    userList:
+      type: array
+      items:
+        $ref: '#/components/schemas/user'
+    dataproduct:
+      required:
+        - UID
+        - description
+        - title
+      type: object
+      properties:
+        UID:
+          type: string
+          example: uid
+          description: 'This property contains the main identifier for the Data Product, e.g. the URI or other unique identifier in the context of the Catalogue.'
+        accessRight:
+          type: array
+          items:
+            type: string
+            example: 'access right'
+          description: 'This property refers to information that indicates whether the Data Product is open data, has access restrictions or is not public.'
+        accrualPeriodicity:
+          type: string
+          example: 'accrual periodicity'
+          description: 'This property refers to the frequency at which the Data Product is updated.'
+        category:
+          type: array
+          items:
+            type: string
+            example: 'category'
+          description: 'This property refers to a category of the Data Product. A Data Product may be associated with multiple categories.'
+        contactPoint:
+          type: array
+          items:
+            type: string
+            example: 'contactPoint UID'
+          description: 'This property contains contact information (i.e. Role) that can be used for sending comments about the Data Product.'
+        created:
+          type: string
+          format: date-time
+          description: 'This property contains the date on which the Data Product was created.'
+        description:
+          type: array
+          items:
+            type: string
+            example: 'description'
+          description: 'This property contains a free-text account of the Data Product. This property can be repeated for parallel language versions of the description.'
+        distribution:
+          type: array
+          items:
+            type: string
+            example: 'distribution UID'
+          description: 'This property links the Data Product to an available Distribution.'
+        hasPart:
+          type: array
+          items:
+            type: string
+            example: 'dataproduct UID'
+          description: 'This property refers to a related Data Product that is part of the described Data Product.'
+        identifier:
+          type: array
+          items:
+            $ref: '#/components/schemas/identifier'
+          description: 'This property refers to a secondary identifier of the Data Product, such as MAST/ADS, DataCite, DOI, EZID or W3ID.'
+        isPartOf:
+          type: array
+          items:
+            type: string
+            example: 'dataproduct'
+          description: 'This property refers to a related Data Product in which the described Data Product is physically or logically included.'
+        issued:
+          type: string
+          format: date-time
+          description: 'This property contains the date of formal issuance (e.g., publication) of the Data Product.'
+        keywords:
+          type: string
+          example: 'keyword1, keyword2'
+          description: 'This property contains a keyword or tag describing the Data Product. Multiple entries in a keywords list are typically delimited by commas.'
+        modified:
+          type: string
+          format: date-time
+          description: 'This property contains the most recent date on which the Data Product was changed or modified.'
+        provenance:
+          type: array
+          items:
+            type: string
+            example: 'provenance'
+          description: 'This property contains a statement about the lineage of a Data Product'
+        publisher:
+          type: array
+          items:
+            type: string
+            example: 'organization'
+          description: 'This property refers to an entity (organisation) responsible for making the Data Product available.'
+        relation:
+          type: array
+          items:
+            type: string
+            example: 'epos resource'
+          description: 'It represents the link to another Epos resource.'
+        spatialExtent:
+          type: array
+          items:
+            $ref: '#/components/schemas/location'
+          description: 'This property refers to a geographic region that is covered by the Data Product.'
+        temporalExtent:
+          type: array
+          items:
+            $ref: '#/components/schemas/periodOfTime'
+          description: 'This property refers to a temporal period (i.e. startDate, endDate) that the Data Product covers.'
+        title:
+          type: array
+          items:
+            type: string
+            example: title
+          description: 'This property contains a name given to the Data Product. This property can be repeated for parallel language versions of the name.'
+        type:
+          type: string
+          example: type
+          description: 'This property refers to the type of the Data Product. A controlled vocabulary for the values has not been established.'
+        versionInfo:
+          type: string
+          example: '1.0'
+          description: 'This property contains a version number or other version designation of the Data Product.'
+    equipment:
+      required:
+        - UID
+        - description
+        - name
+      properties:
+        UID:
+          type: string
+          example: 'UID'
+          description: 'This property contains the main identifier for the Equipment.'
+        category:
+          type: array
+          items:
+            type: string
+            example: 'category'
+          description: 'This property refers to a category of the Equipment. An Equipment may be associated with multiple categories.'
+        contactPoint:
+          type: array
+          items:
+            type: string
+            example: 'contact Point'
+          description: 'This property contains contact information (i.e. Role) that can be used for sending comments about the Equipment.'
+        description:
+          type: string
+          example: 'description'
+          description: 'This property contains a free-text description of the Equipment.'
+        dynamicRange:
+          type: string
+          example: 'dynamicRange'
+          description: 'This property contains the full-scale measuring ability, in nT (unit and value).'
+        filter:
+          type: string
+          example: 'filter'
+          description: 'This property describes the filter that the instrument uses to produce data.'
+        isPartOf:
+          type: array
+          items:
+            type: string
+            example: 'isPartOf'
+          description: 'This property refers to an Equipment or a Facility in which the described Equipment is included.'
+        manufacturer:
+          type: string
+          example: 'manufacturer'
+          description: 'This property refers to an Organisation responsible for manufacturing the Equipment.'
+        name:
+          type: string
+          example: 'name'
+          description: 'This property contains a name given to the Equipment.'
+        pageURL:
+          type: string
+          example: 'pageURL'
+          description: 'This property refers to a page or document about the Equipment'
+        orientation:
+          type: string
+          example: 'orientation'
+          description: 'This property describes how the instrument is oriented.'
+        relation:
+          type: array
+          items:
+            type: string
+            example: 'Data Product or Webservice or Service'
+          description: 'It represents the link to another Epos resource. e.g., Dataset, WebService, Service'
+        resolution:
+          type: string
+          example: 'resolution'
+          description: 'This property contains the resolution in nT.'
+        samplePeriod:
+          type: string
+          example: 'samplePeriod'
+          description: 'This property contains the sample period in mS (unit and value)'
+        serialNumber:
+          type: string
+          example: 'serialNumber'
+          description: 'This property contains the serial number for the Equipment.'
+        spatialExtent:
+          type: array
+          items:
+            $ref: '#/components/schemas/location'
+          description: 'This property refers to a geographical location of the Equipment.'
+        temporalExtent:
+          type: array
+          items:
+            $ref: '#/components/schemas/periodOfTime'
+          description: 'This property refers to a temporal period (i.e. startDate, endDate) that the Equipment covers.'
+        type:
+          type: string
+          example: 'type'
+          description: 'This property refers to the type of the Equipment.'
+    facility:
+      required:
+        - UID
+        - Description
+        - Title
+      properties:
+        UID:
+          type: string
+          example: 'UID'
+          description: 'This property contains the main identifier for the Facility.'
+        address:
+          $ref: '#/components/schemas/address'
+        category:
+          type: array
+          items:
+            type: string
+            example: 'category'
+          description: 'This property refers to a category of the Facility. A Facility may be associated with multiple categories.'
+        contactPoint:
+          type: array
+          items:
+            type: string
+            example: 'contact Point'
+          description: 'This property contains contact information (i.e. Role) that can be used for sending comments about the Facility'
+        description:
+          type: string
+          example: 'description'
+          description: 'This property contains a free-text description of the Facility.'
+        isPartOf:
+          type: array
+          items:
+            type: string
+            example: 'facility'
+          description: 'This property refers to a Facility in which the described Facility is included.'
+        pageURL:
+          type: array
+          items:
+            type: string
+            example: 'pageURL'
+          description: 'This property refers to a page or document about this Facility.'
+        relation:
+          type: array
+          items:
+            type: string
+            example: 'dataproduct or contactPoint or service'
+          description: 'It represents the link to another Epos resource. e.g., Dataset, WebService, Service'
+        spatialExtent:
+          type: array
+          items:
+            $ref: '#/components/schemas/location'
+          description: 'This property refers to a geographical location of the Facility.'
+        title:
+          type: string
+          example: 'title'
+          description: 'This property contains a name given to the Facility.'
+        type:
+          type: string
+          example: 'type'
+          description: 'This property refers to the type of the Facility.'
+    organization:
+      required:
+        - UID
+        - identifier
+      properties:
+        UID:
+          type: string
+          example: 'UID'
+          description: 'This property contains the main identifier for the Organization.'
+        address:
+          $ref: '#/components/schemas/address'
+        contactPoint:
+          type: array
+          items:
+            type: string
+            example: 'contact Point'
+          description: 'This property refers to the Contact Point (i.e. Role) defined for the Organization'
+        email:
+          type: array
+          items:
+            type: string
+            example: 'email'
+          description: 'This property contains the email address of the Organization.'
+        identifier:
+          type: array
+          items:
+            $ref: '#/components/schemas/identifier'
+          description: 'This property contains an identifier for the Organization (e.g., PIC, ISNI, etc.).'
+        legalName:
+          type: string
+          example: 'legalName'
+          description: 'This property contains the official name of the Organization.'
+        leiCode:
+          type: string
+          example: 'leiCode'
+          description: 'This property contains the Organization identifier that uniquely identifies a legal entity as defined in ISO 17442.'
+        logo:
+          type: string
+          example: 'logo'
+          description: 'This property contains the URL of the Organization logo.'
+        memberOf:
+          type: array
+          items:
+            type: string
+            example: 'organization'
+          description: 'This property refers to an Organization to which this Organization belongs.'
+        owns:
+          type: array
+          items:
+            type: string
+            example: 'equipment or facility'
+          description: 'This property refers to a Facility or Equipment of which it is the owner.'
+        telephone:
+          type: array
+          items:
+            type: string
+            example: 'telephone'
+          description: 'This property contains the telephone number of the Organization.'
+        URL:
+          type: string
+          example: 'URL'
+          description: 'This property contains the URL of the Organization website.'
+    person:
+      required:
+        - UID
+        - identifier
+        - familyName
+        - givenName
+      properties:
+        UID:
+          type: string
+          example: 'UID'
+          description: 'This property contains the main identifier for the Person.'
+        address:
+          $ref: '#/components/schemas/address'
+        affiliation:
+          type: array
+          items:
+            type: string
+            example: 'organization'
+          description: 'This property refers to the organization to which the person is affiliated.'
+        CVURL:
+          type: string
+          example: 'https://mycv.com/mario.rossi'
+          description: 'This property refers to the URL of the Person curriculum vitae.'
+        email:
+          type: array
+          items:
+            type: string
+            example: 'mario.rossi@gmail.com'
+          description: 'This property contains the email address of the Person.'
+        familyName:
+          type: string
+          example: 'Rossi'
+          description: 'This property contains the last name of the Person.'
+        givenName:
+          type: string
+          example: 'Mario'
+          description: 'This property contains the first name of the Person.'
+        identifier:
+          type: array
+          items:
+            $ref: '#/components/schemas/identifier'
+          description: 'This property contains an identifier for the Person (e.g., ORCID, ScopusID, etc.).'
+        qualification:
+          type: string
+          example: 'boss'
+          description: 'This property contains the specific qualifications of the Person.'
+        telephone:
+          type: array
+          items:
+            type: string
+            example: '+39 334 86 06 438'
+          description: 'This property contains the telephone number of the Person.'
+    publication:
+      required:
+        - UID
+        - identifier
+        - name
+      properties:
+        UID:
+          type: string
+          example: 'UID'
+          description: 'This property contains the main identifier for the Publication.'
+        identifier:
+          type: array
+          items:
+            $ref: '#/components/schemas/identifier'
+          description: 'This property contains an identifier for the Publication.'
+        name:
+          type: string
+          example: 'name'
+          description: 'This property contains the name of the Publication.'
+        published:
+          type: string
+          format: date-time
+          description: 'This property contains the date of first Publication.'
+        publisher:
+          type: string
+          example: 'Publisher'
+          description: 'This property refers to an organization or person or agent which is the publisher of the Publication.'
+        abstract:
+          type: string
+          example: 'Mario'
+          description: 'This property contains the abstract of the Publication.'
+        author:
+          type: string
+          example: 'person uid'
+          description: 'This property refers to a Person which is the author of the Publication.'
+        Contributor:
+          type: array
+          items:
+            type: string
+            example: 'Contributor uid'
+          description: 'This property refers to a Person which is a contributor of the Publication.'
+        licenseUrl:
+          type: string
+          example: 'https://license.com/'
+          description: 'This property contains the URL of the license document that applies to the Publication.'
+        keywords:
+          type: string
+          example: 'keyword1, keyword2'
+          description: 'This property contains the keywords used to describe the Publication. Multiple entries in a keywords list are typically delimited by commas.'
+        issn:
+          type: string
+          example: 'issn'
+          description: 'This property contains the International Standard Serial Number (ISSN) that identifies the Publication.'
+        pages:
+          type: string
+          example: '100'
+          description: 'This property contains the number of pages of the Publication.'
+        volumesNumber:
+          type: string
+          example: '23'
+          description: 'This property contains the volume identifier of the Publication.'
+        category:
+          type: array
+          items:
+            type: string
+            example: 'category'
+          description: 'This property refers to a category of the Publication. A Publication may be associated with multiple categories.'
+    service:
+      required:
+        - UID
+        - identifier
+      properties:
+        UID:
+          type: string
+          example: 'UID'
+          description: 'This property contains the main identifier for the Service.'
+        category:
+          type: array
+          items:
+            type: string
+            example: 'category'
+          description: 'This property refers to a category of the Service. A Service may be associated with multiple categories.'
+        contactPoint:
+          type: array
+          items:
+            type: string
+            example: 'contact Point'
+          description: 'This property refers to the Contact Point (i.e. Role) defined for the Service.'
+        description:
+          type: string
+          example: 'description'
+          description: 'This property contains the description of the Service.'
+        identifier:
+          type: array
+          items:
+            $ref: '#/components/schemas/identifier'
+          description: 'This property contains an identifier for the Service.'
+        keywords:
+          type: string
+          example: 'keyword1, keyword2'
+          description: 'This property contains the keywords used to describe the Service. Multiple entries in a keywords list are typically delimited by commas.'
+        name:
+          type: string
+          example: 'name'
+          description: 'This property contains the name of the Service.'
+        pageURL:
+          type: string
+          example: 'pageURL'
+          description: 'This property refers to a page or document about the Service'
+        provider:
+          type: string
+          example: 'provider uid'
+          description: 'This property refers to an Organisation or Person responsible for making the Service available.'
+        spatialExtent:
+          type: array
+          items:
+            $ref: '#/components/schemas/location'
+          description: 'This property refers to a geographical location of the Service.'
+        temporalExtent:
+          type: array
+          items:
+            $ref: '#/components/schemas/periodOfTime'
+          description: 'This property refers to a temporal period (i.e. startDate, endDate) that the Service covers.'
+        type:
+          type: string
+          example: 'type'
+          description: 'This property refers to the type of the Service.'
+    softwareApplication:
+      required:
+        - UID
+        - identifier
+        - type
+      properties:
+        UID:
+          type: string
+          example: 'UID'
+          description: 'This property contains the main identifier for the Software Application.'
+        category:
+          type: array
+          items:
+            type: string
+            example: 'category'
+          description: 'This property refers to a category of the Software Application. A Software Application may be associated with multiple categories.'
+        contactPoint:
+          type: array
+          items:
+            type: string
+            example: 'contact Point'
+          description: 'This property refers to the Contact Point (i.e. Role) defined for the Software Application.'
+        description:
+          type: string
+          example: 'description'
+          description: 'This property contains the description of the Software Application'
+        downloadURL:
+          type: string
+          example: 'downloadURL'
+          description: 'If the Software Application can be downloaded this property contains the URL to download it.'
+        identifier:
+          type: array
+          items:
+            type: string
+            example: 'identifier'
+          description: 'This property contains an identifier for the Software Application.'
+        installURL:
+          type: string
+          example: 'installURL'
+          description: 'This property contains the URL at which the application may be installed.'
+        keywords:
+          type: string
+          example: 'keyword1, keyword2'
+          description: 'This property contains the keywords used to describe the Software Application. Multiple entries in a keywords list are typically delimited by commas.'
+        licenseURL:
+          type: string
+          example: 'licenseURL'
+          description: 'This property contains the URL of the license document that applies to the Software Application.'
+        mainEntityofPage:
+          type: string
+          example: 'mainEntityofPage'
+          description: 'This property refers to the web page URL which describes the Software Application.'
+        name:
+          type: string
+          example: 'name'
+          description: 'This property contains the name of the Software Application'
+        parameter:
+          type: array
+          items:
+            $ref: '#/components/schemas/parameter'
+          description: 'This property represents an input or output parameters of the Software Application.'
+        relation:
+          type: array
+          items:
+            type: string
+            example: 'epos resource'
+          description: 'It represents the link to another Epos resource. e.g. Software, WebService, Operation linked to this software.'
+        requirements:
+          type: string
+          example: 'requirements'
+          description: 'Component dependency requirements for application. This includes runtime environments and shared libraries that are not included in the application distribution package, but required to run the application.'
+        softwareVersion:
+          type: string
+          example: 'softwareVersion'
+          description: 'This property contains the version of the Software Application instance.'
+    softwareSourceCode:
+      required:
+        - identifier
+        - type
+      properties:
+        category:
+          type: array
+          items:
+            type: string
+            example: 'category'
+          description: 'This property refers to a category of the Software Source Code. A Software Source Code may be associated with multiple categories.'
+        codeRepository:
+          type: string
+          example: 'codeRepository'
+          description: 'This property contains the link to the repository where the un-compiled, human readable code and related code is located (SVN, GitHub, CodePlex)'
+        contactPoint:
+          type: array
+          items:
+            type: string
+            example: 'contact Point'
+          description: 'This property refers to the Contact Point (i.e. Role) defined for the Software.'
+        description:
+          type: string
+          example: 'description'
+          description: 'This property contains the description of the Software'
+        downloadURL:
+          type: string
+          example: 'downloadURL'
+          description: 'If the Software can be downloaded this property contains the URL to download it.'
+        identifier:
+          type: array
+          items:
+            type: string
+            example: 'identifier'
+          description: 'This property contains an identifier for the Software.'
+        keywords:
+          type: string
+          example: 'keyword1, keyword2'
+          description: 'This property contains the keywords used to describe the Software. Multiple entries in a keywords list are typically delimited by commas.'
+        licenseURL:
+          type: string
+          example: 'licenseURL'
+          description: 'This property contains the URL of the license document that applies to the Software.'
+        mainEntityOfPage:
+          type: string
+          example: 'mainEntityOfPage'
+          description: 'This property refers to the web page URL which describes the Software.'
+        name:
+          type: string
+          example: 'name'
+          description: 'This property contains the name of the Software'
+        programmingLanguage:
+          type: array
+          items:
+            type: string
+            example: 'programmingLanguage'
+          description: 'This property contains the computer programming language used to develop the Software.'
+        relation:
+          type: array
+          items:
+            type: string
+            example: 'epos resource'
+          description: 'It represents the link to another Epos resource. e.g. Software, WebService, Operation linked to this software.'
+        runtimePlatform:
+          type: string
+          example: 'runtimePlatform'
+          description: 'This property refers to the runtime platform or script interpreter dependencies (Example - Java v1, Python2.3, .Net Framework 3.0).'
+        softwareVersion:
+          type: string
+          example: 'softwareVersion'
+          description: 'This property contains the version of the Software instance.'
+    webservice:
+      required:
+        - UID
+      properties:
+        UID:
+          type: string
+          example: uid
+          description: 'This property contains the main identifier for the Web Service.'
+        category:
+          type: array
+          items:
+            type: string
+            example: 'category'
+          description: 'This property refers to a category of the Web Service. A Web Service may be associated with multiple categories.'
+        contactPoint:
+          type: array
+          items:
+            type: string
+            example: 'contact point'
+          description: 'This property contains contact information (i.e. Role) that can be used for sending comments about the Web Service.'
+        dataModified:
+          type: string
+          format: date-time
+          description: 'This property contains the most recent date on which the Web Service was modified.'
+        dataPublished:
+          type: string
+          format: date-time
+          description: 'This property contains the date of publication of the Web Service.'
+        description:
+          type: array
+          items:
+            type: string
+            example: 'description'
+          description: 'This property contains a free-text description of the Web Service.'
+        documentation:
+          type: array
+          items:
+            $ref: '#/components/schemas/documentation'
+          description: 'This property refers to the API documentation.'
+        entryPoint:
+          type: string
+          example: 'Entry Point'
+          description: 'This property refers to the API definitions (e.g., WSDL, WADL)'
+        keywords:
+          type: string
+          example: 'keyword1, keyword2'
+          description: 'This property contains the keywords used to describe the Web Service. Multiple entries in a keywords list are typically delimited by commas.'
+        license:
+          type: string
+          example: 'license'
+          description: 'This property refers to the licence under which the Web Service can be used or reused.'
+        name:
+          type: string
+          example: 'name'
+          description: 'This property contains a name given to the Web Service.'
+        provider:
+          type: string
+          example: 'organization'
+          description: 'This property refers to an Organisation responsible for making the Web Service available.'
+        spatialExtent:
+          type: array
+          items:
+            $ref: '#/components/schemas/location'
+          description: 'This property refers to a geographical area covered by the Web Service.'
+        supportedOperation:
+          type: array
+          items:
+            type: string
+            example: 'operation'
+          description: 'This property refers to a web service operation supported by the Web Service.'
+        temporalExtent:
+          type: array
+          items:
+            $ref: '#/components/schemas/periodOfTime'
+          description: 'This property refers to a temporal period (i.e. startDate, endDate) that the Web Service covers.'
+    operation:
+      required:
+        - UID
+        - template
+      properties:
+        UID:
+          type: string
+          example: uid
+          description: 'This property contains the main identifier for the Operation'
+        method:
+          type: string
+          example: get
+          description: 'The HTTP method.'
+        returns:
+          type: array
+          items:
+            type: string
+            example: 'json'
+          description: 'This property is used to specify the output format of the Operation. The possible values are listed here: https://www.iana.org/assignments/media-types/media-types.xhtml'
+        template:
+          type: string
+          example: 'uri template'
+          description: 'The syntax of the template literal is specified by the [RFC6570] URI Template syntax.'
+        spatialExtent:
+          type: array
+          items:
+            $ref: '#/components/schemas/mapping'
+          description: 'A variable-to-property mapping of the IRI template.'
+    distribution:
+      required:
+        - UID
+        - accessURL
+      type: object
+      properties:
+        UID:
+          type: string
+          example: uid
+          description: 'This property contains the main identifier for the Distribution.'
+        accessService:
+          type: string
+          example: type
+          description: 'This property refers to the WebService which supports selection of an extract, sub-set, or combination of data'
+        accessURL:
+          type: array
+          items:
+            type: string
+            example: 'url'
+          description: 'This property contains a URL that gives access to a Distribution of the Data Product. The resource at the access URL may contain information about how to get the Data Product.'
+        description:
+          type: array
+          items:
+            type: string
+            example: 'description'
+          description: 'This property contains a free-text account of the Distribution. This property can be repeated for parallel language versions of the description.'
+        downloadURL:
+          type: array
+          items:
+            type: string
+            example: 'url'
+          description: 'This property contains a URL that is a direct link to a downloadable file in a given format.'
+        format:
+          type: string
+          example: format
+          description: 'This property refers to the type of the Distribution. A controlled vocabulary for the values has not been established.'
+        issued:
+          type: string
+          format: date-time
+          description: 'This property contains the date of formal issuance (e.g., publication) of the Distribution.'
+        licence:
+          type: string
+          example: licence
+          description: 'This property refers to the licence under which the Distribution is made available.'
+        modified:
+          type: string
+          format: date-time
+          description: 'This property contains the most recent date on which the Distribution was changed or modified.'
+        title:
+          type: array
+          items:
+            type: string
+            example: 'title'
+          description: 'This property contains a name given to the Distribution. This property can be repeated for parallel language versions of the description.'
+        type:
+          type: string
+          example: type
+          description: 'This property refers to the type of the Distribution.'
+    mapping:
+      required:
+        - variable
+        - label
+        - required
+        - range
+      properties:
+        defaultValue:
+          type: string
+          example: 'default Value'
+          description: 'This property contains the default value of the parameter.'
+        label:
+          type: string
+          example: 'label'
+          description: 'This property contains a short string used to describe the meaning of the parameter.'
+        maxValue:
+          type: string
+          example: 'max Value'
+          description: 'This property contains the maximum value of the parameter.'
+        minValue:
+          type: string
+          example: 'min Value'
+          description: 'This property contains the minimum value of the parameter.'
+        paramValue:
+          type: array
+          items:
+            type: string
+            example: 'Param Value'
+          description: 'This property contains one of the possible values which should be used in the web service query. It could be repeated as many times as needed.'
+        property:
+          type: string
+          example: 'property'
+          description: 'This property contains the vocabulary term which indicates the semantic description of parameter.'
+        range:
+          type: string
+          example: 'range'
+          description: 'This property contains the type of parameter'
+        required:
+          type: string
+          example: 'required'
+          description: 'This property contains true if the property is required, false otherwise.'
+        valuePattern:
+          type: string
+          example: 'value Pattern'
+          description: 'This property contains the regular expression for testing values according to the parameters specification.'
+        variable:
+          type: string
+          example: 'variable'
+          description: 'This property contains the name of the parameter as required by web service specifications.'
+    location:
+      type: object
+      properties:
+        latitude:
+          type: string
+          example: 'coordinate latitude'
+        longitude:
+          type: string
+          example: 'coordinate longitude'
+        geobbox:
+          type: array
+          items:
+            type: string
+            example: 'geobbox'
+    periodOfTime:
+      type: object
+      properties:
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+    documentation:
+      type: object
+      properties:
+        title:
+          type: string
+          example: 'title'
+        description:
+          type: string
+          example: 'description'
+        uri:
+          type: string
+          example: 'url'
+    identifier:
+      type: object
+      required:
+        - identifier
+        - type
+      properties:
+        type:
+          type: string
+          example: 'DDSS-ID'
+          description: 'This property refers the identifier scheme referenced by its datatype (e.g., DDSS-ID, DOI, etc.).'
+        identifier:
+          type: string
+          example: 'id'
+          description: 'This property contains a string that is an identifier in the context of the identifier scheme referenced by its datatype'
+    address:
+      type: object
+      required:
+        - country
+        - locality
+        - postalCode
+        - street
+      properties:
+        country:
+          type: string
+          example: 'country'
+          description: 'The country. For example, USA. You can also provide the two-letter ISO 3166-1 alpha-2 country code.'
+        locality:
+          type: string
+          example: 'locality'
+          description: 'The locality in which the street address is, and which is in the region. For example, Mountain View.'
+        postalCode:
+          type: string
+          example: 'postalCode'
+          description: 'The postal code. For example, 94043.'
+        street:
+          type: string
+          example: 'street'
+          description: 'The street address. For example, 1600 Amphitheatre Pkwy.'
+    parameter:
+      type: object
+      required:
+        - action
+      properties:
+        encodingFormat:
+          type: string
+          example: 'application/json'
+          description: 'Format'
+        conformsTo:
+          type: string
+          example: 'https://site.com/schema/request.json'
+          description: 'schema of the request'
+        action:
+          type: string
+          example: 'object or result'
+          enum:
+            - object
+            - result
+          description: 'The type of action, can be object or result'
+  securitySchemes:
+    aai:
+      type: apiKey
+      in: header
+      name: Authorization
