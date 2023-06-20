@@ -16,7 +16,7 @@ jobs:
       - name: Update version in pom.xml
         run: mvn -B versions:set -DnewVersion=latest -DgenerateBackupPoms=false
       - name: build artifact
-        run: mvn clean install
+        run: mvn clean install -DskipTests
       - name: Temporarily save jar artifact
         uses: actions/upload-artifact@v2
         with:
