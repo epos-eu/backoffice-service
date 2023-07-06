@@ -81,6 +81,7 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
      * @param parentsClass the class of the parent entity
      */
     protected <S extends EPOSDataModelEntity, P extends EPOSDataModelEntity> void updateParents(S son, User user, Class<P> parentsClass) {
+    	System.out.println(son.toString());
         for (LinkedEntity l : getParents(son)) {
             P parent;
 
@@ -100,6 +101,7 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
                 continue;
             }
             parent = d.get(0);
+            System.out.println(parent.toString());
 
             //if the son already exist we need to edit the parent draft to point to it
             boolean done = false;
@@ -107,6 +109,7 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
                 for (LinkedEntity ld : getSons(parent)) {
                     if (ld.getInstanceId().equals(son.getInstanceChangedId())) {
                         ld.setInstanceId(son.getInstanceId());
+                        ld.setMetaId(son.getMetaId());
                         ld.setUid(son.getUid());
                         done = true;
                     }
@@ -137,7 +140,7 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
             }
 
             Class<? extends EPOSDataModelEntity> grannyClass = getParentClass(parent);
-            if (grannyClass != null && !originalState.equals(DRAFT))
+            if (grannyClass != null)
                 updateParents(parent, user, grannyClass);
 
         }
@@ -262,6 +265,7 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
             // save the entity and get the reference to it
             reference = dbapi.create(body);
             body.setInstanceId(reference.getInstanceId());
+            body.setMetaId(reference.getMetaId());
 
             // take care of the parents
             if (takeCareOfTheParent)
