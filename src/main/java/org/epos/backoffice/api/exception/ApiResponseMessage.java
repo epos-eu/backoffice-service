@@ -1,5 +1,6 @@
 package org.epos.backoffice.api.exception;
 
+import org.epos.eposdatamodel.LinkedEntity;
 
 @javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2022-02-11T09:12:11.707Z[GMT]")
 public class ApiResponseMessage {
@@ -41,7 +42,32 @@ public class ApiResponseMessage {
         this.message = message;
     }
 
-    public int getCode() {
+    public ApiResponseMessage(int code, LinkedEntity entity) {
+    	this.code = code;
+        switch (code) {
+            case ERROR:
+                setType("error");
+                break;
+            case WARNING:
+                setType("warning");
+                break;
+            case INFO:
+                setType("info");
+                break;
+            case OK:
+                setType("ok");
+                break;
+            case TOO_BUSY:
+                setType("too busy");
+                break;
+            default:
+                setType("unknown");
+                break;
+        }
+        this.message = entity.toString();
+	}
+
+	public int getCode() {
         return code;
     }
 
