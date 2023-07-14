@@ -69,7 +69,6 @@ public abstract class BackofficeAbstractController<T extends EPOSDataModelEntity
             list = dbapi.retrieve(entityType, new DBAPIClient.GetQuery().instanceId(instance_id));
         }
 
-
         list = list.stream()
                 .filter(
                 elem -> user.getRole().equals(ADMIN) || elem.getState().equals(State.PUBLISHED) ||

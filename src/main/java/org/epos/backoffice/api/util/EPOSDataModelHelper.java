@@ -19,7 +19,7 @@ public class EPOSDataModelHelper {
         if (son instanceof WebService) return Optional.ofNullable(((WebService) son).getDistribution()).orElse(List.of());
         if (son instanceof Operation) return Optional.ofNullable(((Operation) son).getWebservice()).orElse(List.of());
         if (son instanceof DataProduct) return List.of();
-        throw new IllegalArgumentException("...just... Why?");
+        throw new IllegalArgumentException("GetParents ...just... Why? "+son.getClass());
     }
 
     public static <P extends EPOSDataModelEntity> List<LinkedEntity> getSons(P parent) {
@@ -31,27 +31,31 @@ public class EPOSDataModelHelper {
             return Optional.of(((DataProduct) parent).getDistribution()).orElse(List.of());
         if (parent instanceof Operation)
             return List.of();
-        throw new IllegalArgumentException("...just... Why?");
+        throw new IllegalArgumentException("GetSons ...just... Why? "+parent.getClass());
     }
 
     public static <S extends EPOSDataModelEntity> Class<? extends EPOSDataModelEntity> getParentClass(S son) {
+    	if (son instanceof ContactPoint) {
+    		if(Optional.ofNullable(((ContactPoint) son).getOrganization()).isPresent()) return Organization.class;
+    		if(Optional.ofNullable(((ContactPoint) son).getPerson()).isPresent()) return Person.class;
+    	}
         if (son instanceof Distribution) return DataProduct.class;
         if (son instanceof WebService) return Distribution.class;
         if (son instanceof Operation) return WebService.class;
-        else return null;
+        throw new IllegalArgumentException("GetParentClass ...just... Why? "+son.getClass());
     }
 
     public static <P extends EPOSDataModelEntity> Class<? extends EPOSDataModelEntity> getSonClass(P parent) {
         if (parent instanceof DataProduct) return Distribution.class;
         if (parent instanceof Distribution) return WebService.class;
         if (parent instanceof WebService) return Operation.class;
-        throw new IllegalArgumentException("...just... Why?");
+        throw new IllegalArgumentException("GetSonClass A ...just... Why? "+parent.getClass());
     }
 
     public static <P extends EPOSDataModelEntity> Class<? extends EPOSDataModelEntity> getSonClass(Class<P> parentClass) {
         if (parentClass.equals(DataProduct.class)) return Distribution.class;
         if (parentClass.equals(Distribution.class)) return WebService.class;
         if (parentClass.equals(WebService.class)) return Operation.class;
-        throw new IllegalArgumentException("...just... Why?");
+        throw new IllegalArgumentException("GetSonClass B  ...just... Why? "+parentClass);
     }
 }

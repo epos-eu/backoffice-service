@@ -81,9 +81,10 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 	 * @param parentsClass the class of the parent entity
 	 */
 	protected <S extends EPOSDataModelEntity, P extends EPOSDataModelEntity> void updateParents(S son, User user, Class<P> parentsClass) {
-		System.out.println(son.toString());
 		for (LinkedEntity l : getParents(son)) {
 			P parent;
+			
+			System.out.println(parentsClass);
 
 			// try to get the drafted the father if exists and is related to the same user.
 			List<P> d = dbapi.retrieve(parentsClass,
@@ -129,6 +130,7 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 				// the parent draft doesn't exist before so there is the need to create it
 				parent.setInstanceChangedId(parent.getInstanceId());
 				parent.setState(DRAFT);
+				System.out.println(parent);
 				LinkedEntity parentReference = dbapi.create(parent);
 				parent.setInstanceId(parentReference.getInstanceId());
 			} else if (originalState.equals(DRAFT)) {
@@ -149,6 +151,7 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 
 	protected <P extends EPOSDataModelEntity, D extends EPOSDataModelEntity> void addSon(P parent, D son) {
 		LinkedEntity linkedEntitySon = new LinkedEntity().uid(son.getUid()).entityType(son.getClass().getSimpleName()).metaId(son.getMetaId()).instanceId(son.getInstanceId());
+		
 		if (parent instanceof Distribution) {
 			((Distribution) parent).setAccessService(linkedEntitySon);
 			return;
@@ -165,6 +168,7 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 			((DataProduct) parent).getDistribution().add(linkedEntitySon);
 			return;
 		}
+		
 		System.err.println("...just... Why?");
 		//throw new IllegalArgumentException("...just... Why?");
 	}
@@ -270,7 +274,6 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 			reference = dbapi.create(body);
 			body.setInstanceId(reference.getInstanceId());
 			body.setMetaId(reference.getMetaId());
-
 			// take care of the parents
 			if (takeCareOfTheParent)
 				updateParents(body, user, getParentClass(body));

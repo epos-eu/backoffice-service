@@ -67,7 +67,7 @@ public class ContactPointController extends ScientificMetadataAbstractController
     public ResponseEntity<?> post(
             @RequestBody ContactPoint body
     ) {
-        return postMethod(body, true);
+        return postMethod(body, false);
     }
 
     @RequestMapping(
@@ -87,7 +87,7 @@ public class ContactPointController extends ScientificMetadataAbstractController
     public ResponseEntity<?> put(
             @RequestBody ContactPoint body
     ) {
-        return updateMethod(body, true);
+        return updateMethod(body, false);
     }
 
     @RequestMapping(value = "/{instance_id}",
