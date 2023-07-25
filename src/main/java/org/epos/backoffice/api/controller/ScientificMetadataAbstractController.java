@@ -287,7 +287,7 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 		dbapi.closeTransaction(true);
 		dbapi.setTransactionModeAuto(true);
 
-		return ResponseEntity.status(201).body(new ApiResponseMessage(ApiResponseMessage.OK, reference));
+		return ResponseEntity.status(201).body(reference);
 	}
 
 	protected ResponseEntity<?> updateMethod(EPOSDataModelEntity body, boolean takeCareOfTheParent) {
@@ -374,9 +374,7 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 
 
 
-		return ResponseEntity.status(201).body(
-				new ApiResponseMessage(ApiResponseMessage.OK, new LinkedEntity().uid(body.getUid()).entityType(entityType.getSimpleName()).instanceId(instanceId).metaId(body.getMetaId()))
-				);
+		return ResponseEntity.status(201).body(new LinkedEntity().uid(body.getUid()).entityType(entityType.getSimpleName()).instanceId(instanceId).metaId(body.getMetaId()));
 	}
 
 	protected ResponseEntity<?> updateStateMethod(String instance_id, State newState, Boolean justThisOne) {
