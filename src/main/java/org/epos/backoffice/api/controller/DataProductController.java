@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
-import static org.epos.backoffice.api.util.EPOSDataModelHelper.getSonClass;
-
 @RestController
 @RequestMapping(
         value = "/dataproduct",

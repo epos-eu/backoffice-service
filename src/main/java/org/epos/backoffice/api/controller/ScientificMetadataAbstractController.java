@@ -275,8 +275,11 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 			body.setInstanceId(reference.getInstanceId());
 			body.setMetaId(reference.getMetaId());
 			// take care of the parents
-			if (takeCareOfTheParent)
-				updateParents(body, user, getParentClass(body));
+			if (takeCareOfTheParent) {
+				Class<? extends EPOSDataModelEntity> parentClass = getParentClass(body);
+				if (parentClass != null)
+					updateParents(body, user, parentClass);
+			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -359,8 +362,11 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 			dbapi.update(body, new DBAPIClient.UpdateQuery().hardUpdate(true));
 
 			// take care of the dataproducts parents
-			if (takeCareOfTheParent)
-				updateParents(body, user, getParentClass(body));
+			if (takeCareOfTheParent) {
+				Class<? extends EPOSDataModelEntity> parentClass = getParentClass(body);
+				if (parentClass != null)
+					updateParents(body, user, parentClass);
+			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -463,8 +469,9 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 
 		if(Boolean.parseBoolean(instance.getToBeDelete()) && Objects.equals(newState, PUBLISHED)) {
 			dbapi.delete(instance.getClass(), new DBAPIClient.DeleteQuery().instanceId(instance.getInstanceId()));
-
-			removeArchivedInstanceFromNewParentInstance(instance,getParentClass(instance));
+			Class<? extends EPOSDataModelEntity> parentClass = getParentClass(instance);
+			if (parentClass != null)
+				removeArchivedInstanceFromNewParentInstance(instance,parentClass);
 
 		} else {
 			dbapi.update(instance, new DBAPIClient.UpdateQuery().state(newState));
