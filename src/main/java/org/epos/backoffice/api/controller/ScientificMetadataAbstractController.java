@@ -174,6 +174,7 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 	}
 
 	protected ResponseEntity<?> postMethod(EPOSDataModelEntity body, boolean takeCareOfTheParent) {
+		
 		User user = getUserFromSession();
 
 		if(body.getUid()==null) {
