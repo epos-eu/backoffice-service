@@ -2,6 +2,12 @@ package org.epos.backoffice.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
+
 import org.epos.backoffice.api.exception.ApiResponseMessage;
 import org.epos.backoffice.api.util.GroupFilter;
 import org.epos.backoffice.bean.BackofficeOperationType;
@@ -16,6 +22,9 @@ import org.springframework.http.ResponseEntity;
 
 import javax.servlet.http.HttpServletRequest;
 
+import java.lang.reflect.Type;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,7 +41,10 @@ public abstract class BackofficeAbstractController<T extends EPOSDataModelEntity
 	@Autowired
 	protected DBAPIClient dbapi;
 
-	protected Gson gson =  new Gson();
+	protected Gson gson = new GsonBuilder()
+	        .setPrettyPrinting()
+	        .registerTypeAdapter(LocalDateTime.class, new LocalDateAdapter())
+	        .create();
 
 	public BackofficeAbstractController(ObjectMapper objectMapper, HttpServletRequest request, Class<T> entityType) {
 		this.objectMapper = objectMapper;
@@ -90,7 +102,7 @@ public abstract class BackofficeAbstractController<T extends EPOSDataModelEntity
 
 		List<T> revertedList = new ArrayList<>();
 		list.forEach(e -> revertedList.add(0, e));
-
+		
 		if (list.isEmpty())
 			return ResponseEntity.status(404).body("[]");
 
@@ -98,4 +110,12 @@ public abstract class BackofficeAbstractController<T extends EPOSDataModelEntity
 				.status(200)
 				.body(gson.toJson(revertedList));
 	}
+	
+	class LocalDateAdapter implements JsonSerializer<LocalDateTime> {
+
+	    public JsonElement serialize(LocalDateTime date, Type typeOfSrc, JsonSerializationContext context) {
+	        return new JsonPrimitive(date.format(DateTimeFormatter.ISO_DATE_TIME)); // "yyyy-mm-dd"
+	    }
+	}
+
 }
