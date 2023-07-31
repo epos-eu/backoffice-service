@@ -264,7 +264,7 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 			}
 		}
 
-		dbapi.setTransactionModeAuto(false);
+		dbapi.setTransactionModeAuto(true);
 		dbapi.startTransaction();
 
 
@@ -352,7 +352,7 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 					.body(new ApiResponseMessage(ApiResponseMessage.ERROR, computePermission.generateErrorMessage()));
 
 
-		dbapi.setTransactionModeAuto(false);
+		dbapi.setTransactionModeAuto(true);
 		dbapi.startTransaction();
 
 		String instanceId;
@@ -428,7 +428,7 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 
 
 
-		dbapi.setTransactionModeAuto(false);
+		dbapi.setTransactionModeAuto(true);
 		dbapi.startTransaction();
 
 		try {

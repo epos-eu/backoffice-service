@@ -41,10 +41,10 @@ class PersonControllerTest {
     public void test(){
         Person p = new Person();
         p.setUid("ciao");
-        p.setState(State.PUBLISHED);
+        p.setState(State.PLACEHOLDER);
         p.setEditorId("ingestor");
         javax.persistence.EntityManager entityManager = getEntityManager();
         PersonDBAPI dbapi = new PersonDBAPI();
-        System.out.println(dbapi.getByUid("andrea.orfino@ingv.it", entityManager));
+        System.out.println(dbapi.getByUid("valerio.vinciarelli@epos-eric.eu", entityManager));
     }
 }
