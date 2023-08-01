@@ -322,6 +322,7 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 			return ResponseEntity
 					.status(400)
 					.body(new ApiResponseMessage(ApiResponseMessage.ERROR, "instanceId required."));
+		
 
 		List<T> retrieved = dbapi.retrieve(entityType, new DBAPIClient.GetQuery().state(DRAFT).instanceId(body.getInstanceId()));
 		if (retrieved.isEmpty()) {
@@ -360,7 +361,10 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 
 			instanceId = body.getInstanceId();
 
-			dbapi.update(body, new DBAPIClient.UpdateQuery().hardUpdate(true));
+			if(body.getState().equals(State.DRAFT))
+				dbapi.update(body, new DBAPIClient.UpdateQuery().hardUpdate(true));
+			else
+				postMethod(body, takeCareOfTheParent);
 
 			// take care of the dataproducts parents
 			if (takeCareOfTheParent) {
