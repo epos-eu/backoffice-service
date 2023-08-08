@@ -12,6 +12,7 @@ import org.epos.eposdatamodel.Person;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -32,7 +33,7 @@ public class PersonController extends ScientificMetadataAbstractController<Perso
         super(objectMapper, request, Person.class);
     }
 
-    @RequestMapping(value = "/{instance_id}",
+    @RequestMapping(value = "/{meta_id}/{instance_id}",
             produces = {"application/json"},
             method = RequestMethod.GET)
     @ResponseBody
@@ -46,9 +47,29 @@ public class PersonController extends ScientificMetadataAbstractController<Perso
             @ApiResponse(responseCode = "500", description = "Error executing the request, the error may be, either in the gateway or the backoffice-service")
     })
     public ResponseEntity<?> get(
+            @PathVariable String meta_id,
             @PathVariable String instance_id
     ) {
-        return getMethod(instance_id);
+        return getMethod(meta_id, instance_id);
+    }
+    
+    @RequestMapping(value = "/{meta_id}",
+            produces = {"application/json"},
+            method = RequestMethod.GET)
+    @ResponseBody
+    @Operation(summary = "Get Persons instances", description = "You can use this endpoint to retrieve all the Persons instances (using \"all\" as path parameter instead of metaId) or a specific instance the endpoint will return only the instances which the user doing the request have access (more information into the BackOffice repository documentation)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "The Persons instances are correctly retrieved", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "400", description = "Bad request."),
+            @ApiResponse(responseCode = "401", description = "Token is missing or invalid"),
+            @ApiResponse(responseCode = "404", description = "Not found"),
+            @ApiResponse(responseCode = "415", description = "Wrong media type"),
+            @ApiResponse(responseCode = "500", description = "Error executing the request, the error may be, either in the gateway or the backoffice-service")
+    })
+    public ResponseEntity<?> get(
+            @PathVariable String meta_id
+    ) {
+        return getMethod(meta_id, null);
     }
 
     @RequestMapping(value = "",

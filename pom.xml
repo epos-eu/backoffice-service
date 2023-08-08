@@ -11,7 +11,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>eu.epos</groupId>
 	<artifactId>backoffice-service</artifactId>
-	<version>0.8.2</version>
+	<version>VERSION</version>
 	<name>Backoffice Service</name>
 	<properties>
 		<java.version>11</java.version>

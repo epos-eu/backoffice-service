@@ -57,16 +57,23 @@ public abstract class BackofficeAbstractController<T extends EPOSDataModelEntity
 	}
 
 
-	protected ResponseEntity<?> getMethod(String instance_id) {
-		if (instance_id == null)
+	protected ResponseEntity<?> getMethod(String meta_id, String instance_id) {
+		if (meta_id == null)
 			return ResponseEntity
 					.status(400)
-					.body(new ApiResponseMessage(1, "The [instance_id] field can't be left blank"));
+					.body(new ApiResponseMessage(1, "The [meta_id] field can't be left blank"));
+		if(instance_id == null) {
+			instance_id = "all";
+		}
+		/*if (instance_id == null)
+			return ResponseEntity
+					.status(400)
+					.body(new ApiResponseMessage(1, "The [instance_id] field can't be left blank"));*/
 
 		User user = getUserFromSession();
 
 		BackofficeOperationType operationType = new BackofficeOperationType()
-				.operationType(instance_id.equals("all") ? GET_ALL : GET_SINGLE)
+				.operationType(meta_id.equals("all") ? GET_ALL : GET_SINGLE)
 				.entityType(entityType)
 				.userRole(user.getRole());
 
@@ -78,10 +85,20 @@ public abstract class BackofficeAbstractController<T extends EPOSDataModelEntity
 					.body(new ApiResponseMessage(1, computePermission.generateErrorMessage()));
 
 		List<T> list;
-		if (instance_id.equals("all")) {
-			list = dbapi.retrieve(entityType, new DBAPIClient.GetQuery());
+		if (meta_id.equals("all")) {
+			list = dbapi.retrieve(entityType, new DBAPIClient.GetQuery());	
 		} else {
-			list = dbapi.retrieve(entityType, new DBAPIClient.GetQuery().instanceId(instance_id));
+			if(instance_id.equals("all")) {
+				list = dbapi.retrieve(entityType, new DBAPIClient.GetQuery());	
+				list = list.stream()
+						.filter(
+								elem -> elem.getMetaId().equals(meta_id)
+								)
+						.collect(Collectors.toList());
+				
+			}else {
+				list = dbapi.retrieve(entityType, new DBAPIClient.GetQuery().instanceId(instance_id));
+			}
 		}
 
 		list = list.stream()
