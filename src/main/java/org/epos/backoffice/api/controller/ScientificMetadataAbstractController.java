@@ -297,6 +297,7 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 	protected ResponseEntity<?> updateMethod(EPOSDataModelEntity body, boolean takeCareOfTheParent) {
 		User user = getUserFromSession();
 
+		System.out.println(body.getInstanceId()+" "+body.getMetaId()+" "+body.getUid());
 
 		body.setState(body.getState() == null ? State.DRAFT : body.getState());
 		body.setEditorId(user.getMetaId());
@@ -360,6 +361,8 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 		try {
 
 			instanceId = body.getInstanceId();
+			
+			System.out.println(body.getInstanceId()+" "+instanceId+" "+body.getState());
 
 			if(body.getState().equals(State.DRAFT))
 				dbapi.update(body, new DBAPIClient.UpdateQuery().hardUpdate(true));

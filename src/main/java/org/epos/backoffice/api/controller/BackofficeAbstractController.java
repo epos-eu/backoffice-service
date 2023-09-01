@@ -83,6 +83,8 @@ public abstract class BackofficeAbstractController<T extends EPOSDataModelEntity
 			return ResponseEntity
 					.status(403)
 					.body(new ApiResponseMessage(1, computePermission.generateErrorMessage()));
+		
+		System.out.println(meta_id+" "+instance_id);
 
 		List<T> list;
 		if (meta_id.equals("all")) {
