@@ -343,6 +343,9 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 		}
 
 		T instance = retrieved.get(0);
+		
+		
+		if(instance.getState().equals(PUBLISHED)) body.setState(DRAFT);
 
 		GroupFilter groupFilter = new GroupFilter()
 				.instanceGroup(instance.getGroups())
@@ -364,7 +367,7 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 			
 			System.out.println(body.getInstanceId()+" "+instanceId+" "+body.getState());
 
-			if(body.getState().equals(State.DRAFT))
+			if(!instance.getState().equals(State.PUBLISHED))
 				dbapi.update(body, new DBAPIClient.UpdateQuery().hardUpdate(true));
 			else
 				postMethod(body, takeCareOfTheParent);
