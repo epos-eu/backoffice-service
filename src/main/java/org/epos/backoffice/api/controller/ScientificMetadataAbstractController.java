@@ -361,6 +361,7 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 		dbapi.startTransaction();
 
 		String instanceId;
+		ResponseEntity<?> response = null;
 		try {
 
 			instanceId = body.getInstanceId();
@@ -370,7 +371,7 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 			if(!instance.getState().equals(State.PUBLISHED))
 				dbapi.update(body, new DBAPIClient.UpdateQuery().hardUpdate(true));
 			else
-				postMethod(body, takeCareOfTheParent);
+				response  = postMethod(body, takeCareOfTheParent);
 
 			// take care of the dataproducts parents
 			if (takeCareOfTheParent) {
@@ -390,8 +391,8 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 		dbapi.setTransactionModeAuto(true);
 
 
-
-		return ResponseEntity.status(201).body(new LinkedEntity().uid(body.getUid()).entityType(entityType.getSimpleName()).instanceId(instanceId).metaId(body.getMetaId()));
+		if(response != null) return response;
+		else return ResponseEntity.status(201).body(new LinkedEntity().uid(body.getUid()).entityType(entityType.getSimpleName()).instanceId(instanceId).metaId(body.getMetaId()));
 	}
 
 	protected ResponseEntity<?> updateStateMethod(String instance_id, State newState, Boolean justThisOne) {
