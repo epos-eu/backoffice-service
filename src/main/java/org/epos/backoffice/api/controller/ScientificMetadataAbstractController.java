@@ -297,11 +297,10 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 	protected ResponseEntity<?> updateMethod(EPOSDataModelEntity body, boolean takeCareOfTheParent) {
 		User user = getUserFromSession();
 
-		System.out.println(body.getInstanceId()+" "+body.getMetaId()+" "+body.getUid());
-
 		body.setState(body.getState() == null ? State.DRAFT : body.getState());
 		body.setEditorId(user.getMetaId());
 		body.setFileProvenance("instance created with the backoffice");
+		if(body.getInstanceChangedId().isBlank()) body.setInstanceChangedId(body.getInstanceId());
 
 		OperationTypeEnum operationTypeEnum;
 		if (body.getState().equals(State.DRAFT)) operationTypeEnum = MANAGE_DRAFT;
@@ -365,13 +364,11 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 		try {
 
 			instanceId = body.getInstanceId();
-			
-			System.out.println(body.getInstanceId()+" "+instanceId+" "+body.getState());
 
 			if(!instance.getState().equals(State.PUBLISHED))
 				dbapi.update(body, new DBAPIClient.UpdateQuery().hardUpdate(true));
 			else
-				response  = postMethod(body, takeCareOfTheParent);
+				response = postMethod(body, takeCareOfTheParent);
 
 			// take care of the dataproducts parents
 			if (takeCareOfTheParent) {
@@ -381,9 +378,8 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 			}
 
 		} catch (Exception e) {
-			e.printStackTrace();
 			dbapi.rollbackTransaction();
-			return ResponseEntity.status(400).body(new ApiResponseMessage(ApiResponseMessage.ERROR, "Something went wrong during the persisting of the new instance"));
+			return ResponseEntity.status(400).body(new ApiResponseMessage(ApiResponseMessage.ERROR, "Something went wrong during the persisting of the new instance: "+e.getLocalizedMessage()));
 		}
 
 
