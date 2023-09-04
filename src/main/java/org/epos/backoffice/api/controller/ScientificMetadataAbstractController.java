@@ -300,7 +300,7 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 		body.setState(body.getState() == null ? State.DRAFT : body.getState());
 		body.setEditorId(user.getMetaId());
 		body.setFileProvenance("instance created with the backoffice");
-		if(body.getInstanceChangedId().isBlank()) body.setInstanceChangedId(body.getInstanceId());
+		if(body.getInstanceChangedId()!=null && body.getInstanceChangedId().isBlank()) body.setInstanceChangedId(body.getInstanceId());
 
 		OperationTypeEnum operationTypeEnum;
 		if (body.getState().equals(State.DRAFT)) operationTypeEnum = MANAGE_DRAFT;
