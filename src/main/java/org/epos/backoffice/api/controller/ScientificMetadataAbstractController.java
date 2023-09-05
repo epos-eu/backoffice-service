@@ -12,6 +12,23 @@ import org.epos.backoffice.service.ComputePermissionWithGroup;
 import org.epos.eposdatamodel.*;
 import org.epos.handler.dbapi.DBAPIClient;
 import org.epos.handler.dbapi.DBAPIClient.DeleteQuery;
+import org.epos.handler.dbapi.DBAPIClient.UpdateQuery;
+import org.epos.handler.dbapi.dbapiimplementation.CategoryDBAPI;
+import org.epos.handler.dbapi.dbapiimplementation.CategorySchemeDBAPI;
+import org.epos.handler.dbapi.dbapiimplementation.ContactPointDBAPI;
+import org.epos.handler.dbapi.dbapiimplementation.ContractDBAPI;
+import org.epos.handler.dbapi.dbapiimplementation.DataProductDBAPI;
+import org.epos.handler.dbapi.dbapiimplementation.DistributionDBAPI;
+import org.epos.handler.dbapi.dbapiimplementation.EquipmentDBAPI;
+import org.epos.handler.dbapi.dbapiimplementation.FacilityDBAPI;
+import org.epos.handler.dbapi.dbapiimplementation.OperationDBAPI;
+import org.epos.handler.dbapi.dbapiimplementation.OrganizationDBAPI;
+import org.epos.handler.dbapi.dbapiimplementation.PersonDBAPI;
+import org.epos.handler.dbapi.dbapiimplementation.PublicationDBAPI;
+import org.epos.handler.dbapi.dbapiimplementation.ServiceDBAPI;
+import org.epos.handler.dbapi.dbapiimplementation.SoftwareApplicationDBAPI;
+import org.epos.handler.dbapi.dbapiimplementation.SoftwareSourceCodeDBAPI;
+import org.epos.handler.dbapi.dbapiimplementation.WebServiceDBAPI;
 import org.springframework.http.ResponseEntity;
 
 import javax.servlet.http.HttpServletRequest;
@@ -83,20 +100,26 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 	protected <S extends EPOSDataModelEntity, P extends EPOSDataModelEntity> void updateParents(S son, User user, Class<P> parentsClass) {
 		for (LinkedEntity l : getParents(son)) {
 			P parent;
-			
-			System.out.println(parentsClass);
 
-			// try to get the drafted the father if exists and is related to the same user.
-			List<P> d = dbapi.retrieve(parentsClass,
-					new DBAPIClient.GetQuery()
-					.metaId(l.getMetaId())
-					.state(DRAFT)
-					.specificParameters(Map.of("editorId", user.getMetaId())));
+			List<P> d = new ArrayList<P>();
+			try {
+				d = dbapi.retrieve(parentsClass,
+						new DBAPIClient.GetQuery()
+						.metaId(l.getMetaId())
+						.state(DRAFT)	
+						.specificParameters(Map.of("editorId", user.getMetaId())));
+			}catch(Exception e) {
+				System.err.println(e.getLocalizedMessage());
+			}
 
 			//if the there isn't an already drafted father it just take the Published version of it
-			if (d.isEmpty())
-				d = dbapi.retrieve(parentsClass, new DBAPIClient.GetQuery().metaId(l.getMetaId()).state(PUBLISHED));
-
+			if (d.isEmpty()) {
+				try {
+					d = dbapi.retrieve(parentsClass, new DBAPIClient.GetQuery().metaId(l.getMetaId()).state(PUBLISHED));
+				}catch(Exception e) {
+					System.err.println(e.getLocalizedMessage());
+				}
+			}
 			// if there isn't again any dataproduct father then it means it will be created in the future, so it will create a Placeholder
 			if (d.isEmpty()) {
 				continue;
@@ -130,7 +153,6 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 				// the parent draft doesn't exist before so there is the need to create it
 				parent.setInstanceChangedId(parent.getInstanceId());
 				parent.setState(DRAFT);
-				System.out.println(parent);
 				LinkedEntity parentReference = dbapi.create(parent);
 				parent.setInstanceId(parentReference.getInstanceId());
 			} else if (originalState.equals(DRAFT)) {
@@ -151,7 +173,7 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 
 	protected <P extends EPOSDataModelEntity, D extends EPOSDataModelEntity> void addSon(P parent, D son) {
 		LinkedEntity linkedEntitySon = new LinkedEntity().uid(son.getUid()).entityType(son.getClass().getSimpleName()).metaId(son.getMetaId()).instanceId(son.getInstanceId());
-		
+
 		if (parent instanceof Distribution) {
 			((Distribution) parent).setAccessService(linkedEntitySon);
 			return;
@@ -168,13 +190,13 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 			((DataProduct) parent).getDistribution().add(linkedEntitySon);
 			return;
 		}
-		
+
 		System.err.println("...just... Why?");
 		//throw new IllegalArgumentException("...just... Why?");
 	}
 
 	protected ResponseEntity<?> postMethod(EPOSDataModelEntity body, boolean takeCareOfTheParent) {
-		
+
 		User user = getUserFromSession();
 
 		if(body.getUid()==null) {
@@ -283,7 +305,6 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 			}
 
 		} catch (Exception e) {
-			e.printStackTrace();
 			dbapi.rollbackTransaction();
 			return ResponseEntity.status(400).body(new ApiResponseMessage(ApiResponseMessage.ERROR, "Something went wrong during the persisting of the new instance: "+e.getMessage()));
 		}
@@ -295,13 +316,12 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 	}
 
 	protected ResponseEntity<?> updateMethod(EPOSDataModelEntity body, boolean takeCareOfTheParent) {
+		
 		User user = getUserFromSession();
 
 		body.setState(body.getState() == null ? State.DRAFT : body.getState());
 		body.setEditorId(user.getMetaId());
 		body.setFileProvenance("instance created with the backoffice");
-		if(body.getInstanceChangedId()!=null && body.getInstanceChangedId().isBlank()) body.setInstanceChangedId(body.getInstanceId());
-		if(body.getInstanceChangedId()==null) body.setInstanceChangedId(body.getInstanceId());
 
 		OperationTypeEnum operationTypeEnum;
 		if (body.getState().equals(State.DRAFT)) operationTypeEnum = MANAGE_DRAFT;
@@ -323,7 +343,7 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 			return ResponseEntity
 					.status(400)
 					.body(new ApiResponseMessage(ApiResponseMessage.ERROR, "instanceId required."));
-		
+
 
 		List<T> retrieved = dbapi.retrieve(entityType, new DBAPIClient.GetQuery().state(DRAFT).instanceId(body.getInstanceId()));
 		if (retrieved.isEmpty()) {
@@ -343,9 +363,12 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 		}
 
 		T instance = retrieved.get(0);
-		
-		
+
+
 		if(instance.getState().equals(PUBLISHED)) body.setState(DRAFT);
+		if(body.getInstanceChangedId()!=null && body.getInstanceChangedId().isBlank()) body.setInstanceChangedId(instance.getInstanceId());
+		if(body.getInstanceChangedId()==null) body.setInstanceChangedId(instance.getInstanceId());
+		body.setInstanceId(instance.getInstanceId());
 
 		GroupFilter groupFilter = new GroupFilter()
 				.instanceGroup(instance.getGroups())
@@ -365,17 +388,89 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 		try {
 
 			instanceId = body.getInstanceId();
+			body.setMetaId(instance.getMetaId());
 
-			if(!instance.getState().equals(State.PUBLISHED))
-				dbapi.update(body, new DBAPIClient.UpdateQuery().hardUpdate(true));
-			else
+			// TODO: temporary solution
+			if(!instance.getState().equals(State.PUBLISHED)) {
+				//dbapi.update(body, new UpdateQuery().hardUpdate(true));
+				switch(body.getClass().getSimpleName()) {
+				case "Category":
+					CategoryDBAPI catApi = new CategoryDBAPI();
+					catApi.save((Category) body);	
+					break;
+				case "CategoryScheme":
+					CategorySchemeDBAPI catSchemeApi = new CategorySchemeDBAPI();
+					catSchemeApi.save((CategoryScheme) body);
+					break;
+				case "ContactPoint":
+					ContactPointDBAPI contactApi = new ContactPointDBAPI();
+					contactApi.save((ContactPoint) body);
+					break;
+				case "Contract":
+					ContractDBAPI contractApi = new ContractDBAPI();
+					contractApi.save((Contract) body);
+					break;
+				case "DataProduct":
+					DataProductDBAPI dataproductApi = new DataProductDBAPI();
+					dataproductApi.save((DataProduct) body);
+					break;
+				case "Distribution":
+					DistributionDBAPI distributionApi = new DistributionDBAPI();
+					distributionApi.save((Distribution) body);
+					break;
+				case "Equipment":
+					EquipmentDBAPI equipmentApi = new EquipmentDBAPI();
+					equipmentApi.save((Equipment) body);
+					break;
+				case "Facility":
+					FacilityDBAPI facilityApi = new FacilityDBAPI();
+					facilityApi.save((Facility) body);
+					break;
+				case "Operation":
+					OperationDBAPI operationApi = new OperationDBAPI();
+					operationApi.save((Operation) body);
+					break;
+				case "Organization":
+					OrganizationDBAPI organizationApi = new OrganizationDBAPI();
+					organizationApi.save((Organization) body);
+					break;
+				case "Person":
+					PersonDBAPI personApi = new PersonDBAPI();
+					personApi.save((Person) body);
+					break;
+				case "Publication":
+					PublicationDBAPI publicationApi = new PublicationDBAPI();
+					publicationApi.save((Publication) body);
+					break;
+				case "Service":
+					ServiceDBAPI serviceApi = new ServiceDBAPI();
+					serviceApi.save((Service) body);
+					break;
+				case "SoftwareApplication":
+					SoftwareApplicationDBAPI softwareApplicationApi = new SoftwareApplicationDBAPI();
+					softwareApplicationApi.save((SoftwareApplication) body);
+					break;
+				case "SoftwareSourceCode":
+					SoftwareSourceCodeDBAPI softwareSourceCodeApi = new SoftwareSourceCodeDBAPI();
+					softwareSourceCodeApi.save((SoftwareSourceCode) body);
+					break;
+				case "WebService":
+					WebServiceDBAPI webserviceApi = new WebServiceDBAPI();
+					webserviceApi.save((WebService) body);
+					break;
+				default:
+					break;
+				}
+			}
+			else {
 				response = postMethod(body, takeCareOfTheParent);
 
-			// take care of the dataproducts parents
-			if (takeCareOfTheParent) {
-				Class<? extends EPOSDataModelEntity> parentClass = getParentClass(body);
-				if (parentClass != null)
-					updateParents(body, user, parentClass);
+				// take care of the dataproducts parents
+				if (takeCareOfTheParent) {
+					Class<? extends EPOSDataModelEntity> parentClass = getParentClass(body);
+					if (parentClass != null)
+						updateParents(body, user, parentClass);
+				}
 			}
 
 		} catch (Exception e) {
@@ -383,10 +478,8 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 			return ResponseEntity.status(400).body(new ApiResponseMessage(ApiResponseMessage.ERROR, "Something went wrong during the persisting of the new instance: "+e.getLocalizedMessage()));
 		}
 
-
 		dbapi.closeTransaction(true);
 		dbapi.setTransactionModeAuto(true);
-
 
 		if(response != null) return response;
 		else return ResponseEntity.status(201).body(new LinkedEntity().uid(body.getUid()).entityType(entityType.getSimpleName()).instanceId(instanceId).metaId(body.getMetaId()));
