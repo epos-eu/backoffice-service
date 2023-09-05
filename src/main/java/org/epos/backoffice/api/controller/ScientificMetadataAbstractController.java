@@ -366,8 +366,8 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 
 
 		if(instance.getState().equals(PUBLISHED)) body.setState(DRAFT);
-		if(body.getInstanceChangedId()!=null && body.getInstanceChangedId().isBlank()) body.setInstanceChangedId(instance.getInstanceId());
-		if(body.getInstanceChangedId()==null) body.setInstanceChangedId(instance.getInstanceId());
+		if(body.getInstanceChangedId()!=null && body.getInstanceChangedId().isBlank()) body.setInstanceChangedId(null);
+		if(body.getInstanceChangedId()!=null) body.setInstanceChangedId(null);
 		body.setInstanceId(instance.getInstanceId());
 
 		GroupFilter groupFilter = new GroupFilter()
@@ -383,83 +383,32 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 		dbapi.setTransactionModeAuto(true);
 		dbapi.startTransaction();
 
-		String instanceId;
 		ResponseEntity<?> response = null;
+		LinkedEntity reference = null;
+		
 		try {
-
-			instanceId = body.getInstanceId();
+			//instanceId = body.getInstanceId();
 			body.setMetaId(instance.getMetaId());
 
 			// TODO: temporary solution
 			if(!instance.getState().equals(State.PUBLISHED)) {
 				//dbapi.update(body, new UpdateQuery().hardUpdate(true));
-				switch(body.getClass().getSimpleName()) {
-				case "Category":
-					CategoryDBAPI catApi = new CategoryDBAPI();
-					catApi.save((Category) body);	
-					break;
-				case "CategoryScheme":
-					CategorySchemeDBAPI catSchemeApi = new CategorySchemeDBAPI();
-					catSchemeApi.save((CategoryScheme) body);
-					break;
-				case "ContactPoint":
-					ContactPointDBAPI contactApi = new ContactPointDBAPI();
-					contactApi.save((ContactPoint) body);
-					break;
-				case "Contract":
-					ContractDBAPI contractApi = new ContractDBAPI();
-					contractApi.save((Contract) body);
-					break;
-				case "DataProduct":
-					DataProductDBAPI dataproductApi = new DataProductDBAPI();
-					dataproductApi.save((DataProduct) body);
-					break;
-				case "Distribution":
-					DistributionDBAPI distributionApi = new DistributionDBAPI();
-					distributionApi.save((Distribution) body);
-					break;
-				case "Equipment":
-					EquipmentDBAPI equipmentApi = new EquipmentDBAPI();
-					equipmentApi.save((Equipment) body);
-					break;
-				case "Facility":
-					FacilityDBAPI facilityApi = new FacilityDBAPI();
-					facilityApi.save((Facility) body);
-					break;
-				case "Operation":
-					OperationDBAPI operationApi = new OperationDBAPI();
-					operationApi.save((Operation) body);
-					break;
-				case "Organization":
-					OrganizationDBAPI organizationApi = new OrganizationDBAPI();
-					organizationApi.save((Organization) body);
-					break;
-				case "Person":
-					PersonDBAPI personApi = new PersonDBAPI();
-					personApi.save((Person) body);
-					break;
-				case "Publication":
-					PublicationDBAPI publicationApi = new PublicationDBAPI();
-					publicationApi.save((Publication) body);
-					break;
-				case "Service":
-					ServiceDBAPI serviceApi = new ServiceDBAPI();
-					serviceApi.save((Service) body);
-					break;
-				case "SoftwareApplication":
-					SoftwareApplicationDBAPI softwareApplicationApi = new SoftwareApplicationDBAPI();
-					softwareApplicationApi.save((SoftwareApplication) body);
-					break;
-				case "SoftwareSourceCode":
-					SoftwareSourceCodeDBAPI softwareSourceCodeApi = new SoftwareSourceCodeDBAPI();
-					softwareSourceCodeApi.save((SoftwareSourceCode) body);
-					break;
-				case "WebService":
-					WebServiceDBAPI webserviceApi = new WebServiceDBAPI();
-					webserviceApi.save((WebService) body);
-					break;
-				default:
-					break;
+
+				try {
+					// save the entity and get the reference to it
+					reference = dbapi.create(body);
+					body.setInstanceId(reference.getInstanceId());
+					body.setMetaId(reference.getMetaId());
+					// take care of the parents
+					if (takeCareOfTheParent) {
+						Class<? extends EPOSDataModelEntity> parentClass = getParentClass(body);
+						if (parentClass != null)
+							updateParents(body, user, parentClass);
+					}
+					deleteMethod(instance.getInstanceId());
+				}catch (Exception e) {
+					dbapi.rollbackTransaction();
+					return ResponseEntity.status(400).body(new ApiResponseMessage(ApiResponseMessage.ERROR, "Something went wrong during the persisting of the new instance: "+e.getLocalizedMessage()));
 				}
 			}
 			else {
@@ -482,7 +431,7 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 		dbapi.setTransactionModeAuto(true);
 
 		if(response != null) return response;
-		else return ResponseEntity.status(201).body(new LinkedEntity().uid(body.getUid()).entityType(entityType.getSimpleName()).instanceId(instanceId).metaId(body.getMetaId()));
+		else return ResponseEntity.status(201).body(reference);
 	}
 
 	protected ResponseEntity<?> updateStateMethod(String instance_id, State newState, Boolean justThisOne) {
