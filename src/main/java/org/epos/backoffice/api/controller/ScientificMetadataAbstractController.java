@@ -200,7 +200,8 @@ public abstract class ScientificMetadataAbstractController<T extends EPOSDataMod
 		User user = getUserFromSession();
 
 		if(body.getUid()==null) {
-			return ResponseEntity.status(400).body(new ApiResponseMessage(ApiResponseMessage.ERROR, "UID undefined"));
+			System.err.println("UID undefined, generating a new one");
+			body.setUid("resource/"+body.getClass().getSimpleName().toLowerCase()+"/"+UUID.randomUUID());
 		}
 
 		body.setState(body.getState() == null ? State.DRAFT : body.getState());
