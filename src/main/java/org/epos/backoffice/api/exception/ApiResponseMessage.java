@@ -13,6 +13,7 @@ public class ApiResponseMessage {
     int code;
     String type;
     String message;
+    LinkedEntity entity;
 
     public ApiResponseMessage() {
     }
@@ -64,7 +65,7 @@ public class ApiResponseMessage {
                 setType("unknown");
                 break;
         }
-        this.message = entity.toString();
+        this.entity = entity;
 	}
 
 	public int getCode() {
@@ -90,4 +91,19 @@ public class ApiResponseMessage {
     public void setMessage(String message) {
         this.message = message;
     }
+    
+    public LinkedEntity getEntity() {
+        return entity;
+    }
+
+    public void setEntity(LinkedEntity entity) {
+        this.entity = entity;
+    }
+
+	@Override
+	public String toString() {
+		return "ApiResponseMessage [code=" + code + ", type=" + type + ", message=" + message + ", entity=" + entity
+				+ "]";
+	}
+    
 }

@@ -21,7 +21,7 @@ import javax.servlet.http.HttpServletRequest;
         value = "/operation",
         produces = {"application/json"}
 )
-public class OperationController extends ScientificMetadataAbstractController<Operation> implements ApiDocTag{
+public class OperationController extends MetadataAbstractController<Operation> implements ApiDocTag{
 
 
     private static final Logger log = LoggerFactory.getLogger(OperationController.class);

@@ -22,7 +22,7 @@ import javax.servlet.http.HttpServletRequest;
         value = "/webservice",
         produces = {"application/json"}
 )
-public class WebServiceController extends ScientificMetadataAbstractController<WebService> implements ApiDocTag {
+public class WebServiceController extends MetadataAbstractController<WebService> implements ApiDocTag {
 
 
     private static final Logger log = LoggerFactory.getLogger(WebServiceController.class);

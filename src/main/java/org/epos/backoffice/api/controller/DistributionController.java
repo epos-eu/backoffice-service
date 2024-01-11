@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletRequest;
         value = "/distribution",
         produces = {"application/json"}
 )
-public class DistributionController extends ScientificMetadataAbstractController<Distribution> implements ApiDocTag{
+public class DistributionController extends MetadataAbstractController<Distribution> implements ApiDocTag{
 
 
     private static final Logger log = LoggerFactory.getLogger(DistributionController.class);
