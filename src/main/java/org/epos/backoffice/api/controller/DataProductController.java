@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletRequest;
         value = "/dataproduct",
         produces = {"application/json"}
 )
-public class DataProductController extends ScientificMetadataAbstractController<DataProduct>  implements ApiDocTag{
+public class DataProductController extends MetadataAbstractController<DataProduct>  implements ApiDocTag{
 
 
     private static final Logger log = LoggerFactory.getLogger(DataProductController.class);
@@ -110,7 +110,7 @@ public class DataProductController extends ScientificMetadataAbstractController<
         return updateMethod(body, true);
     }
 
-    @RequestMapping(
+   /* @RequestMapping(
             value = "/{instance_id}",
             method = RequestMethod.PUT
     )
@@ -130,7 +130,7 @@ public class DataProductController extends ScientificMetadataAbstractController<
     ) {
         return updateStateMethod(instance_id, body.getState(), body.getJustThisOne());
     }
-
+*/
 
     @RequestMapping(value = "/{instance_id}",
             method = RequestMethod.DELETE)

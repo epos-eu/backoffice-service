@@ -1,7 +1,6 @@
 package org.epos.backoffice.api.util;
 
 import org.epos.eposdatamodel.*;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -21,15 +20,15 @@ public class EPOSDataModelHelper {
         if (son instanceof DataProduct) return List.of();
         System.err.println("GetParents ...just... Why? "+son.getClass());
 		return null;
-    }
+    }	
 
     public static <P extends EPOSDataModelEntity> List<LinkedEntity> getSons(P parent) {
         if (parent instanceof Distribution)
-            return Optional.of(List.of(((Distribution) parent).getAccessService())).orElse(List.of());
+            return Optional.ofNullable(List.of(((Distribution) parent).getAccessService())).orElse(List.of());
         if (parent instanceof WebService)
-            return Optional.of(((WebService) parent).getSupportedOperation()).orElse(List.of());
+            return Optional.ofNullable(((WebService) parent).getSupportedOperation()).orElse(List.of());
         if (parent instanceof DataProduct)
-            return Optional.of(((DataProduct) parent).getDistribution()).orElse(List.of());
+            return Optional.ofNullable(((DataProduct) parent).getDistribution()).orElse(List.of());
         if (parent instanceof Operation)
             return List.of();
         System.err.println("GetSons ...just... Why? "+parent.getClass());
