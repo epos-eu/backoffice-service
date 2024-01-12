@@ -183,11 +183,18 @@ public class DistributionManager {
 				for(LinkedEntity le : distribution.getDataProduct()) {
 					DataProduct dataProduct = DataProductManager.getDataProduct(le.getMetaId(), le.getInstanceId(), user).get(0);
 					dataProduct.addDistribution(relation);
-					DataProductManager.updateDataProduct(dataProduct, user, false, false);
+					DataProductManager.createDataProduct(dataProduct, user, true, false);
 				}
 			}
 		}
+		if(sons) {
+			if(distribution.getAccessService()!=null) {
+				LinkedEntity le = distribution.getAccessService(); 
+				WebService webService = WebServiceManager.getWebService(le.getMetaId(), le.getInstanceId(), user).get(0);
+				webService.getDistribution().add(relation);
+				WebServiceManager.createWebService(webService, user, false, true);
+			}
+		}
 	}
-
 
 }

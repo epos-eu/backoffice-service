@@ -21,6 +21,7 @@ import static org.epos.backoffice.api.util.EPOSDataModelHelper.*;
 import static org.epos.backoffice.bean.OperationTypeEnum.*;
 import static org.epos.eposdatamodel.State.*;
 
+@Deprecated
 public abstract class ScientificMetadataAbstractController<T extends EPOSDataModelEntity> extends BackofficeAbstractController<T> {
 
 	public ScientificMetadataAbstractController(ObjectMapper objectMapper, HttpServletRequest request, Class<T> entityType) {

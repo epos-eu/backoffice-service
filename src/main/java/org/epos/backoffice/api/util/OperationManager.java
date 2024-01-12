@@ -13,6 +13,7 @@ import org.epos.eposdatamodel.Distribution;
 import org.epos.eposdatamodel.Operation;
 import org.epos.eposdatamodel.LinkedEntity;
 import org.epos.eposdatamodel.State;
+import org.epos.eposdatamodel.WebService;
 import org.epos.handler.dbapi.DBAPIClient;
 import org.epos.handler.dbapi.DBAPIClient.DeleteQuery;
 import org.epos.handler.dbapi.DBAPIClient.SaveQuery;
@@ -186,6 +187,13 @@ public class OperationManager {
 
 		System.out.println("*************\nManaging relation of: "+operation);
 		System.out.println("WebServices: "+operation.getWebservice());
+		if(parents) {
+			for(LinkedEntity le : operation.getWebservice()) {
+				WebService webService = WebServiceManager.getWebService(le.getMetaId(), le.getInstanceId(), user).get(0);
+				webService.getSupportedOperation().add(relation);
+				WebServiceManager.createWebService(webService, user, true, false);
+			}
+		}
 	}
 
 

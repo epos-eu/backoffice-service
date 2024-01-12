@@ -12,6 +12,7 @@ import org.epos.eposdatamodel.DataProduct;
 import org.epos.eposdatamodel.Distribution;
 import org.epos.eposdatamodel.WebService;
 import org.epos.eposdatamodel.LinkedEntity;
+import org.epos.eposdatamodel.Operation;
 import org.epos.eposdatamodel.State;
 import org.epos.handler.dbapi.DBAPIClient;
 import org.epos.handler.dbapi.DBAPIClient.DeleteQuery;
@@ -107,7 +108,7 @@ public class WebServiceManager {
 		dbapi.closeTransaction(true);
 		dbapi.setTransactionModeAuto(true);
 
-		manageRelations(webservice, reference, user, parents, sons);
+		manageNewDraftRelations(webservice, reference, user, parents, sons);
 
 		return new ApiResponseMessage(ApiResponseMessage.OK, reference);
 	}
@@ -144,9 +145,7 @@ public class WebServiceManager {
 
 		dbapi.closeTransaction(true);
 		dbapi.setTransactionModeAuto(true);
-
-		manageRelations(webservice, reference, user, parents, sons);
-
+		
 		return new ApiResponseMessage(ApiResponseMessage.OK, reference);
 	}
 
@@ -171,17 +170,22 @@ public class WebServiceManager {
 		return true;
 	}
 
-	private static void manageRelations(WebService webservice, LinkedEntity relation, User user, boolean parents, boolean sons) {
+	private static void manageNewDraftRelations(WebService webservice, LinkedEntity relation, User user, boolean parents, boolean sons) {
 
-		System.out.println("*************\nManaging relation of: "+webservice);
-		System.out.println("Distribution: "+webservice.getDistribution());
-		/*if(parents) {
+		if(parents) {
 			for(LinkedEntity le : webservice.getDistribution()) {
 				Distribution distribution = DistributionManager.getDistribution(le.getMetaId(), le.getInstanceId(), user).get(0);
 				distribution.setAccessService(relation);
-				DistributionManager.updateDistribution(distribution, user, false, false);
+				DistributionManager.createDistribution(distribution, user, true, false);
 			}
-		}*/
+		}
+		if(sons) {
+			for(LinkedEntity le : webservice.getSupportedOperation()) {
+				Operation operation = OperationManager.getOperation(le.getMetaId(), le.getInstanceId(), user).get(0);
+				operation.getWebservice().add(relation);
+				OperationManager.createOperation(operation, user, false, true);
+			}
+		}
 	}
 
 

@@ -108,7 +108,7 @@ public class DataProductManager {
 		dbapi.closeTransaction(true);
 		dbapi.setTransactionModeAuto(true);
 
-		manageRelations(dataProduct, reference, user, parents, sons);
+		manageNewDraftRelations(dataProduct, reference, user, parents, sons);
 
 		return new ApiResponseMessage(ApiResponseMessage.OK, reference);
 	}
@@ -147,8 +147,6 @@ public class DataProductManager {
 		dbapi.closeTransaction(true);
 		dbapi.setTransactionModeAuto(true);
 
-		manageRelations(dataProduct, reference, user, parents, sons);
-
 		return new ApiResponseMessage(ApiResponseMessage.OK, reference);
 	}
 
@@ -174,10 +172,16 @@ public class DataProductManager {
 	}
 
 
-	private static void manageRelations(DataProduct dataProduct, LinkedEntity relation, User user, boolean parents, boolean sons) {
+	private static void manageNewDraftRelations(DataProduct dataProduct, LinkedEntity relation, User user, boolean parents, boolean sons) {
 
-		System.out.println("*************\nManaging relation of: "+dataProduct);
-		System.out.println("Distribution: "+dataProduct.getDistribution());
+		if(sons) {
+			if(dataProduct.getDistribution()!=null)
+				for(LinkedEntity le : dataProduct.getDistribution()) {
+					Distribution distribution = DistributionManager.getDistribution(le.getMetaId(), le.getInstanceId(), user).get(0);
+					distribution.getDataProduct().add(relation);
+					DistributionManager.createDistribution(distribution, user, false, true);
+				}
+		}
 	
 	}
 
