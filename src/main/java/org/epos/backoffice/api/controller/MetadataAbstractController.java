@@ -32,10 +32,10 @@ public abstract class MetadataAbstractController<T extends EPOSDataModelEntity> 
 		List<T> revertedList = new ArrayList<>();
 		List<T> list = new ArrayList<T>();
 		
-		if(entityType.equals(DataProduct.class)) list.addAll((Collection<? extends T>) DataProductManager.getDataProduct(meta_id,instance_id, user));
-		if(entityType.equals(Distribution.class)) list.addAll((Collection<? extends T>) DistributionManager.getDistribution(meta_id,instance_id, user));
-		if(entityType.equals(WebService.class)) list.addAll((Collection<? extends T>) WebServiceManager.getWebService(meta_id,instance_id, user));
-		if(entityType.equals(Operation.class)) list.addAll((Collection<? extends T>) OperationManager.getOperation(meta_id,instance_id, user));
+		if(entityType.equals(DataProduct.class)) list.addAll((Collection<? extends T>) DataProductManager.getDataProduct(meta_id,instance_id, user).getListOfEntities());
+		if(entityType.equals(Distribution.class)) list.addAll((Collection<? extends T>) DistributionManager.getDistribution(meta_id,instance_id, user).getListOfEntities());
+		if(entityType.equals(WebService.class)) list.addAll((Collection<? extends T>) WebServiceManager.getWebService(meta_id,instance_id, user).getListOfEntities());
+		if(entityType.equals(Operation.class)) list.addAll((Collection<? extends T>) OperationManager.getOperation(meta_id,instance_id, user).getListOfEntities());
 
 		list.forEach(e -> revertedList.add(0, e));
 		

@@ -1,13 +1,20 @@
 package org.epos.backoffice.api.util;
 
+import static org.epos.backoffice.bean.OperationTypeEnum.GET_ALL;
+import static org.epos.backoffice.bean.OperationTypeEnum.GET_SINGLE;
 import static org.epos.backoffice.bean.RoleEnum.ADMIN;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.epos.backoffice.api.exception.ApiResponseMessage;
+import org.epos.backoffice.bean.BackofficeOperationType;
+import org.epos.backoffice.bean.ComputePermissionAbstract;
+import org.epos.backoffice.bean.EntityTypeEnum;
 import org.epos.backoffice.bean.User;
+import org.epos.backoffice.service.ComputePermissionNoGroup;
 import org.epos.eposdatamodel.DataProduct;
 import org.epos.eposdatamodel.Distribution;
 import org.epos.eposdatamodel.LinkedEntity;
@@ -22,8 +29,27 @@ public class DistributionManager {
 
 	protected static DBAPIClient dbapi = new DBAPIClient();
 
-	public static List<Distribution> getDistribution(String meta_id, String instance_id, User user) {
+	public static ApiResponseMessage getDistribution(String meta_id, String instance_id, User user) {
 		//dbapi.setMetadataMode(false);
+
+		if (meta_id == null)
+			return new ApiResponseMessage(1, "The [meta_id] field can't be left blank");
+		if(instance_id == null) {
+			instance_id = "all";
+		}
+
+		BackofficeOperationType operationType = new BackofficeOperationType()
+				.operationType(meta_id.equals("all") ? GET_ALL : GET_SINGLE)
+				.entityType(DataProduct.class)
+				.userRole(user.getRole());
+
+
+		ComputePermissionAbstract computePermission = new ComputePermissionNoGroup(operationType);
+		if (!computePermission.isAuthorized())
+			return new ApiResponseMessage(1, computePermission.generateErrorMessage());
+
+		System.out.println(meta_id+" "+instance_id);
+
 		List<Distribution> list;
 		if (meta_id.equals("all")) {
 			list = dbapi.retrieve(Distribution.class, new DBAPIClient.GetQuery());	
@@ -41,16 +67,29 @@ public class DistributionManager {
 			}
 		}
 
-		System.out.println(list);
-
 		list = list.stream()
 				.filter(
 						elem -> user.getRole().equals(ADMIN) || elem.getState().equals(State.PUBLISHED) ||
 						(elem.getState().equals(State.DRAFT) && user.getMetaId().equals(elem.getEditorId()))
 						)
+				.filter(
+						elem -> {
+							GroupFilter groupFilter = new GroupFilter()
+									.instanceGroup(elem.getGroups())
+									.userGroup(user.getGroups())
+									.operationType(operationType.getOperationType());
+							return groupFilter.isOk();
+						}
+						)
 				.collect(Collectors.toList());
 
-		return list;
+		List<Distribution> revertedList = new ArrayList<>();
+		list.forEach(e -> revertedList.add(0, e));
+
+		if (list.isEmpty())
+			return new ApiResponseMessage(ApiResponseMessage.OK, new ArrayList<Distribution>());
+
+		return new ApiResponseMessage(ApiResponseMessage.OK, list);
 	}
 
 	/**
@@ -72,6 +111,10 @@ public class DistributionManager {
 		}
 		distribution.setInstanceId(null);
 		distribution.setInstanceChangedId(null);
+
+
+		if(!ManagePermissions.checkPermissions(distribution, EntityTypeEnum.DISTRIBUTION, user)) 
+			return new ApiResponseMessage(ApiResponseMessage.ERROR, "You don't have auth on the groups of this instance");
 
 		// Check if exists a version PUBLISHED or ARCHIVED if MetaId!=null
 		if (distribution.getMetaId() != null) {
@@ -134,6 +177,9 @@ public class DistributionManager {
 		distribution.setEditorId(user.getMetaId());
 		distribution.setFileProvenance("instance created with the backoffice");
 
+		if(!ManagePermissions.checkPermissions(distribution, EntityTypeEnum.DISTRIBUTION, user)) 
+			return new ApiResponseMessage(ApiResponseMessage.ERROR, "You don't have auth on the groups of this instance");
+
 		dbapi.setTransactionModeAuto(true);
 		dbapi.startTransaction();
 		LinkedEntity reference = null;
@@ -181,7 +227,7 @@ public class DistributionManager {
 		if(parents) {
 			if(distribution.getDataProduct()!=null) {
 				for(LinkedEntity le : distribution.getDataProduct()) {
-					DataProduct dataProduct = DataProductManager.getDataProduct(le.getMetaId(), le.getInstanceId(), user).get(0);
+					DataProduct dataProduct = (DataProduct) DataProductManager.getDataProduct(le.getMetaId(), le.getInstanceId(), user).getListOfEntities().get(0);
 					dataProduct.addDistribution(relation);
 					DataProductManager.createDataProduct(dataProduct, user, true, false);
 				}
@@ -190,7 +236,7 @@ public class DistributionManager {
 		if(sons) {
 			if(distribution.getAccessService()!=null) {
 				LinkedEntity le = distribution.getAccessService(); 
-				WebService webService = WebServiceManager.getWebService(le.getMetaId(), le.getInstanceId(), user).get(0);
+				WebService webService = (WebService) WebServiceManager.getWebService(le.getMetaId(), le.getInstanceId(), user).getListOfEntities().get(0);
 				webService.getDistribution().add(relation);
 				WebServiceManager.createWebService(webService, user, false, true);
 			}

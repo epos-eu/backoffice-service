@@ -1,13 +1,20 @@
 package org.epos.backoffice.api.util;
 
+import static org.epos.backoffice.bean.OperationTypeEnum.GET_ALL;
+import static org.epos.backoffice.bean.OperationTypeEnum.GET_SINGLE;
 import static org.epos.backoffice.bean.RoleEnum.ADMIN;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.epos.backoffice.api.exception.ApiResponseMessage;
+import org.epos.backoffice.bean.BackofficeOperationType;
+import org.epos.backoffice.bean.ComputePermissionAbstract;
+import org.epos.backoffice.bean.EntityTypeEnum;
 import org.epos.backoffice.bean.User;
+import org.epos.backoffice.service.ComputePermissionNoGroup;
 import org.epos.eposdatamodel.DataProduct;
 import org.epos.eposdatamodel.Distribution;
 import org.epos.eposdatamodel.LinkedEntity;
@@ -15,14 +22,32 @@ import org.epos.eposdatamodel.State;
 import org.epos.handler.dbapi.DBAPIClient;
 import org.epos.handler.dbapi.DBAPIClient.DeleteQuery;
 import org.epos.handler.dbapi.DBAPIClient.SaveQuery;
-import org.epos.handler.dbapi.DBAPIClient.UpdateQuery;
 
 public class DataProductManager {
 
 	protected static DBAPIClient dbapi = new DBAPIClient();
 
-	public static List<DataProduct> getDataProduct(String meta_id, String instance_id, User user) {
+	public static ApiResponseMessage getDataProduct(String meta_id, String instance_id, User user) {
 		//dbapi.setMetadataMode(false);
+		
+		if (meta_id == null)
+			return new ApiResponseMessage(1, "The [meta_id] field can't be left blank");
+		if(instance_id == null) {
+			instance_id = "all";
+		}
+
+		BackofficeOperationType operationType = new BackofficeOperationType()
+				.operationType(meta_id.equals("all") ? GET_ALL : GET_SINGLE)
+				.entityType(DataProduct.class)
+				.userRole(user.getRole());
+
+
+		ComputePermissionAbstract computePermission = new ComputePermissionNoGroup(operationType);
+		if (!computePermission.isAuthorized())
+			return new ApiResponseMessage(1, computePermission.generateErrorMessage());
+		
+		System.out.println(meta_id+" "+instance_id);
+
 		List<DataProduct> list;
 		if (meta_id.equals("all")) {
 			list = dbapi.retrieve(DataProduct.class, new DBAPIClient.GetQuery());	
@@ -34,22 +59,35 @@ public class DataProductManager {
 								elem -> elem.getMetaId().equals(meta_id)
 								)
 						.collect(Collectors.toList());
-
+				
 			}else {
 				list = dbapi.retrieve(DataProduct.class, new DBAPIClient.GetQuery().instanceId(instance_id));
 			}
 		}
-
-		System.out.println(list);
 
 		list = list.stream()
 				.filter(
 						elem -> user.getRole().equals(ADMIN) || elem.getState().equals(State.PUBLISHED) ||
 						(elem.getState().equals(State.DRAFT) && user.getMetaId().equals(elem.getEditorId()))
 						)
+				.filter(
+						elem -> {
+							GroupFilter groupFilter = new GroupFilter()
+									.instanceGroup(elem.getGroups())
+									.userGroup(user.getGroups())
+									.operationType(operationType.getOperationType());
+							return groupFilter.isOk();
+						}
+						)
 				.collect(Collectors.toList());
 
-		return list;
+		List<DataProduct> revertedList = new ArrayList<>();
+		list.forEach(e -> revertedList.add(0, e));
+		
+		if (list.isEmpty())
+			return new ApiResponseMessage(ApiResponseMessage.OK, new ArrayList<DataProduct>());
+		
+		return new ApiResponseMessage(ApiResponseMessage.OK, list);
 	}
 
 	/**
@@ -71,6 +109,9 @@ public class DataProductManager {
 		}
 		dataProduct.setInstanceId(null);
 		dataProduct.setInstanceChangedId(null);
+		
+		if(!ManagePermissions.checkPermissions(dataProduct, EntityTypeEnum.DATAPRODUCT, user)) 
+			return new ApiResponseMessage(ApiResponseMessage.ERROR, "You don't have auth on the groups of this instance");
 
 		// Check if exists a version PUBLISHED or ARCHIVED if MetaId!=null
 		if (dataProduct.getMetaId() != null) {
@@ -132,6 +173,9 @@ public class DataProductManager {
 
 		dataProduct.setEditorId(user.getMetaId());
 		dataProduct.setFileProvenance("instance created with the backoffice");
+		
+		if(!ManagePermissions.checkPermissions(dataProduct, EntityTypeEnum.DATAPRODUCT, user)) 
+			return new ApiResponseMessage(ApiResponseMessage.ERROR, "You don't have auth on the groups of this instance");
 
 		dbapi.setTransactionModeAuto(true);
 		dbapi.startTransaction();
@@ -177,7 +221,7 @@ public class DataProductManager {
 		if(sons) {
 			if(dataProduct.getDistribution()!=null)
 				for(LinkedEntity le : dataProduct.getDistribution()) {
-					Distribution distribution = DistributionManager.getDistribution(le.getMetaId(), le.getInstanceId(), user).get(0);
+					Distribution distribution = (Distribution) DistributionManager.getDistribution(le.getMetaId(), le.getInstanceId(), user).getListOfEntities().get(0);
 					distribution.getDataProduct().add(relation);
 					DistributionManager.createDistribution(distribution, user, false, true);
 				}

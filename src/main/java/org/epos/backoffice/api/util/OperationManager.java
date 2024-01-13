@@ -1,13 +1,20 @@
 package org.epos.backoffice.api.util;
 
+import static org.epos.backoffice.bean.OperationTypeEnum.GET_ALL;
+import static org.epos.backoffice.bean.OperationTypeEnum.GET_SINGLE;
 import static org.epos.backoffice.bean.RoleEnum.ADMIN;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.epos.backoffice.api.exception.ApiResponseMessage;
+import org.epos.backoffice.bean.BackofficeOperationType;
+import org.epos.backoffice.bean.ComputePermissionAbstract;
+import org.epos.backoffice.bean.EntityTypeEnum;
 import org.epos.backoffice.bean.User;
+import org.epos.backoffice.service.ComputePermissionNoGroup;
 import org.epos.eposdatamodel.DataProduct;
 import org.epos.eposdatamodel.Distribution;
 import org.epos.eposdatamodel.Operation;
@@ -24,8 +31,26 @@ public class OperationManager {
 
 	protected static DBAPIClient dbapi = new DBAPIClient();
 
-	public static List<Operation> getOperation(String meta_id, String instance_id, User user) {
+	public static ApiResponseMessage getOperation(String meta_id, String instance_id, User user) {
 		//dbapi.setMetadataMode(false);
+		if (meta_id == null)
+			return new ApiResponseMessage(1, "The [meta_id] field can't be left blank");
+		if(instance_id == null) {
+			instance_id = "all";
+		}
+
+		BackofficeOperationType operationType = new BackofficeOperationType()
+				.operationType(meta_id.equals("all") ? GET_ALL : GET_SINGLE)
+				.entityType(DataProduct.class)
+				.userRole(user.getRole());
+
+
+		ComputePermissionAbstract computePermission = new ComputePermissionNoGroup(operationType);
+		if (!computePermission.isAuthorized())
+			return new ApiResponseMessage(1, computePermission.generateErrorMessage());
+		
+		System.out.println(meta_id+" "+instance_id);
+
 		List<Operation> list;
 		if (meta_id.equals("all")) {
 			list = dbapi.retrieve(Operation.class, new DBAPIClient.GetQuery());	
@@ -37,7 +62,7 @@ public class OperationManager {
 								elem -> elem.getMetaId().equals(meta_id)
 								)
 						.collect(Collectors.toList());
-
+				
 			}else {
 				list = dbapi.retrieve(Operation.class, new DBAPIClient.GetQuery().instanceId(instance_id));
 			}
@@ -48,9 +73,24 @@ public class OperationManager {
 						elem -> user.getRole().equals(ADMIN) || elem.getState().equals(State.PUBLISHED) ||
 						(elem.getState().equals(State.DRAFT) && user.getMetaId().equals(elem.getEditorId()))
 						)
+				.filter(
+						elem -> {
+							GroupFilter groupFilter = new GroupFilter()
+									.instanceGroup(elem.getGroups())
+									.userGroup(user.getGroups())
+									.operationType(operationType.getOperationType());
+							return groupFilter.isOk();
+						}
+						)
 				.collect(Collectors.toList());
 
-		return list;
+		List<Operation> revertedList = new ArrayList<>();
+		list.forEach(e -> revertedList.add(0, e));
+		
+		if (list.isEmpty())
+			return new ApiResponseMessage(ApiResponseMessage.OK, new ArrayList<Operation>());
+		
+		return new ApiResponseMessage(ApiResponseMessage.OK, list);
 	}
 
 	/**
@@ -88,6 +128,9 @@ public class OperationManager {
 		operation.setState(State.DRAFT);
 		operation.setEditorId(user.getMetaId());
 		operation.setFileProvenance("instance created with the backoffice");
+		
+		if(!ManagePermissions.checkPermissions(operation, EntityTypeEnum.OPERATION, user)) 
+			return new ApiResponseMessage(ApiResponseMessage.ERROR, "You don't have auth on the groups of this instance");
 
 		dbapi.setTransactionModeAuto(true);
 		dbapi.startTransaction();
@@ -133,6 +176,9 @@ public class OperationManager {
 
 		operation.setEditorId(user.getMetaId());
 		operation.setFileProvenance("instance created with the backoffice");
+		
+		if(!ManagePermissions.checkPermissions(operation, EntityTypeEnum.OPERATION, user)) 
+			return new ApiResponseMessage(ApiResponseMessage.ERROR, "You don't have auth on the groups of this instance");
 
 		dbapi.setTransactionModeAuto(true);
 		dbapi.startTransaction();
@@ -165,7 +211,7 @@ public class OperationManager {
 		dbapi.setTransactionModeAuto(true);
 		dbapi.startTransaction();
 
-		List<Distribution> distributions = DistributionManager.getDistribution("all", null, user);
+		List<Distribution> distributions = (List<Distribution>) DistributionManager.getDistribution("all", null, user).getListOfEntities();
 		for(Distribution distr : distributions) {
 			if(distr.getAccessURL()!=null) {
 				if(distr.getAccessURL().removeIf(url -> url.getUid().equals(instance.getUid())
@@ -189,7 +235,7 @@ public class OperationManager {
 		System.out.println("WebServices: "+operation.getWebservice());
 		if(parents) {
 			for(LinkedEntity le : operation.getWebservice()) {
-				WebService webService = WebServiceManager.getWebService(le.getMetaId(), le.getInstanceId(), user).get(0);
+				WebService webService = (WebService) WebServiceManager.getWebService(le.getMetaId(), le.getInstanceId(), user).getListOfEntities().get(0);
 				webService.getSupportedOperation().add(relation);
 				WebServiceManager.createWebService(webService, user, true, false);
 			}
