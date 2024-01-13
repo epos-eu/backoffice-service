@@ -1,13 +1,20 @@
 package org.epos.backoffice.api.util;
 
+import static org.epos.backoffice.bean.OperationTypeEnum.GET_ALL;
+import static org.epos.backoffice.bean.OperationTypeEnum.GET_SINGLE;
 import static org.epos.backoffice.bean.RoleEnum.ADMIN;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.epos.backoffice.api.exception.ApiResponseMessage;
+import org.epos.backoffice.bean.BackofficeOperationType;
+import org.epos.backoffice.bean.ComputePermissionAbstract;
+import org.epos.backoffice.bean.EntityTypeEnum;
 import org.epos.backoffice.bean.User;
+import org.epos.backoffice.service.ComputePermissionNoGroup;
 import org.epos.eposdatamodel.DataProduct;
 import org.epos.eposdatamodel.Distribution;
 import org.epos.eposdatamodel.WebService;
@@ -23,8 +30,26 @@ public class WebServiceManager {
 
 	protected static DBAPIClient dbapi = new DBAPIClient();
 
-	public static List<WebService> getWebService(String meta_id, String instance_id, User user) {
+	public static ApiResponseMessage getWebService(String meta_id, String instance_id, User user) {
 		//dbapi.setMetadataMode(false);
+		if (meta_id == null)
+			return new ApiResponseMessage(1, "The [meta_id] field can't be left blank");
+		if(instance_id == null) {
+			instance_id = "all";
+		}
+
+		BackofficeOperationType operationType = new BackofficeOperationType()
+				.operationType(meta_id.equals("all") ? GET_ALL : GET_SINGLE)
+				.entityType(DataProduct.class)
+				.userRole(user.getRole());
+
+
+		ComputePermissionAbstract computePermission = new ComputePermissionNoGroup(operationType);
+		if (!computePermission.isAuthorized())
+			return new ApiResponseMessage(1, computePermission.generateErrorMessage());
+		
+		System.out.println(meta_id+" "+instance_id);
+
 		List<WebService> list;
 		if (meta_id.equals("all")) {
 			list = dbapi.retrieve(WebService.class, new DBAPIClient.GetQuery());	
@@ -36,7 +61,7 @@ public class WebServiceManager {
 								elem -> elem.getMetaId().equals(meta_id)
 								)
 						.collect(Collectors.toList());
-
+				
 			}else {
 				list = dbapi.retrieve(WebService.class, new DBAPIClient.GetQuery().instanceId(instance_id));
 			}
@@ -47,9 +72,24 @@ public class WebServiceManager {
 						elem -> user.getRole().equals(ADMIN) || elem.getState().equals(State.PUBLISHED) ||
 						(elem.getState().equals(State.DRAFT) && user.getMetaId().equals(elem.getEditorId()))
 						)
+				.filter(
+						elem -> {
+							GroupFilter groupFilter = new GroupFilter()
+									.instanceGroup(elem.getGroups())
+									.userGroup(user.getGroups())
+									.operationType(operationType.getOperationType());
+							return groupFilter.isOk();
+						}
+						)
 				.collect(Collectors.toList());
 
-		return list;
+		List<WebService> revertedList = new ArrayList<>();
+		list.forEach(e -> revertedList.add(0, e));
+		
+		if (list.isEmpty())
+			return new ApiResponseMessage(ApiResponseMessage.OK, new ArrayList<WebService>());
+		
+		return new ApiResponseMessage(ApiResponseMessage.OK, list);
 	}
 
 	/**
@@ -87,6 +127,9 @@ public class WebServiceManager {
 		webservice.setState(State.DRAFT);
 		webservice.setEditorId(user.getMetaId());
 		webservice.setFileProvenance("instance created with the backoffice");
+		
+		if(!ManagePermissions.checkPermissions(webservice, EntityTypeEnum.WEBSERVICE, user)) 
+			return new ApiResponseMessage(ApiResponseMessage.ERROR, "You don't have auth on the groups of this instance");
 
 		dbapi.setTransactionModeAuto(true);
 		dbapi.startTransaction();
@@ -133,6 +176,9 @@ public class WebServiceManager {
 		webservice.setEditorId(user.getMetaId());
 		webservice.setFileProvenance("instance created with the backoffice");
 
+		if(!ManagePermissions.checkPermissions(webservice, EntityTypeEnum.WEBSERVICE, user)) 
+			return new ApiResponseMessage(ApiResponseMessage.ERROR, "You don't have auth on the groups of this instance");
+		
 		dbapi.setTransactionModeAuto(true);
 		dbapi.startTransaction();
 		LinkedEntity reference = null;
@@ -174,14 +220,14 @@ public class WebServiceManager {
 
 		if(parents) {
 			for(LinkedEntity le : webservice.getDistribution()) {
-				Distribution distribution = DistributionManager.getDistribution(le.getMetaId(), le.getInstanceId(), user).get(0);
+				Distribution distribution = (Distribution) DistributionManager.getDistribution(le.getMetaId(), le.getInstanceId(), user).getListOfEntities().get(0);
 				distribution.setAccessService(relation);
 				DistributionManager.createDistribution(distribution, user, true, false);
 			}
 		}
 		if(sons) {
 			for(LinkedEntity le : webservice.getSupportedOperation()) {
-				Operation operation = OperationManager.getOperation(le.getMetaId(), le.getInstanceId(), user).get(0);
+				Operation operation = (Operation) OperationManager.getOperation(le.getMetaId(), le.getInstanceId(), user).getListOfEntities().get(0);
 				operation.getWebservice().add(relation);
 				OperationManager.createOperation(operation, user, false, true);
 			}
