@@ -113,9 +113,6 @@ public class DistributionManager {
 		distribution.setInstanceChangedId(null);
 
 
-		if(!ManagePermissions.checkPermissions(distribution, EntityTypeEnum.DISTRIBUTION, user)) 
-			return new ApiResponseMessage(ApiResponseMessage.ERROR, "You don't have auth on the groups of this instance");
-
 		// Check if exists a version PUBLISHED or ARCHIVED if MetaId!=null
 		if (distribution.getMetaId() != null) {
 			List<Distribution> retrieved = dbapi.retrieve(Distribution.class, new DBAPIClient.GetQuery().state(State.PUBLISHED).metaId(distribution.getMetaId()));
@@ -132,6 +129,9 @@ public class DistributionManager {
 		distribution.setEditorId(user.getMetaId());
 		distribution.setFileProvenance("instance created with the backoffice");
 
+		if(!ManagePermissions.checkPermissions(distribution, EntityTypeEnum.DISTRIBUTION, user)) 
+			return new ApiResponseMessage(ApiResponseMessage.ERROR, "You don't have auth on the groups of this instance");
+		
 		dbapi.setTransactionModeAuto(true);
 		dbapi.startTransaction();
 

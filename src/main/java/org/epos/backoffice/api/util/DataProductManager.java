@@ -109,9 +109,6 @@ public class DataProductManager {
 		}
 		dataProduct.setInstanceId(null);
 		dataProduct.setInstanceChangedId(null);
-		
-		if(!ManagePermissions.checkPermissions(dataProduct, EntityTypeEnum.DATAPRODUCT, user)) 
-			return new ApiResponseMessage(ApiResponseMessage.ERROR, "You don't have auth on the groups of this instance");
 
 		// Check if exists a version PUBLISHED or ARCHIVED if MetaId!=null
 		if (dataProduct.getMetaId() != null) {
@@ -128,6 +125,9 @@ public class DataProductManager {
 		dataProduct.setState(State.DRAFT);
 		dataProduct.setEditorId(user.getMetaId());
 		dataProduct.setFileProvenance("instance created with the backoffice");
+		
+		if(!ManagePermissions.checkPermissions(dataProduct, EntityTypeEnum.DATAPRODUCT, user)) 
+			return new ApiResponseMessage(ApiResponseMessage.ERROR, "You don't have auth on the groups of this instance");
 
 		dbapi.setTransactionModeAuto(true);
 		dbapi.startTransaction();
