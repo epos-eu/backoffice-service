@@ -1,5 +1,9 @@
 package org.epos.backoffice.api.exception;
 
+import java.util.List;
+
+import org.epos.eposdatamodel.DataProduct;
+import org.epos.eposdatamodel.EPOSDataModelEntity;
 import org.epos.eposdatamodel.LinkedEntity;
 
 @javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2022-02-11T09:12:11.707Z[GMT]")
@@ -13,6 +17,8 @@ public class ApiResponseMessage {
     int code;
     String type;
     String message;
+    LinkedEntity entity;
+    List<? extends EPOSDataModelEntity> listOfEntities;
 
     public ApiResponseMessage() {
     }
@@ -64,7 +70,32 @@ public class ApiResponseMessage {
                 setType("unknown");
                 break;
         }
-        this.message = entity.toString();
+        this.entity = entity;
+	}
+
+	public ApiResponseMessage(int code, List<? extends EPOSDataModelEntity> list) {
+		 this.code = code;
+	        switch (code) {
+	            case ERROR:
+	                setType("error");
+	                break;
+	            case WARNING:
+	                setType("warning");
+	                break;
+	            case INFO:
+	                setType("info");
+	                break;
+	            case OK:
+	                setType("ok");
+	                break;
+	            case TOO_BUSY:
+	                setType("too busy");
+	                break;
+	            default:
+	                setType("unknown");
+	                break;
+	        }
+	        this.listOfEntities = list;
 	}
 
 	public int getCode() {
@@ -90,4 +121,27 @@ public class ApiResponseMessage {
     public void setMessage(String message) {
         this.message = message;
     }
+    
+    public LinkedEntity getEntity() {
+        return entity;
+    }
+
+    public void setEntity(LinkedEntity entity) {
+        this.entity = entity;
+    }
+    
+    public List<? extends EPOSDataModelEntity> getListOfEntities() {
+        return listOfEntities;
+    }
+
+    public void setEntity(List<? extends EPOSDataModelEntity> listOfEntities) {
+        this.listOfEntities = listOfEntities;
+    }
+
+	@Override
+	public String toString() {
+		return "ApiResponseMessage [code=" + code + ", type=" + type + ", message=" + message + ", entity=" + entity
+				+ "]";
+	}
+    
 }
