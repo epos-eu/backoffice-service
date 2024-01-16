@@ -48,7 +48,7 @@ public class OperationManager {
 		ComputePermissionAbstract computePermission = new ComputePermissionNoGroup(operationType);
 		if (!computePermission.isAuthorized())
 			return new ApiResponseMessage(1, computePermission.generateErrorMessage());
-		
+
 		System.out.println(meta_id+" "+instance_id);
 
 		List<Operation> list;
@@ -62,7 +62,7 @@ public class OperationManager {
 								elem -> elem.getMetaId().equals(meta_id)
 								)
 						.collect(Collectors.toList());
-				
+
 			}else {
 				list = dbapi.retrieve(Operation.class, new DBAPIClient.GetQuery().instanceId(instance_id));
 			}
@@ -86,10 +86,10 @@ public class OperationManager {
 
 		List<Operation> revertedList = new ArrayList<>();
 		list.forEach(e -> revertedList.add(0, e));
-		
+
 		if (list.isEmpty())
 			return new ApiResponseMessage(ApiResponseMessage.OK, new ArrayList<Operation>());
-		
+
 		return new ApiResponseMessage(ApiResponseMessage.OK, list);
 	}
 
@@ -128,7 +128,7 @@ public class OperationManager {
 		operation.setState(State.DRAFT);
 		operation.setEditorId(user.getMetaId());
 		operation.setFileProvenance("instance created with the backoffice");
-		
+
 		if(!ManagePermissions.checkPermissions(operation, EntityTypeEnum.OPERATION, user)) 
 			return new ApiResponseMessage(ApiResponseMessage.ERROR, "You don't have auth on the groups of this instance");
 
@@ -176,7 +176,7 @@ public class OperationManager {
 
 		operation.setEditorId(user.getMetaId());
 		operation.setFileProvenance("instance created with the backoffice");
-		
+
 		if(!ManagePermissions.checkPermissions(operation, EntityTypeEnum.OPERATION, user)) 
 			return new ApiResponseMessage(ApiResponseMessage.ERROR, "You don't have auth on the groups of this instance");
 
@@ -234,11 +234,12 @@ public class OperationManager {
 		System.out.println("*************\nManaging relation of: "+operation);
 		System.out.println("WebServices: "+operation.getWebservice());
 		if(parents) {
-			for(LinkedEntity le : operation.getWebservice()) {
-				WebService webService = (WebService) WebServiceManager.getWebService(le.getMetaId(), le.getInstanceId(), user).getListOfEntities().get(0);
-				webService.getSupportedOperation().add(relation);
-				WebServiceManager.createWebService(webService, user, true, false);
-			}
+			if(operation.getWebservice()!=null)
+				for(LinkedEntity le : operation.getWebservice()) {
+					WebService webService = (WebService) WebServiceManager.getWebService(le.getMetaId(), le.getInstanceId(), user).getListOfEntities().get(0);
+					webService.getSupportedOperation().add(relation);
+					WebServiceManager.createWebService(webService, user, true, false);
+				}
 		}
 	}
 
