@@ -47,7 +47,7 @@ public class WebServiceManager {
 		ComputePermissionAbstract computePermission = new ComputePermissionNoGroup(operationType);
 		if (!computePermission.isAuthorized())
 			return new ApiResponseMessage(1, computePermission.generateErrorMessage());
-		
+
 		System.out.println(meta_id+" "+instance_id);
 
 		List<WebService> list;
@@ -61,7 +61,7 @@ public class WebServiceManager {
 								elem -> elem.getMetaId().equals(meta_id)
 								)
 						.collect(Collectors.toList());
-				
+
 			}else {
 				list = dbapi.retrieve(WebService.class, new DBAPIClient.GetQuery().instanceId(instance_id));
 			}
@@ -85,10 +85,10 @@ public class WebServiceManager {
 
 		List<WebService> revertedList = new ArrayList<>();
 		list.forEach(e -> revertedList.add(0, e));
-		
+
 		if (list.isEmpty())
 			return new ApiResponseMessage(ApiResponseMessage.OK, new ArrayList<WebService>());
-		
+
 		return new ApiResponseMessage(ApiResponseMessage.OK, list);
 	}
 
@@ -127,7 +127,7 @@ public class WebServiceManager {
 		webservice.setState(State.DRAFT);
 		webservice.setEditorId(user.getMetaId());
 		webservice.setFileProvenance("instance created with the backoffice");
-		
+
 		if(!ManagePermissions.checkPermissions(webservice, EntityTypeEnum.WEBSERVICE, user)) 
 			return new ApiResponseMessage(ApiResponseMessage.ERROR, "You don't have auth on the groups of this instance");
 
@@ -178,7 +178,7 @@ public class WebServiceManager {
 
 		if(!ManagePermissions.checkPermissions(webservice, EntityTypeEnum.WEBSERVICE, user)) 
 			return new ApiResponseMessage(ApiResponseMessage.ERROR, "You don't have auth on the groups of this instance");
-		
+
 		dbapi.setTransactionModeAuto(true);
 		dbapi.startTransaction();
 		LinkedEntity reference = null;
@@ -191,7 +191,7 @@ public class WebServiceManager {
 
 		dbapi.closeTransaction(true);
 		dbapi.setTransactionModeAuto(true);
-		
+
 		return new ApiResponseMessage(ApiResponseMessage.OK, reference);
 	}
 
@@ -219,18 +219,20 @@ public class WebServiceManager {
 	private static void manageNewDraftRelations(WebService webservice, LinkedEntity relation, User user, boolean parents, boolean sons) {
 
 		if(parents) {
-			for(LinkedEntity le : webservice.getDistribution()) {
-				Distribution distribution = (Distribution) DistributionManager.getDistribution(le.getMetaId(), le.getInstanceId(), user).getListOfEntities().get(0);
-				distribution.setAccessService(relation);
-				DistributionManager.createDistribution(distribution, user, true, false);
-			}
+			if(webservice.getDistribution()!=null)
+				for(LinkedEntity le : webservice.getDistribution()) {
+					Distribution distribution = (Distribution) DistributionManager.getDistribution(le.getMetaId(), le.getInstanceId(), user).getListOfEntities().get(0);
+					distribution.setAccessService(relation);
+					DistributionManager.createDistribution(distribution, user, true, false);
+				}
 		}
 		if(sons) {
-			for(LinkedEntity le : webservice.getSupportedOperation()) {
-				Operation operation = (Operation) OperationManager.getOperation(le.getMetaId(), le.getInstanceId(), user).getListOfEntities().get(0);
-				operation.getWebservice().add(relation);
-				OperationManager.createOperation(operation, user, false, true);
-			}
+			if(webservice.getSupportedOperation()!=null)
+				for(LinkedEntity le : webservice.getSupportedOperation()) {
+					Operation operation = (Operation) OperationManager.getOperation(le.getMetaId(), le.getInstanceId(), user).getListOfEntities().get(0);
+					operation.getWebservice().add(relation);
+					OperationManager.createOperation(operation, user, false, true);
+				}
 		}
 	}
 
