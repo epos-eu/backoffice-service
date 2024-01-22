@@ -110,7 +110,7 @@ public class DataProductController extends MetadataAbstractController<DataProduc
         return updateMethod(body, true);
     }
 
-   /* @RequestMapping(
+    @RequestMapping(
             value = "/{instance_id}",
             method = RequestMethod.PUT
     )
@@ -130,7 +130,7 @@ public class DataProductController extends MetadataAbstractController<DataProduc
     ) {
         return updateStateMethod(instance_id, body.getState(), body.getJustThisOne());
     }
-*/
+
 
     @RequestMapping(value = "/{instance_id}",
             method = RequestMethod.DELETE)
