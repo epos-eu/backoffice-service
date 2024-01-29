@@ -6,215 +6,216 @@ import org.epos.handler.dbapi.dbapiimplementation.PersonDBAPI;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 import static org.epos.backoffice.bean.EntityTypeEnum.*;
 
 public class User {
 
-    @JsonIgnore
-    private static final PersonDBAPI personDBAPI = (PersonDBAPI) new PersonDBAPI().metadataMode(false);
+	@JsonIgnore
+	private static final PersonDBAPI personDBAPI = (PersonDBAPI) new PersonDBAPI().metadataMode(false);
 
-    private String eduPersonUniqueId;
-    private String instanceId;
-    private String lastName;
-    private List<Group> groups;
-    @JsonIgnore
-    private String sub;
-    private String firstName;
-    private String email;
-    private String metaId;
-    private RoleEnum role;
-    private List<EntityTypeEnum> accessibleSection;
-
-
-    public User() {
-    }
-
-    public User(String instanceId) {
-        this.instanceId = instanceId;
-        Person person = personDBAPI.getByInstanceId(instanceId);
+	private String eduPersonUniqueId;
+	private String instanceId;
+	private String lastName;
+	private List<Group> groups;
+	@JsonIgnore
+	private String sub;
+	private String firstName;
+	private String email;
+	private String metaId;
+	private RoleEnum role;
+	private List<EntityTypeEnum> accessibleSection;
 
 
-        Objects.requireNonNull(person, "User with instanceId: [" + instanceId + "] not found");
-        Objects.requireNonNull(person.getAuthIdentifier(), "Person with instanceId: [" + instanceId + "] is not a user");
-        Objects.requireNonNull(person.getRole(), "Person with instanceId: [" + instanceId + "] is not a user");
+	public User() {
+	}
 
-        this.eduPersonUniqueId = person.getAuthIdentifier();
-        this.instanceId = person.getInstanceId();
-        this.lastName = person.getFamilyName();
-        this.firstName = person.getGivenName();
-        this.email = person.getEmail().get(0);
-        this.metaId = person.getMetaId();
-        this.role = RoleEnum.valueOf(person.getRole().toString());
-        this.groups = person.getAuthorizedGroup();
+	public User(String instanceId) {
+		this.instanceId = instanceId;
+		Person person = personDBAPI.getByInstanceId(instanceId);
 
-    }
 
-    /**
-     * The method check if the eduPersonUniqueId is present in some record of the person table
-     *
-     * @return true if the user is already registered
-     */
-    public boolean isRegistered() {
-        return personDBAPI.getByAuthId(this.eduPersonUniqueId) != null;
-    }
+		Objects.requireNonNull(person, "User with instanceId: [" + instanceId + "] not found");
+		Objects.requireNonNull(person.getAuthIdentifier(), "Person with instanceId: [" + instanceId + "] is not a user");
+		Objects.requireNonNull(person.getRole(), "Person with instanceId: [" + instanceId + "] is not a user");
 
-    public void signUp() {
-        Person person = mapUserToPerson();
-        personDBAPI.save(person);
-        Person personPersisted = personDBAPI.getByAuthId(this.eduPersonUniqueId);
-        this.metaId = personPersisted.getMetaId();
-        this.role = RoleEnum.valueOf(personPersisted.getRole().toString());
-        this.instanceId = personPersisted.getInstanceId();
-    }
+		this.eduPersonUniqueId = person.getAuthIdentifier();
+		this.instanceId = person.getInstanceId();
+		this.lastName = person.getFamilyName();
+		this.firstName = person.getGivenName();
+		this.email = person.getEmail().get(0);
+		this.metaId = person.getMetaId();
+		this.role = RoleEnum.valueOf(person.getRole().toString());
+		this.groups = person.getAuthorizedGroup();
 
-    public void signIn() {
-        Person person = personDBAPI.getByAuthId(this.eduPersonUniqueId);
-        this.metaId = person.getMetaId();
-        this.email = person.getEmail().get(0);
-        this.firstName = person.getGivenName();
-        this.lastName = person.getFamilyName();
-        this.role = RoleEnum.valueOf(person.getRole().toString());
-        this.instanceId = person.getInstanceId();
-    }
+	}
 
-    public String getEduPersonUniqueId() {
-        return eduPersonUniqueId;
-    }
+	/**
+	 * The method check if the eduPersonUniqueId is present in some record of the person table
+	 *
+	 * @return true if the user is already registered
+	 */
+	public boolean isRegistered() {
+		return personDBAPI.getByAuthId(this.eduPersonUniqueId) != null;
+	}
 
-    public User setEduPersonUniqueId(String eduPersonUniqueId) {
-        this.eduPersonUniqueId = eduPersonUniqueId;
-        return this;
-    }
+	public void signUp() {
+		Person person = mapUserToPerson();
+		personDBAPI.save(person);
+		Person personPersisted = personDBAPI.getByAuthId(this.eduPersonUniqueId);
+		this.metaId = personPersisted.getMetaId();
+		this.role = RoleEnum.valueOf(personPersisted.getRole().toString());
+		this.instanceId = personPersisted.getInstanceId();
+	}
 
-    public String getLastName() {
-        return lastName;
-    }
+	public void signIn() {
+		Person person = personDBAPI.getByAuthId(this.eduPersonUniqueId);
+		this.metaId = person.getMetaId();
+		this.email = person.getEmail().get(0);
+		this.firstName = person.getGivenName();
+		this.lastName = person.getFamilyName();
+		this.role = RoleEnum.valueOf(person.getRole().toString());
+		this.instanceId = person.getInstanceId();
+	}
 
-    public User setLastName(String lastName) {
-        this.lastName = lastName;
-        return this;
-    }
+	public String getEduPersonUniqueId() {
+		return eduPersonUniqueId;
+	}
 
-    public String getSub() {
-        return sub;
-    }
+	public User setEduPersonUniqueId(String eduPersonUniqueId) {
+		this.eduPersonUniqueId = eduPersonUniqueId;
+		return this;
+	}
 
-    public User setSub(String sub) {
-        this.sub = sub;
-        return this;
-    }
+	public String getLastName() {
+		return lastName;
+	}
 
-    public String getFirstName() {
-        return firstName;
-    }
+	public User setLastName(String lastName) {
+		this.lastName = lastName;
+		return this;
+	}
 
-    public User setFirstName(String firstName) {
-        this.firstName = firstName;
-        return this;
-    }
+	public String getSub() {
+		return sub;
+	}
 
-    public String getEmail() {
-        return email;
-    }
+	public User setSub(String sub) {
+		this.sub = sub;
+		return this;
+	}
 
-    public User setEmail(String email) {
-        this.email = email;
-        return this;
-    }
+	public String getFirstName() {
+		return firstName;
+	}
 
-    public String getMetaId() {
-        return metaId;
-    }
+	public User setFirstName(String firstName) {
+		this.firstName = firstName;
+		return this;
+	}
 
-    public void setMetaId(String metaId) {
-        this.metaId = metaId;
-    }
+	public String getEmail() {
+		return email;
+	}
 
-    public RoleEnum getRole() {
-        return role;
-    }
+	public User setEmail(String email) {
+		this.email = email;
+		return this;
+	}
 
-    public void setRole(RoleEnum role) {
-        this.role = role;
-    }
+	public String getMetaId() {
+		return metaId;
+	}
 
-    public List<Group> getGroups() {
-        return groups;
-    }
+	public void setMetaId(String metaId) {
+		this.metaId = metaId;
+	}
 
-    public void setGroups(List<Group> groups) {
-        this.groups = groups;
-    }
+	public RoleEnum getRole() {
+		return role;
+	}
 
-    public void update() {
-        Person person = mapUserToPerson();
-        //person.setRole(this.role.toString());
-        personDBAPI.hardUpdate(instanceId, person);
-    }
+	public void setRole(RoleEnum role) {
+		this.role = role;
+	}
 
-    private Person mapUserToPerson() {
-        Person person = new Person();
-        person.setAuthIdentifier(this.eduPersonUniqueId);
-        person.setFamilyName(this.lastName);
-        person.setGivenName(this.firstName);
-        person.setUid(this.email);
-        person.setEmail(List.of(this.email));
-        person.setState(State.PLACEHOLDER);
-        person.setEditorId("backoffice");
-        person.setRole(Role.valueOf(Objects.nonNull(this.role) ? this.role.toString() : String.valueOf(RoleEnum.VIEWER)));
-        person.setAuthorizedGroup(this.groups);
-        Identifier identifier = new Identifier();
-        identifier.setType("email");
-        identifier.setIdentifier(this.email);
-        person.setIdentifier(List.of(identifier));
-        return person;
-    }
+	public List<Group> getGroups() {
+		return groups;
+	}
 
-    public String getInstanceId() {
-        return instanceId;
-    }
+	public void setGroups(List<Group> groups) {
+		this.groups = groups;
+	}
 
-    public void setInstanceId(String instanceId) {
-        this.instanceId = instanceId;
-    }
+	public void update() {
+		Person person = mapUserToPerson();
+		//person.setRole(this.role.toString());
+		personDBAPI.hardUpdate(instanceId, person);
+	}
 
-    @Override
-    public String toString() {
-        return "User{" +
-                "eduPersonUniqueId='" + eduPersonUniqueId + '\'' +
-                ", instanceId='" + instanceId + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", groups=" + groups +
-                ", sub='" + sub + '\'' +
-                ", firstName='" + firstName + '\'' +
-                ", email='" + email + '\'' +
-                ", metaId='" + metaId + '\'' +
-                ", role=" + role +
-                ", accessibleSection=" + accessibleSection +
-                '}';
-    }
+	private Person mapUserToPerson() {
+		Person person = new Person();
+		person.setAuthIdentifier(this.eduPersonUniqueId);
+		person.setFamilyName(this.lastName);
+		person.setGivenName(this.firstName);
+		person.setUid("Person/"+UUID.randomUUID());
+		person.setEmail(List.of(this.email));
+		person.setState(State.PLACEHOLDER);
+		person.setEditorId("backoffice");
+		person.setRole(Role.valueOf(Objects.nonNull(this.role) ? this.role.toString() : String.valueOf(RoleEnum.VIEWER)));
+		person.setAuthorizedGroup(this.groups);
+		Identifier identifier = new Identifier();
+		identifier.setType("email");
+		identifier.setIdentifier(this.email);
+		person.setIdentifier(List.of(identifier));
+		return person;
+	}
 
-    public List<EntityTypeEnum> getAccessibleSection() {
-        return accessibleSection;
-    }
+	public String getInstanceId() {
+		return instanceId;
+	}
 
-    public void setAccessibleSection(List<EntityTypeEnum> accessibleSection) {
-        this.accessibleSection = accessibleSection;
-    }
+	public void setInstanceId(String instanceId) {
+		this.instanceId = instanceId;
+	}
 
-    public void generateAccessibleSection() {
-        switch (this.role) {
-            case ADMIN:
-                this.accessibleSection = List.of(USER, CONTACTPOINT, DATAPRODUCT, DISTRIBUTION, WEBSERVICE, OPERATION, ORGANIZATION, PERSON);
-                break;
-            case REVIEWER:
-                this.accessibleSection = List.of(DATAPRODUCT, ORGANIZATION, PERSON);
-                break;
-            case EDITOR:
-            case VIEWER:
-                this.accessibleSection = List.of(DATAPRODUCT);
-                break;
-        }
-    }
+	@Override
+	public String toString() {
+		return "User{" +
+				"eduPersonUniqueId='" + eduPersonUniqueId + '\'' +
+				", instanceId='" + instanceId + '\'' +
+				", lastName='" + lastName + '\'' +
+				", groups=" + groups +
+				", sub='" + sub + '\'' +
+				", firstName='" + firstName + '\'' +
+				", email='" + email + '\'' +
+				", metaId='" + metaId + '\'' +
+				", role=" + role +
+				", accessibleSection=" + accessibleSection +
+				'}';
+	}
+
+	public List<EntityTypeEnum> getAccessibleSection() {
+		return accessibleSection;
+	}
+
+	public void setAccessibleSection(List<EntityTypeEnum> accessibleSection) {
+		this.accessibleSection = accessibleSection;
+	}
+
+	public void generateAccessibleSection() {
+		switch (this.role) {
+		case ADMIN:
+			this.accessibleSection = List.of(USER, CONTACTPOINT, DATAPRODUCT, DISTRIBUTION, WEBSERVICE, OPERATION, ORGANIZATION, PERSON);
+			break;
+		case REVIEWER:
+			this.accessibleSection = List.of(DATAPRODUCT, ORGANIZATION, PERSON);
+			break;
+		case EDITOR:
+		case VIEWER:
+			this.accessibleSection = List.of(DATAPRODUCT);
+			break;
+		}
+	}
 }
