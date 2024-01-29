@@ -33,6 +33,7 @@ public class OperationManager {
 
 	public static ApiResponseMessage getOperation(String meta_id, String instance_id, User user) {
 		//dbapi.setMetadataMode(false);
+		dbapi.setMetadataMode(false);
 		if (meta_id == null)
 			return new ApiResponseMessage(1, "The [meta_id] field can't be left blank");
 		if(instance_id == null) {
@@ -197,6 +198,39 @@ public class OperationManager {
 
 		return new ApiResponseMessage(ApiResponseMessage.OK, reference);
 	}
+	
+	/**
+	 * 
+	 * @param operation
+	 * @param user
+	 * @return
+	 */
+	public static ApiResponseMessage updateStateOperation(Operation operation, User user, State newState, boolean parents, boolean sons) {
+
+		operation.setEditorId(user.getMetaId());
+		operation.setFileProvenance("instance created with the backoffice");
+		operation.setState(newState);
+
+		if(!ManagePermissions.checkPermissions(operation, EntityTypeEnum.OPERATION, user)) 
+			return new ApiResponseMessage(ApiResponseMessage.ERROR, "You don't have auth on the groups of this instance");
+
+		dbapi.setTransactionModeAuto(true);
+		dbapi.startTransaction();
+		LinkedEntity reference = null;
+		try {
+			reference = dbapi.createUpdate(operation, new SaveQuery().setInstanceId(operation.getInstanceId()));//dbapi.hardUpdate(operation);
+		} catch (Exception e) {
+			dbapi.rollbackTransaction();
+			return new ApiResponseMessage(ApiResponseMessage.ERROR, "Something went wrong during the persisting of the new instance: "+e.getMessage());
+		}
+
+		dbapi.closeTransaction(true);
+		dbapi.setTransactionModeAuto(true);
+
+		manageNewStateRelations(operation, reference, user, newState, parents, sons);
+
+		return new ApiResponseMessage(ApiResponseMessage.OK, reference);
+	}
 
 	/**
 	 * 
@@ -238,7 +272,21 @@ public class OperationManager {
 				for(LinkedEntity le : operation.getWebservice()) {
 					WebService webService = (WebService) WebServiceManager.getWebService(le.getMetaId(), le.getInstanceId(), user).getListOfEntities().get(0);
 					webService.getSupportedOperation().add(relation);
-					WebServiceManager.createWebService(webService, user, true, false);
+					WebServiceManager.updateWebService(webService, user, true, false);
+				}
+		}
+	}
+	
+	
+	private static void manageNewStateRelations(Operation operation, LinkedEntity relation, User user, State newState, boolean parents, boolean sons) {
+
+		System.out.println("*************\nManaging relation of: "+operation);
+		System.out.println("WebServices: "+operation.getWebservice());
+		if(parents) {
+			if(operation.getWebservice()!=null)
+				for(LinkedEntity le : operation.getWebservice()) {
+					WebService webService = (WebService) WebServiceManager.getWebService(le.getMetaId(), le.getInstanceId(), user).getListOfEntities().get(0);
+					WebServiceManager.updateStateWebService(webService, user, newState, true, false);
 				}
 		}
 	}

@@ -50,13 +50,14 @@ public class VariousTests {
 
 		dp.setDistribution(List.of(message_three.getEntity()));
 
-		System.out.println("----> UPDATE DISTRIBUTION");
+		System.out.println("----> UPDATE DATAPRODUCT");
 		ApiResponseMessage message_two = DataProductManager.updateDataProduct(dp, user, true, true);
 		System.out.println(message_two);
 		
 		
 		
-		System.out.println(DataProductManager.getDataProduct(dataproduct.getMetaId(), dataproduct.getInstanceId(), user));
+		System.out.println(DataProductManager.getDataProduct(dataproduct.getMetaId(), dataproduct.getInstanceId(), user).getListOfEntities());
+		System.out.println(DistributionManager.getDistribution(message_three.getEntity().getMetaId(), message_three.getEntity().getInstanceId(), user).getListOfEntities());
 		
 	}
 

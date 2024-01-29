@@ -29,6 +29,7 @@ public class DataProductManager {
 
 	public static ApiResponseMessage getDataProduct(String meta_id, String instance_id, User user) {
 		//dbapi.setMetadataMode(false);
+		dbapi.setMetadataMode(false);
 		
 		if (meta_id == null)
 			return new ApiResponseMessage(1, "The [meta_id] field can't be left blank");
@@ -83,6 +84,8 @@ public class DataProductManager {
 
 		List<DataProduct> revertedList = new ArrayList<>();
 		list.forEach(e -> revertedList.add(0, e));
+		
+		System.out.println("THE LIST: "+list);
 		
 		if (list.isEmpty())
 			return new ApiResponseMessage(ApiResponseMessage.OK, new ArrayList<DataProduct>());
@@ -179,6 +182,9 @@ public class DataProductManager {
 
 		dbapi.setTransactionModeAuto(true);
 		dbapi.startTransaction();
+
+		System.out.println("DATAPROD: "+dataProduct);
+		
 		LinkedEntity reference = null;
 		try {
 			reference = dbapi.createUpdate(dataProduct, new SaveQuery().setInstanceId(dataProduct.getInstanceId()));//dbapi.hardUpdate(dataProduct);
@@ -191,8 +197,45 @@ public class DataProductManager {
 		dbapi.closeTransaction(true);
 		dbapi.setTransactionModeAuto(true);
 
+		manageNewDraftRelations(dataProduct, reference, user, parents, sons);
+		
 		return new ApiResponseMessage(ApiResponseMessage.OK, reference);
 	}
+	
+	/**
+	 * 
+	 * @param dataProduct
+	 * @param user
+	 * @return
+	 */
+	public static ApiResponseMessage updateStateDataProduct(DataProduct dataProduct, User user, State newState, boolean parents, boolean sons) {
+
+		dataProduct.setEditorId(user.getMetaId());
+		dataProduct.setFileProvenance("instance created with the backoffice");
+		dataProduct.setState(newState);
+		
+		if(!ManagePermissions.checkPermissions(dataProduct, EntityTypeEnum.DATAPRODUCT, user)) 
+			return new ApiResponseMessage(ApiResponseMessage.ERROR, "You don't have auth on the groups of this instance");
+
+		dbapi.setTransactionModeAuto(true);
+		dbapi.startTransaction();
+		LinkedEntity reference = null;
+		try {
+			reference = dbapi.createUpdate(dataProduct, new SaveQuery().setInstanceId(dataProduct.getInstanceId()));//dbapi.hardUpdate(dataProduct);
+		} catch (Exception e) {
+			//e.printStackTrace();
+			dbapi.rollbackTransaction();
+			return new ApiResponseMessage(ApiResponseMessage.ERROR, "Something went wrong during the persisting of the new instance: "+e.getMessage());
+		}
+
+		dbapi.closeTransaction(true);
+		dbapi.setTransactionModeAuto(true);
+		
+		manageNewStateRelations(dataProduct, reference, user, newState, parents, sons);
+
+		return new ApiResponseMessage(ApiResponseMessage.OK, reference);
+	}
+
 
 	/**
 	 * 
@@ -222,8 +265,21 @@ public class DataProductManager {
 			if(dataProduct.getDistribution()!=null)
 				for(LinkedEntity le : dataProduct.getDistribution()) {
 					Distribution distribution = (Distribution) DistributionManager.getDistribution(le.getMetaId(), le.getInstanceId(), user).getListOfEntities().get(0);
+					System.out.println("DEST --> "+distribution);
 					distribution.getDataProduct().add(relation);
-					DistributionManager.createDistribution(distribution, user, false, true);
+					DistributionManager.updateDistribution(distribution, user, false, true);
+				}
+		}
+	
+	}
+	
+	private static void manageNewStateRelations(DataProduct dataProduct, LinkedEntity relation, User user, State newState, boolean parents, boolean sons) {
+
+		if(sons) {
+			if(dataProduct.getDistribution()!=null)
+				for(LinkedEntity le : dataProduct.getDistribution()) {
+					Distribution distribution = (Distribution) DistributionManager.getDistribution(le.getMetaId(), le.getInstanceId(), user).getListOfEntities().get(0);
+					DistributionManager.updateStateDistribution(distribution, user, newState, false, true);
 				}
 		}
 	

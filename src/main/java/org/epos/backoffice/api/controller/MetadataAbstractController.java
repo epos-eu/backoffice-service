@@ -33,7 +33,7 @@ import static org.epos.eposdatamodel.State.PUBLISHED;
 import java.util.*;
 
 public abstract class MetadataAbstractController<T extends EPOSDataModelEntity> extends AbstractController<T> {
-	
+
 	protected static DBAPIClient dbapi = new DBAPIClient();
 
 	public MetadataAbstractController(ObjectMapper objectMapper, HttpServletRequest request, Class<T> entityType) {
@@ -52,14 +52,14 @@ public abstract class MetadataAbstractController<T extends EPOSDataModelEntity> 
 
 		List<T> revertedList = new ArrayList<>();
 		List<T> list = new ArrayList<T>();
-		
+
 		if(entityType.equals(DataProduct.class)) list.addAll((Collection<? extends T>) DataProductManager.getDataProduct(meta_id,instance_id, user).getListOfEntities());
 		if(entityType.equals(Distribution.class)) list.addAll((Collection<? extends T>) DistributionManager.getDistribution(meta_id,instance_id, user).getListOfEntities());
 		if(entityType.equals(WebService.class)) list.addAll((Collection<? extends T>) WebServiceManager.getWebService(meta_id,instance_id, user).getListOfEntities());
 		if(entityType.equals(Operation.class)) list.addAll((Collection<? extends T>) OperationManager.getOperation(meta_id,instance_id, user).getListOfEntities());
 
 		list.forEach(e -> revertedList.add(0, e));
-		
+
 		if (list.isEmpty())
 			return ResponseEntity.status(404).body("[]");
 
@@ -90,25 +90,25 @@ public abstract class MetadataAbstractController<T extends EPOSDataModelEntity> 
 	protected ResponseEntity<?> postMethod(EPOSDataModelEntity body, boolean takeCareOfTheParent) {
 
 		User user = getUserFromSession();
-		
+
 		if(entityType.equals(DataProduct.class)) {
 			ApiResponseMessage response = DataProductManager.createDataProduct((DataProduct) body, user, true, true);
 			if(response.getCode()==ApiResponseMessage.OK) return ResponseEntity.status(201).body(response.getEntity());
 			else return ResponseEntity.status(400).body(response.getMessage());
 		}
-		
+
 		if(entityType.equals(Distribution.class)) {
 			ApiResponseMessage response = DistributionManager.createDistribution((Distribution) body, user, true, true);
 			if(response.getCode()==ApiResponseMessage.OK) return ResponseEntity.status(201).body(response.getEntity());
 			else return ResponseEntity.status(400).body(response.getMessage());
 		}
-		
+
 		if(entityType.equals(WebService.class)) {
 			ApiResponseMessage response = WebServiceManager.createWebService((WebService) body, user, true, true);
 			if(response.getCode()==ApiResponseMessage.OK) return ResponseEntity.status(201).body(response.getEntity());
 			else return ResponseEntity.status(400).body(response.getMessage());
 		}
-		
+
 		if(entityType.equals(Operation.class)) {
 			ApiResponseMessage response = OperationManager.createOperation((Operation) body, user, true, true);
 			if(response.getCode()==ApiResponseMessage.OK) return ResponseEntity.status(201).body(response.getEntity());
@@ -127,7 +127,7 @@ public abstract class MetadataAbstractController<T extends EPOSDataModelEntity> 
 			if(response.getCode()==ApiResponseMessage.OK) return ResponseEntity.status(201).body(response.getEntity());
 			else return ResponseEntity.status(400).body(response.getMessage());
 		}
-		
+
 		if(entityType.equals(Distribution.class)) {
 			ApiResponseMessage response = DistributionManager.updateDistribution((Distribution) body, user, true, true);
 			if(response.getCode()==ApiResponseMessage.OK) return ResponseEntity.status(201).body(response.getEntity());
@@ -146,7 +146,7 @@ public abstract class MetadataAbstractController<T extends EPOSDataModelEntity> 
 
 		return ResponseEntity.status(400).body(null);
 	}
-	
+
 	protected ResponseEntity<?> updateStateMethod(String instance_id, State newState, Boolean justThisOne) {
 
 		User user = getUserFromSession();
@@ -187,30 +187,37 @@ public abstract class MetadataAbstractController<T extends EPOSDataModelEntity> 
 			return ResponseEntity
 					.status(403)
 					.body(new ApiResponseMessage(ApiResponseMessage.ERROR, computePermission.generateErrorMessage()));
+		
+		instanceWithStateToBeUpdated.setState(newState);
 
+		updateInstanceStateAndItsSonState(instanceWithStateToBeUpdated, user, newState);
+		
+		/*if(justThisOne != null && justThisOne) {
+			//dbapi.update(instanceWithStateToBeUpdated, new DBAPIClient.UpdateQuery().state(newState));
+			if(entityType.equals(DataProduct.class)) {
+				ApiResponseMessage response = DataProductManager.updateStateDataProduct((DataProduct) instanceWithStateToBeUpdated, user, true, true);
+				if(response.getCode()==ApiResponseMessage.OK) return ResponseEntity.status(201).body(response.getEntity());
+				else return ResponseEntity.status(400).body(response.getMessage());
+			}
 
-
-
-		dbapi.setTransactionModeAuto(true);
-		dbapi.startTransaction();
-
-		try {
-
-			if(justThisOne != null && justThisOne)
-				dbapi.update(instanceWithStateToBeUpdated, new DBAPIClient.UpdateQuery().state(newState));
-			else
-				updateInstanceStateAndItsSonState(instanceWithStateToBeUpdated, user, getSonClass(entityType), newState);
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			dbapi.rollbackTransaction();
-			return ResponseEntity.status(400).body(new ApiResponseMessage(ApiResponseMessage.ERROR, "Something went wrong during the persisting of the new instance: "+e.getMessage()));
-		}
-		//dbapi.rollbackTransaction();
-
-
-		dbapi.closeTransaction(true);
-		dbapi.setTransactionModeAuto(true);
+			if(entityType.equals(Distribution.class)) {
+				ApiResponseMessage response = DistributionManager.updateStateDistribution((Distribution) instanceWithStateToBeUpdated, user, true, true);
+				if(response.getCode()==ApiResponseMessage.OK) return ResponseEntity.status(201).body(response.getEntity());
+				else return ResponseEntity.status(400).body(response.getMessage());
+			}
+			if(entityType.equals(WebService.class)) {
+				ApiResponseMessage response = WebServiceManager.updateStateWebService((WebService) instanceWithStateToBeUpdated, user, true, true);
+				if(response.getCode()==ApiResponseMessage.OK) return ResponseEntity.status(201).body(response.getEntity());
+				else return ResponseEntity.status(400).body(response.getMessage());
+			}
+			if(entityType.equals(Operation.class)) {
+				ApiResponseMessage response = OperationManager.updateStateOperation((Operation) instanceWithStateToBeUpdated, user, true, true);
+				if(response.getCode()==ApiResponseMessage.OK) return ResponseEntity.status(201).body(response.getEntity());
+				else return ResponseEntity.status(400).body(response.getMessage());
+			}
+		}else {
+			updateInstanceStateAndItsSonState(instanceWithStateToBeUpdated, user, newState);
+		}*/
 
 		return ResponseEntity.status(201).body(
 				new ApiResponseMessage(ApiResponseMessage.OK, "Correctly updated the state of the instance")
@@ -219,7 +226,7 @@ public abstract class MetadataAbstractController<T extends EPOSDataModelEntity> 
 	}
 
 	@SuppressWarnings("unchecked")
-	protected <S extends EPOSDataModelEntity, P extends EPOSDataModelEntity> void updateInstanceStateAndItsSonState(S instance, User user, Class<P> sonClass, State newState)  {
+	protected <S extends EPOSDataModelEntity, P extends EPOSDataModelEntity> void updateInstanceStateAndItsSonState(S instance, User user, State newState)  {
 
 		//archive the old instance if exist
 		if (instance.getInstanceChangedId() != null && !instance.getInstanceChangedId().isBlank()){
@@ -232,37 +239,34 @@ public abstract class MetadataAbstractController<T extends EPOSDataModelEntity> 
 		}
 
 		if(Boolean.parseBoolean(instance.getToBeDelete()) && Objects.equals(newState, PUBLISHED)) {
-			dbapi.delete(instance.getClass(), new DBAPIClient.DeleteQuery().instanceId(instance.getInstanceId()));
-			Class<? extends EPOSDataModelEntity> parentClass = getParentClass(instance);
-			if (parentClass != null)
-				removeArchivedInstanceFromNewParentInstance(instance,parentClass);
+			if(entityType.equals(DataProduct.class)) {
+				DataProductManager.deleteDataProduct(instance.getInstanceId(), user);
+			}
+
+			if(entityType.equals(Distribution.class)) {
+				DistributionManager.deleteDistribution(instance.getInstanceId(), user);
+			}
+			if(entityType.equals(WebService.class)) {
+				WebServiceManager.deleteWebService(instance.getInstanceId(), user);
+			}
+			if(entityType.equals(Operation.class)) {
+				OperationManager.deleteOperation(instance.getInstanceId(), user);
+			}
 
 		} else {
-			dbapi.update(instance, new DBAPIClient.UpdateQuery().state(newState));
-		}
-
-
-		for (LinkedEntity l : getSons(instance)) {
-
-			P instanceSon = dbapi.retrieve(sonClass, new DBAPIClient.GetQuery().instanceId(l.getInstanceId())).get(0);
-
-			if(instanceSon.getState().equals(PUBLISHED)) continue;
-
-			try {
-				updateInstanceStateAndItsSonState(instanceSon, user, getSonClass(instanceSon), newState);
-			} catch(IllegalArgumentException ignored){
-				updateInstanceStateAndItsSonState(instanceSon, user, null, newState);
+			if(entityType.equals(DataProduct.class)) {
+				DataProductManager.updateStateDataProduct((DataProduct) instance, user, newState, true, true);
 			}
-		}
-	}
-	
-	private <S extends EPOSDataModelEntity, P extends EPOSDataModelEntity> void removeArchivedInstanceFromNewParentInstance(S instance, Class<P> parentClass) {
-		for (LinkedEntity lp : getParents(instance)) {
-			P parent = dbapi.retrieve(parentClass, new DBAPIClient.GetQuery().instanceId(lp.getInstanceId())).get(0);
 
-			if(parent.getState().equals(ARCHIVED)) continue;
-
-			getSons(parent).removeIf(linkedEntity -> Objects.equals(linkedEntity.getInstanceId(), instance.getInstanceId()));
+			if(entityType.equals(Distribution.class)) {
+				DistributionManager.updateStateDistribution((Distribution) instance, user, newState, true, true);
+			}
+			if(entityType.equals(WebService.class)) {
+				WebServiceManager.updateStateWebService((WebService) instance, user, newState, true, true);
+			}
+			if(entityType.equals(Operation.class)) {
+				OperationManager.updateStateOperation((Operation) instance, user, newState, true, true);
+			}
 		}
 	}
 

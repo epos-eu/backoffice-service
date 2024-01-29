@@ -31,6 +31,7 @@ public class DistributionManager {
 
 	public static ApiResponseMessage getDistribution(String meta_id, String instance_id, User user) {
 		//dbapi.setMetadataMode(false);
+		dbapi.setMetadataMode(false);
 
 		if (meta_id == null)
 			return new ApiResponseMessage(1, "The [meta_id] field can't be left blank");
@@ -135,6 +136,7 @@ public class DistributionManager {
 		dbapi.setTransactionModeAuto(true);
 		dbapi.startTransaction();
 
+		System.out.println("DISTR: "+distribution);
 		LinkedEntity reference;
 		try {
 
@@ -176,6 +178,9 @@ public class DistributionManager {
 
 		distribution.setEditorId(user.getMetaId());
 		distribution.setFileProvenance("instance created with the backoffice");
+		
+
+		System.out.println("DISTR 2: "+distribution);
 
 		if(!ManagePermissions.checkPermissions(distribution, EntityTypeEnum.DISTRIBUTION, user)) 
 			return new ApiResponseMessage(ApiResponseMessage.ERROR, "You don't have auth on the groups of this instance");
@@ -198,6 +203,41 @@ public class DistributionManager {
 
 		return new ApiResponseMessage(ApiResponseMessage.OK, reference);
 	}
+	
+	/**
+	 * 
+	 * @param distribution
+	 * @param user
+	 * @return
+	 */
+	public static ApiResponseMessage updateStateDistribution(Distribution distribution, User user, State newState, boolean parents, boolean sons) {
+
+		distribution.setEditorId(user.getMetaId());
+		distribution.setFileProvenance("instance created with the backoffice");
+		distribution.setState(newState);
+
+		if(!ManagePermissions.checkPermissions(distribution, EntityTypeEnum.DISTRIBUTION, user)) 
+			return new ApiResponseMessage(ApiResponseMessage.ERROR, "You don't have auth on the groups of this instance");
+
+		dbapi.setTransactionModeAuto(true);
+		dbapi.startTransaction();
+		LinkedEntity reference = null;
+		try {
+			reference = dbapi.createUpdate(distribution, new SaveQuery().setInstanceId(distribution.getInstanceId()));//dbapi.hardUpdate(distribution);
+		} catch (Exception e) {
+			//e.printStackTrace();
+			dbapi.rollbackTransaction();
+			return new ApiResponseMessage(ApiResponseMessage.ERROR, "Something went wrong during the persisting of the new instance: "+e.getMessage());
+		}
+
+		dbapi.closeTransaction(true);
+		dbapi.setTransactionModeAuto(true);
+
+		manageNewStateRelations(distribution, reference, user, newState, parents, sons);
+
+		return new ApiResponseMessage(ApiResponseMessage.OK, reference);
+	}
+	
 
 	/**
 	 * 
@@ -227,9 +267,11 @@ public class DistributionManager {
 		if(parents) {
 			if(distribution.getDataProduct()!=null) {
 				for(LinkedEntity le : distribution.getDataProduct()) {
+					System.out.println("--------------------\n"+le+"\n--------------------");
 					DataProduct dataProduct = (DataProduct) DataProductManager.getDataProduct(le.getMetaId(), le.getInstanceId(), user).getListOfEntities().get(0);
+					System.out.println("--------------------\n"+dataProduct+"\n--------------------");
 					dataProduct.addDistribution(relation);
-					DataProductManager.createDataProduct(dataProduct, user, true, false);
+					DataProductManager.updateDataProduct(dataProduct, user, true, false);
 				}
 			}
 		}
@@ -238,9 +280,31 @@ public class DistributionManager {
 				LinkedEntity le = distribution.getAccessService(); 
 				WebService webService = (WebService) WebServiceManager.getWebService(le.getMetaId(), le.getInstanceId(), user).getListOfEntities().get(0);
 				webService.getDistribution().add(relation);
-				WebServiceManager.createWebService(webService, user, false, true);
+				WebServiceManager.updateWebService(webService, user, false, true);
 			}
 		}
 	}
+	
+	private static void manageNewStateRelations(Distribution distribution, LinkedEntity relation, User user, State newState, boolean parents, boolean sons) {
+
+		System.out.println("*************\nManaging relation of: "+distribution);
+		System.out.println("DataProduct: "+distribution.getDataProduct());
+		if(parents) {
+			if(distribution.getDataProduct()!=null) {
+				for(LinkedEntity le : distribution.getDataProduct()) {
+					DataProduct dataProduct = (DataProduct) DataProductManager.getDataProduct(le.getMetaId(), le.getInstanceId(), user).getListOfEntities().get(0);
+					DataProductManager.updateStateDataProduct(dataProduct, user, newState, true, false);
+				}
+			}
+		}
+		if(sons) {
+			if(distribution.getAccessService()!=null) {
+				LinkedEntity le = distribution.getAccessService(); 
+				WebService webService = (WebService) WebServiceManager.getWebService(le.getMetaId(), le.getInstanceId(), user).getListOfEntities().get(0);
+				WebServiceManager.updateStateWebService(webService, user, newState, false, true);
+			}
+		}
+	}
+
 
 }
