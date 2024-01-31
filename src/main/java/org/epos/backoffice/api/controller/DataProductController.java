@@ -48,7 +48,7 @@ public class DataProductController extends MetadataAbstractController<DataProduc
             @PathVariable String meta_id,
             @PathVariable String instance_id
     ) {
-        return getMethod(meta_id, instance_id);
+        return getMethod(meta_id, instance_id, null);
     }
     
     @RequestMapping(value = "/{meta_id}",
@@ -67,7 +67,7 @@ public class DataProductController extends MetadataAbstractController<DataProduc
     public ResponseEntity<?> get(
             @PathVariable String meta_id
     ) {
-        return getMethod(meta_id, null);
+        return getMethod(meta_id, null, null);
     }
 
     @RequestMapping(value = "",

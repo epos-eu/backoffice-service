@@ -47,7 +47,9 @@ public class LogUserInInterceptor implements HandlerInterceptor {
 
         if (!request.getMethod().equals("POST") && !user.isRegistered()) {
         	System.out.println("ALL REQUEST PARAMETERS: "+allRequestParams.toString());
-        	 user.setEmail(allRequestParams.get("userId"));
+        	 user.setEmail(allRequestParams.get("email"));
+        	 user.setFirstName(allRequestParams.get("firstName"));
+        	 user.setLastName(allRequestParams.get("lastName"));
         	 user.setRole(VIEWER);
         	 user.signUp();
         }

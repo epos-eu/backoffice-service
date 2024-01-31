@@ -6,6 +6,7 @@ import org.epos.backoffice.api.util.DataProductManager;
 import org.epos.backoffice.api.util.DistributionManager;
 import org.epos.backoffice.api.util.GroupFilter;
 import org.epos.backoffice.api.util.OperationManager;
+import org.epos.backoffice.api.util.UserManager;
 import org.epos.backoffice.api.util.WebServiceManager;
 import org.epos.backoffice.bean.BackofficeOperationType;
 import org.epos.backoffice.bean.ComputePermissionAbstract;
@@ -18,10 +19,6 @@ import org.springframework.http.ResponseEntity;
 
 import javax.servlet.http.HttpServletRequest;
 
-import static org.epos.backoffice.api.util.EPOSDataModelHelper.getParentClass;
-import static org.epos.backoffice.api.util.EPOSDataModelHelper.getParents;
-import static org.epos.backoffice.api.util.EPOSDataModelHelper.getSonClass;
-import static org.epos.backoffice.api.util.EPOSDataModelHelper.getSons;
 import static org.epos.backoffice.bean.OperationTypeEnum.DATAPRODUCT__CHANGE_STATUS__DRAFT_SUBMITTED;
 import static org.epos.backoffice.bean.OperationTypeEnum.DATAPRODUCT__CHANGE_STATUS__SUBMITTED_DISCARDED;
 import static org.epos.backoffice.bean.OperationTypeEnum.DATAPRODUCT__CHANGE_STATUS__SUBMITTED_DRAFT;
@@ -39,7 +36,7 @@ public abstract class MetadataAbstractController<T extends EPOSDataModelEntity> 
 	public MetadataAbstractController(ObjectMapper objectMapper, HttpServletRequest request, Class<T> entityType) {
 		super(objectMapper, request, entityType);
 	}
-	protected ResponseEntity<?> getMethod(String meta_id, String instance_id) {
+	protected ResponseEntity<?> getMethod(String meta_id, String instance_id, Boolean available_section) {
 		if (meta_id == null)
 			return ResponseEntity
 					.status(400)
@@ -53,6 +50,7 @@ public abstract class MetadataAbstractController<T extends EPOSDataModelEntity> 
 		List<T> revertedList = new ArrayList<>();
 		List<T> list = new ArrayList<T>();
 
+		if(entityType.equals(Person.class)) list.addAll((Collection<? extends T>) UserManager.getUser(meta_id,instance_id, user, available_section).getListOfEntities());
 		if(entityType.equals(DataProduct.class)) list.addAll((Collection<? extends T>) DataProductManager.getDataProduct(meta_id,instance_id, user).getListOfEntities());
 		if(entityType.equals(Distribution.class)) list.addAll((Collection<? extends T>) DistributionManager.getDistribution(meta_id,instance_id, user).getListOfEntities());
 		if(entityType.equals(WebService.class)) list.addAll((Collection<? extends T>) WebServiceManager.getWebService(meta_id,instance_id, user).getListOfEntities());

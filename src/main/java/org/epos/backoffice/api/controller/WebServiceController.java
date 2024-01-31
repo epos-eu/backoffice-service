@@ -49,7 +49,7 @@ public class WebServiceController extends MetadataAbstractController<WebService>
             @PathVariable String meta_id,
             @PathVariable String instance_id
     ) {
-        return getMethod(meta_id, instance_id);
+        return getMethod(meta_id, instance_id, null);
     }
     
     @RequestMapping(
@@ -68,7 +68,7 @@ public class WebServiceController extends MetadataAbstractController<WebService>
     public ResponseEntity<?> get(
             @PathVariable String meta_id
     ) {
-        return getMethod(meta_id, null);
+        return getMethod(meta_id, null, null);
     }
 
     @RequestMapping(

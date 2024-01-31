@@ -2,6 +2,8 @@ package org.epos.backoffice.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.epos.eposdatamodel.*;
+import org.epos.handler.dbapi.DBAPIClient;
+import org.epos.handler.dbapi.DBAPIClient.SaveQuery;
 import org.epos.handler.dbapi.dbapiimplementation.PersonDBAPI;
 
 import java.util.List;
@@ -12,8 +14,10 @@ import static org.epos.backoffice.bean.EntityTypeEnum.*;
 
 public class User {
 
-	@JsonIgnore
-	private static final PersonDBAPI personDBAPI = (PersonDBAPI) new PersonDBAPI().metadataMode(false);
+	//@JsonIgnore
+	//private static final PersonDBAPI personDBAPI = (PersonDBAPI) new PersonDBAPI().metadataMode(false);
+
+	protected static DBAPIClient dbapi = new DBAPIClient();
 
 	private String eduPersonUniqueId;
 	private String instanceId;
@@ -33,7 +37,7 @@ public class User {
 
 	public User(String instanceId) {
 		this.instanceId = instanceId;
-		Person person = personDBAPI.getByInstanceId(instanceId);
+		Person person = dbapi.retrieve(Person.class, new DBAPIClient.GetQuery().instanceId(instanceId)).get(0);
 
 
 		Objects.requireNonNull(person, "User with instanceId: [" + instanceId + "] not found");
@@ -57,26 +61,43 @@ public class User {
 	 * @return true if the user is already registered
 	 */
 	public boolean isRegistered() {
-		return personDBAPI.getByAuthId(this.eduPersonUniqueId) != null;
+		List<Person> person = dbapi.retrieve(Person.class, new DBAPIClient.GetQuery());
+		boolean registered = false;
+		for(Person p : person) {
+			if(p.getAuthIdentifier()!=null && p.getAuthIdentifier().equals(this.eduPersonUniqueId)) registered = true;
+		}
+		return registered;
+		//return personDBAPI.getByAuthId(this.eduPersonUniqueId) != null;
 	}
 
 	public void signUp() {
 		Person person = mapUserToPerson();
-		personDBAPI.save(person);
-		Person personPersisted = personDBAPI.getByAuthId(this.eduPersonUniqueId);
+		dbapi.setTransactionModeAuto(true);
+		dbapi.startTransaction();
+		LinkedEntity le = dbapi.create(person);
+		dbapi.closeTransaction(true);
+		dbapi.setTransactionModeAuto(true);
+		//personDBAPI.save(person);
+		Person personPersisted = dbapi.retrieve(Person.class, new DBAPIClient.GetQuery().instanceId(le.getInstanceId())).get(0);
 		this.metaId = personPersisted.getMetaId();
 		this.role = RoleEnum.valueOf(personPersisted.getRole().toString());
 		this.instanceId = personPersisted.getInstanceId();
 	}
 
 	public void signIn() {
-		Person person = personDBAPI.getByAuthId(this.eduPersonUniqueId);
-		this.metaId = person.getMetaId();
-		this.email = person.getEmail().get(0);
-		this.firstName = person.getGivenName();
-		this.lastName = person.getFamilyName();
-		this.role = RoleEnum.valueOf(person.getRole().toString());
-		this.instanceId = person.getInstanceId();
+		Person person = null;
+		List<Person> people = dbapi.retrieve(Person.class, new DBAPIClient.GetQuery());
+		for(Person p : people) {
+			if(p.getAuthIdentifier()!=null && p.getAuthIdentifier().equals(this.eduPersonUniqueId)) person = p;
+		}
+		if(person!=null) {
+			this.metaId = person.getMetaId();
+			this.email = person.getEmail().get(0);
+			this.firstName = person.getGivenName();
+			this.lastName = person.getFamilyName();
+			this.role = RoleEnum.valueOf(person.getRole().toString());
+			this.instanceId = person.getInstanceId();
+		}
 	}
 
 	public String getEduPersonUniqueId() {
@@ -150,8 +171,14 @@ public class User {
 
 	public void update() {
 		Person person = mapUserToPerson();
+		dbapi.setTransactionModeAuto(true);
+		dbapi.startTransaction();
+		dbapi.createUpdate(person, new SaveQuery().setInstanceId(person.getInstanceId()));
+		dbapi.closeTransaction(true);
+		dbapi.setTransactionModeAuto(true);
+		
 		//person.setRole(this.role.toString());
-		personDBAPI.hardUpdate(instanceId, person);
+		//personDBAPI.hardUpdate(person.getInstanceId(), person);
 	}
 
 	private Person mapUserToPerson() {
@@ -210,11 +237,13 @@ public class User {
 			this.accessibleSection = List.of(USER, CONTACTPOINT, DATAPRODUCT, DISTRIBUTION, WEBSERVICE, OPERATION, ORGANIZATION, PERSON);
 			break;
 		case REVIEWER:
-			this.accessibleSection = List.of(DATAPRODUCT, ORGANIZATION, PERSON);
+			this.accessibleSection = List.of(DATAPRODUCT, DISTRIBUTION, WEBSERVICE, OPERATION, ORGANIZATION, PERSON);
 			break;
 		case EDITOR:
+			this.accessibleSection = List.of(DATAPRODUCT, DISTRIBUTION, WEBSERVICE, OPERATION);
+			break;
 		case VIEWER:
-			this.accessibleSection = List.of(DATAPRODUCT);
+			this.accessibleSection = List.of(DATAPRODUCT, DISTRIBUTION);
 			break;
 		}
 	}

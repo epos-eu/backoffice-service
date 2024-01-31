@@ -2,6 +2,7 @@ package org.epos.backoffice.api.exception;
 
 import java.util.List;
 
+import org.epos.backoffice.bean.User;
 import org.epos.eposdatamodel.DataProduct;
 import org.epos.eposdatamodel.EPOSDataModelEntity;
 import org.epos.eposdatamodel.LinkedEntity;
@@ -13,14 +14,16 @@ public class ApiResponseMessage {
     public static final int INFO = 3;
     public static final int OK = 4;
     public static final int TOO_BUSY = 5;
+    public static final int UNAUTHORIZED = 6;
 
     int code;
     String type;
     String message;
     LinkedEntity entity;
     List<? extends EPOSDataModelEntity> listOfEntities;
+    List<User> listOfUsers;
 
-    public ApiResponseMessage() {
+	public ApiResponseMessage() {
     }
 
     public ApiResponseMessage(int code, String message) {
@@ -40,6 +43,9 @@ public class ApiResponseMessage {
                 break;
             case TOO_BUSY:
                 setType("too busy");
+                break;
+            case UNAUTHORIZED:
+                setType("unauthorized");
                 break;
             default:
                 setType("unknown");
@@ -66,6 +72,9 @@ public class ApiResponseMessage {
             case TOO_BUSY:
                 setType("too busy");
                 break;
+            case UNAUTHORIZED:
+                setType("unauthorized");
+                break;
             default:
                 setType("unknown");
                 break;
@@ -91,12 +100,44 @@ public class ApiResponseMessage {
 	            case TOO_BUSY:
 	                setType("too busy");
 	                break;
+	            case UNAUTHORIZED:
+	                setType("unauthorized");
+	                break;
 	            default:
 	                setType("unknown");
 	                break;
 	        }
 	        this.listOfEntities = list;
 	}
+	
+	public ApiResponseMessage(int code, boolean userManagement, List<User> list) {
+		 this.code = code;
+	        switch (code) {
+	            case ERROR:
+	                setType("error");
+	                break;
+	            case WARNING:
+	                setType("warning");
+	                break;
+	            case INFO:
+	                setType("info");
+	                break;
+	            case OK:
+	                setType("ok");
+	                break;
+	            case TOO_BUSY:
+	                setType("too busy");
+	                break;
+	            case UNAUTHORIZED:
+	                setType("unauthorized");
+	                break;
+	            default:
+	                setType("unknown");
+	                break;
+	        }
+	        this.listOfUsers = list;
+	}
+
 
 	public int getCode() {
         return code;
@@ -137,11 +178,21 @@ public class ApiResponseMessage {
     public void setEntity(List<? extends EPOSDataModelEntity> listOfEntities) {
         this.listOfEntities = listOfEntities;
     }
+    
+
+    public List<User> getListOfUsers() {
+		return listOfUsers;
+	}
+
+	public void setListOfUsers(List<User> listOfUsers) {
+		this.listOfUsers = listOfUsers;
+	}
 
 	@Override
 	public String toString() {
 		return "ApiResponseMessage [code=" + code + ", type=" + type + ", message=" + message + ", entity=" + entity
-				+ "]";
+				+ ", listOfEntities=" + listOfEntities + ", listOfUsers=" + listOfUsers + "]";
 	}
-    
+
+
 }
