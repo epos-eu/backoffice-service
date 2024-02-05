@@ -23,6 +23,7 @@ import static org.epos.backoffice.bean.OperationTypeEnum.DATAPRODUCT__CHANGE_STA
 import static org.epos.backoffice.bean.OperationTypeEnum.DATAPRODUCT__CHANGE_STATUS__SUBMITTED_DISCARDED;
 import static org.epos.backoffice.bean.OperationTypeEnum.DATAPRODUCT__CHANGE_STATUS__SUBMITTED_DRAFT;
 import static org.epos.backoffice.bean.OperationTypeEnum.DATAPRODUCT__CHANGE_STATUS__SUBMITTED_PUBLISHED;
+import static org.epos.backoffice.bean.OperationTypeEnum.DATAPRODUCT__CHANGE_STATUS__DRAFT_DISCARDED;
 import static org.epos.backoffice.bean.OperationTypeEnum.OTHER;
 import static org.epos.eposdatamodel.State.ARCHIVED;
 import static org.epos.eposdatamodel.State.PUBLISHED;
@@ -159,6 +160,7 @@ public abstract class MetadataAbstractController<T extends EPOSDataModelEntity> 
 		T instanceWithStateToBeUpdated = instanceWithStateToBeUpdatedList.get(0);
 		State originalState = instanceWithStateToBeUpdated.getState();
 
+		//TODO: ADD DISCARDED TO DRAFT
 		OperationTypeEnum operationTypeEnum;
 		if (newState.equals(State.SUBMITTED) && originalState.equals(State.DRAFT))
 			operationTypeEnum = DATAPRODUCT__CHANGE_STATUS__DRAFT_SUBMITTED;
@@ -168,7 +170,10 @@ public abstract class MetadataAbstractController<T extends EPOSDataModelEntity> 
 			operationTypeEnum = DATAPRODUCT__CHANGE_STATUS__SUBMITTED_PUBLISHED;
 		else if (newState.equals(State.DISCARDED) && originalState.equals(State.SUBMITTED))
 			operationTypeEnum = DATAPRODUCT__CHANGE_STATUS__SUBMITTED_DISCARDED;
+		else if (newState.equals(State.DISCARDED) && originalState.equals(State.DRAFT))
+			operationTypeEnum = DATAPRODUCT__CHANGE_STATUS__DRAFT_DISCARDED;
 		else operationTypeEnum = OTHER;
+		
 
 		BackofficeOperationType operationType = new BackofficeOperationType()
 				.operationType(operationTypeEnum)
@@ -230,9 +235,20 @@ public abstract class MetadataAbstractController<T extends EPOSDataModelEntity> 
 		if (instance.getInstanceChangedId() != null && !instance.getInstanceChangedId().isBlank()){
 			S instanceOriginal = (S) dbapi.retrieve(instance.getClass(), new DBAPIClient.GetQuery().instanceId(instance.getInstanceChangedId())).get(0);
 
-			if (instanceOriginal.getState().equals(PUBLISHED)) {
-				dbapi.update(instanceOriginal, new DBAPIClient.UpdateQuery().state(ARCHIVED));
-				dbapi.flush();	
+			if (instanceOriginal.getState().equals(PUBLISHED) && newState.equals(PUBLISHED)) {
+				if(entityType.equals(DataProduct.class)) {
+					DataProductManager.updateStateDataProduct((DataProduct) instanceOriginal, user, ARCHIVED, true, true);
+				}
+
+				if(entityType.equals(Distribution.class)) {
+					DistributionManager.updateStateDistribution((Distribution) instanceOriginal, user, ARCHIVED, true, true);
+				}
+				if(entityType.equals(WebService.class)) {
+					WebServiceManager.updateStateWebService((WebService) instanceOriginal, user, ARCHIVED, true, true);
+				}
+				if(entityType.equals(Operation.class)) {
+					OperationManager.updateStateOperation((Operation) instanceOriginal, user, ARCHIVED, true, true);
+				}
 			}
 		}
 

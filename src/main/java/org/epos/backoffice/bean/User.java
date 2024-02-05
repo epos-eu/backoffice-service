@@ -1,6 +1,8 @@
 package org.epos.backoffice.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import org.epos.backoffice.api.util.PersonManager;
 import org.epos.eposdatamodel.*;
 import org.epos.handler.dbapi.DBAPIClient;
 import org.epos.handler.dbapi.DBAPIClient.SaveQuery;
@@ -37,7 +39,7 @@ public class User {
 
 	public User(String instanceId) {
 		this.instanceId = instanceId;
-		Person person = dbapi.retrieve(Person.class, new DBAPIClient.GetQuery().instanceId(instanceId)).get(0);
+		Person person = ((List<Person>) PersonManager.getPersonInternal("all", instanceId).getListOfEntities()).get(0);//dbapi.retrieve(Person.class, new DBAPIClient.GetQuery().instanceId(instanceId)).get(0);
 
 
 		Objects.requireNonNull(person, "User with instanceId: [" + instanceId + "] not found");
@@ -61,7 +63,7 @@ public class User {
 	 * @return true if the user is already registered
 	 */
 	public boolean isRegistered() {
-		List<Person> person = dbapi.retrieve(Person.class, new DBAPIClient.GetQuery());
+		List<Person> person = (List<Person>) PersonManager.getPersonInternal("all", "all").getListOfEntities(); //dbapi.retrieve(Person.class, new DBAPIClient.GetQuery());
 		boolean registered = false;
 		for(Person p : person) {
 			if(p.getAuthIdentifier()!=null && p.getAuthIdentifier().equals(this.eduPersonUniqueId)) registered = true;
@@ -78,7 +80,7 @@ public class User {
 		dbapi.closeTransaction(true);
 		dbapi.setTransactionModeAuto(true);
 		//personDBAPI.save(person);
-		Person personPersisted = dbapi.retrieve(Person.class, new DBAPIClient.GetQuery().instanceId(le.getInstanceId())).get(0);
+		Person personPersisted = ((List<Person>) PersonManager.getPersonInternal("all", le.getInstanceId()).getListOfEntities()).get(0);//dbapi.retrieve(Person.class, new DBAPIClient.GetQuery().instanceId(le.getInstanceId())).get(0);
 		this.metaId = personPersisted.getMetaId();
 		this.role = RoleEnum.valueOf(personPersisted.getRole().toString());
 		this.instanceId = personPersisted.getInstanceId();
@@ -86,7 +88,7 @@ public class User {
 
 	public void signIn() {
 		Person person = null;
-		List<Person> people = dbapi.retrieve(Person.class, new DBAPIClient.GetQuery());
+		List<Person> people = (List<Person>) PersonManager.getPersonInternal("all", "all").getListOfEntities();//dbapi.retrieve(Person.class, new DBAPIClient.GetQuery());
 		for(Person p : people) {
 			if(p.getAuthIdentifier()!=null && p.getAuthIdentifier().equals(this.eduPersonUniqueId)) person = p;
 		}
@@ -188,7 +190,7 @@ public class User {
 		person.setGivenName(this.firstName);
 		person.setUid("Person/"+UUID.randomUUID());
 		person.setEmail(List.of(this.email));
-		person.setState(State.PLACEHOLDER);
+		person.setState(State.SUBMITTED);
 		person.setEditorId("backoffice");
 		person.setRole(Role.valueOf(Objects.nonNull(this.role) ? this.role.toString() : String.valueOf(RoleEnum.VIEWER)));
 		person.setAuthorizedGroup(this.groups);

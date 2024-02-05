@@ -4,6 +4,7 @@ import org.epos.backoffice.api.exception.ApiResponseMessage;
 import org.epos.backoffice.api.util.UserManager;
 import org.epos.backoffice.bean.RoleEnum;
 import org.epos.backoffice.bean.User;
+import org.epos.eposdatamodel.Role;
 
 public class VariousTests {
 	
@@ -15,16 +16,24 @@ public class VariousTests {
 		user.setEmail("valerio.vinciarelli@epos-eric.eu");
 		user.setRole(RoleEnum.ADMIN);
 		
-		ApiResponseMessage message_one = UserManager.getUser(null, "test", user, true);
-		System.out.println(message_one);
-		
 		User newUser = new User();
-		newUser.setInstanceId("eb8e9b60-8929-4da2-a5f7-a6e50df7c3c3");
+		newUser.setEduPersonUniqueId("f190eef9f005482a9e88b4400b080a2a@aaai.epos-eu.org");
+		newUser.setFirstName("Valerio");
+		newUser.setLastName("Vinciarelli");
+		newUser.setEmail("valerio.vinciarelli@ingv.it");
+		newUser.setInstanceId("91dfdff5-efbf-4883-b6b2-3d396567a400");
+		newUser.setMetaId("35c623ca-f5ce-4926-b496-c3cfbdbba8f4");
 		newUser.setRole(RoleEnum.EDITOR);
 		
+		//ApiResponseMessage message_one = UserManager.updateUser(newUser,user);
+		//System.out.println(message_one);
 		
-		message_one = UserManager.updateUser(newUser, user);
-		System.out.println(message_one);
+		
+		ApiResponseMessage message_one = UserManager.getUser("all","all",user,true);
+		System.out.println(message_one.getListOfUsers());
+		
+		//message_one = UserManager.updateUser(newUser, user);
+		//System.out.println(message_one);
 	}
 	/*public static void main(String[] args) {
 		DataProduct dp = new DataProduct();

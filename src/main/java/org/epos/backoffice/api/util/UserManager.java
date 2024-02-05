@@ -24,6 +24,7 @@ import org.epos.eposdatamodel.DataProduct;
 import org.epos.eposdatamodel.Distribution;
 import org.epos.eposdatamodel.LinkedEntity;
 import org.epos.eposdatamodel.Person;
+import org.epos.eposdatamodel.Role;
 import org.epos.eposdatamodel.State;
 import org.epos.handler.dbapi.DBAPIClient;
 import org.epos.handler.dbapi.DBAPIClient.DeleteQuery;
@@ -69,6 +70,8 @@ public class UserManager {
 		List<User> userStream = personList.stream()
 				.filter(x -> x.getAuthIdentifier() != null && !x.getAuthIdentifier().isEmpty())
 				.map(e->mapFromPersonToUser(e)).collect(Collectors.toList());
+		
+		System.out.println("STREAM: "+userStream.toString());
 
 		if (available_section) userStream.forEach(User::generateAccessibleSection);
 
@@ -90,7 +93,7 @@ public class UserManager {
 		inputUser.setLastName(inputUser.getLastName() == null ? user.getLastName() : inputUser.getLastName());
 		inputUser.setEmail(inputUser.getEmail() == null ? user.getEmail() : inputUser.getEmail());
 		inputUser.setEduPersonUniqueId(inputUser.getEduPersonUniqueId() == null ? user.getEduPersonUniqueId() : inputUser.getEduPersonUniqueId());
-		
+
 		System.out.println(inputUser);
 
 
@@ -131,31 +134,54 @@ public class UserManager {
 	 * @return
 	 */
 	public static ApiResponseMessage updateUser(User newUser, User user) {
-		
+
 		//ONLY CHANGE ROLE WORKING ATM
-		
+
 		if (newUser.getInstanceId() == null)
 			return new ApiResponseMessage(1, "missing instanceId in the body");
+		
+		Person person = null;
+		List<Person> userPeople = (List<Person>) PersonManager.getPerson("all", null, user).getListOfEntities();
+		for(Person p : userPeople) {
+			if(p.getAuthIdentifier()!=null && p.getAuthIdentifier().equals(user.getEduPersonUniqueId())) person = p;
+		}
+		System.out.println("HOLY: "+person);
+		if(person!=null) {
+			user.setMetaId(person.getMetaId());
+			user.setEmail(person.getEmail().get(0));
+			user.setFirstName(person.getGivenName());
+			user.setLastName(person.getFamilyName());
+			user.setRole(RoleEnum.valueOf(person.getRole().toString()));
+			user.setInstanceId(person.getInstanceId());
+		}
+		System.out.println("HOLY: "+user);
 
 		//check admissibility of the operation
-		DBAPIClient.GetQuery query = new DBAPIClient.GetQuery().instanceId(newUser.getInstanceId());
-		List<Person> people = dbapi.retrieve(Person.class, query);
+		//DBAPIClient.GetQuery query = new DBAPIClient.GetQuery().instanceId(newUser.getInstanceId());
+		//List<Person> people = dbapi.retrieve(Person.class, query);
+		List<Person> people = (List<Person>) PersonManager.getPerson("single", newUser.getInstanceId(), user).getListOfEntities();
+		
 
 		if (people.isEmpty()) {
 			return new ApiResponseMessage(1, "user not found");
 		}
 		if (newUser.getEduPersonUniqueId() != null && !people.get(0).getAuthIdentifier().equals(newUser.getEduPersonUniqueId()))
 			return new ApiResponseMessage(1, "The user instanceId and authIdentifier doesn't correspond");
-		
+
 		if (!user.getRole().equals(ADMIN)) return new ApiResponseMessage(6, "You can't update your role");
-		
-		User toBeUpdated = mapFromPersonToUser(people.get(0));
-		
+
+		System.out.println(people.size());
+		Person toBeUpdated = people.get(0);
+
+		//User toBeUpdated = mapFromPersonToUser(people.get(0));
+
+		toBeUpdated.setRole(Role.valueOf(newUser.getRole().toString()));
 		System.out.println(toBeUpdated);
-		toBeUpdated.setRole(newUser.getRole());
-		
-		toBeUpdated.update();
-		
+
+		//toBeUpdated.update();
+		PersonManager.updatePerson(toBeUpdated, user, false, false);
+
+
 		return new ApiResponseMessage(4, "User successfully modified");
 		/*if (!user.getRole().equals(ADMIN)) {
 			if (user.getEduPersonUniqueId().equals(newUser.getEduPersonUniqueId())) {
@@ -197,6 +223,7 @@ public class UserManager {
 		u.setMetaId(person.getMetaId());
 		u.setInstanceId(person.getInstanceId());
 		u.setRole(RoleEnum.valueOf(person.getRole().toString()));
+
 		return u;
 	}
 }

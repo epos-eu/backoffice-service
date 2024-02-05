@@ -58,6 +58,7 @@ public abstract class BackofficeAbstractController<T extends EPOSDataModelEntity
 
 
 	protected ResponseEntity<?> getMethod(String meta_id, String instance_id) {
+		dbapi.setMetadataMode(false);
 		if (meta_id == null)
 			return ResponseEntity
 					.status(400)

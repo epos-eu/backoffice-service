@@ -30,7 +30,7 @@ public class DataProductManager {
 	public static ApiResponseMessage getDataProduct(String meta_id, String instance_id, User user) {
 		//dbapi.setMetadataMode(false);
 		dbapi.setMetadataMode(false);
-		
+
 		if (meta_id == null)
 			return new ApiResponseMessage(1, "The [meta_id] field can't be left blank");
 		if(instance_id == null) {
@@ -46,7 +46,7 @@ public class DataProductManager {
 		ComputePermissionAbstract computePermission = new ComputePermissionNoGroup(operationType);
 		if (!computePermission.isAuthorized())
 			return new ApiResponseMessage(1, computePermission.generateErrorMessage());
-		
+
 		System.out.println(meta_id+" "+instance_id);
 
 		List<DataProduct> list;
@@ -60,7 +60,7 @@ public class DataProductManager {
 								elem -> elem.getMetaId().equals(meta_id)
 								)
 						.collect(Collectors.toList());
-				
+
 			}else {
 				list = dbapi.retrieve(DataProduct.class, new DBAPIClient.GetQuery().instanceId(instance_id));
 			}
@@ -84,12 +84,12 @@ public class DataProductManager {
 
 		List<DataProduct> revertedList = new ArrayList<>();
 		list.forEach(e -> revertedList.add(0, e));
-		
+
 		System.out.println("THE LIST: "+list);
-		
+
 		if (list.isEmpty())
 			return new ApiResponseMessage(ApiResponseMessage.OK, new ArrayList<DataProduct>());
-		
+
 		return new ApiResponseMessage(ApiResponseMessage.OK, list);
 	}
 
@@ -113,6 +113,9 @@ public class DataProductManager {
 		dataProduct.setInstanceId(null);
 		dataProduct.setInstanceChangedId(null);
 
+		boolean fromNotDraft = false;
+		LinkedEntity origin = null;
+
 		// Check if exists a version PUBLISHED or ARCHIVED if MetaId!=null
 		if (dataProduct.getMetaId() != null) {
 			List<DataProduct> retrieved = dbapi.retrieve(DataProduct.class, new DBAPIClient.GetQuery().state(State.PUBLISHED).metaId(dataProduct.getMetaId()));
@@ -122,13 +125,19 @@ public class DataProductManager {
 				retrieved = dbapi.retrieve(DataProduct.class, new DBAPIClient.GetQuery().state(State.SUBMITTED).metaId(dataProduct.getMetaId()));
 			if(!retrieved.isEmpty()) {
 				dataProduct.setInstanceChangedId(retrieved.get(0).getInstanceId());
+				fromNotDraft = true;
+				origin = new LinkedEntity();
+				origin.setEntityType("dataproduct");
+				origin.setInstanceId(retrieved.get(0).getInstanceId());
+				origin.setMetaId(retrieved.get(0).getMetaId());
+				origin.setUid(retrieved.get(0).getUid());
 			}	
 		}
 
 		dataProduct.setState(State.DRAFT);
 		dataProduct.setEditorId(user.getMetaId());
 		dataProduct.setFileProvenance("instance created with the backoffice");
-		
+
 		if(!ManagePermissions.checkPermissions(dataProduct, EntityTypeEnum.DATAPRODUCT, user)) 
 			return new ApiResponseMessage(ApiResponseMessage.ERROR, "You don't have auth on the groups of this instance");
 
@@ -152,7 +161,7 @@ public class DataProductManager {
 		dbapi.closeTransaction(true);
 		dbapi.setTransactionModeAuto(true);
 
-		manageNewDraftRelations(dataProduct, reference, user, parents, sons);
+		manageNewDraftRelations(dataProduct, reference, origin, user, parents, sons, fromNotDraft);
 
 		return new ApiResponseMessage(ApiResponseMessage.OK, reference);
 	}
@@ -176,7 +185,7 @@ public class DataProductManager {
 
 		dataProduct.setEditorId(user.getMetaId());
 		dataProduct.setFileProvenance("instance created with the backoffice");
-		
+
 		if(!ManagePermissions.checkPermissions(dataProduct, EntityTypeEnum.DATAPRODUCT, user)) 
 			return new ApiResponseMessage(ApiResponseMessage.ERROR, "You don't have auth on the groups of this instance");
 
@@ -184,7 +193,7 @@ public class DataProductManager {
 		dbapi.startTransaction();
 
 		System.out.println("DATAPROD: "+dataProduct);
-		
+
 		LinkedEntity reference = null;
 		try {
 			reference = dbapi.createUpdate(dataProduct, new SaveQuery().setInstanceId(dataProduct.getInstanceId()));//dbapi.hardUpdate(dataProduct);
@@ -197,11 +206,11 @@ public class DataProductManager {
 		dbapi.closeTransaction(true);
 		dbapi.setTransactionModeAuto(true);
 
-		manageNewDraftRelations(dataProduct, reference, user, parents, sons);
-		
+		manageUpdateRelations(dataProduct, reference, user, parents, sons);
+
 		return new ApiResponseMessage(ApiResponseMessage.OK, reference);
 	}
-	
+
 	/**
 	 * 
 	 * @param dataProduct
@@ -213,7 +222,7 @@ public class DataProductManager {
 		dataProduct.setEditorId(user.getMetaId());
 		dataProduct.setFileProvenance("instance created with the backoffice");
 		dataProduct.setState(newState);
-		
+
 		if(!ManagePermissions.checkPermissions(dataProduct, EntityTypeEnum.DATAPRODUCT, user)) 
 			return new ApiResponseMessage(ApiResponseMessage.ERROR, "You don't have auth on the groups of this instance");
 
@@ -230,7 +239,7 @@ public class DataProductManager {
 
 		dbapi.closeTransaction(true);
 		dbapi.setTransactionModeAuto(true);
-		
+
 		manageNewStateRelations(dataProduct, reference, user, newState, parents, sons);
 
 		return new ApiResponseMessage(ApiResponseMessage.OK, reference);
@@ -258,21 +267,49 @@ public class DataProductManager {
 		return true;
 	}
 
-
-	private static void manageNewDraftRelations(DataProduct dataProduct, LinkedEntity relation, User user, boolean parents, boolean sons) {
+	private static void manageNewDraftRelations(DataProduct dataProduct, LinkedEntity relation,LinkedEntity origin, User user, boolean parents, boolean sons, boolean fromNotDraft) {
 
 		if(sons) {
-			if(dataProduct.getDistribution()!=null)
+			if(dataProduct.getDistribution()!=null) {
+				if(fromNotDraft) {
+					List<LinkedEntity> distributions = new ArrayList<LinkedEntity>();
+					for(LinkedEntity le : dataProduct.getDistribution()) {
+						Distribution distribution = (Distribution) DistributionManager.getDistribution(le.getMetaId(), le.getInstanceId(), user).getListOfEntities().get(0);
+						System.out.println("DEST --> "+distribution);
+						distribution.getDataProduct().remove(origin);
+						distribution.getDataProduct().add(relation); //NEED TO CHECK IF REMOVE ORPHAN DATAPRODUCTS
+						distributions.add(DistributionManager.createDistribution(distribution, user, false, true).getEntity());
+					}
+					dataProduct.setDistribution(distributions);
+					DataProductManager.updateDataProduct(dataProduct, user, false, false);
+				}else {
+					for(LinkedEntity le : dataProduct.getDistribution()) {
+						Distribution distribution = (Distribution) DistributionManager.getDistribution(le.getMetaId(), le.getInstanceId(), user).getListOfEntities().get(0);
+						System.out.println("DEST --> "+distribution);
+						distribution.getDataProduct().add(relation);//NEED TO CHECK IF REMOVE ORPHAN DATAPRODUCTS
+						DistributionManager.updateDistribution(distribution, user, false, true);
+					}
+				}
+			}
+		}
+
+	}
+
+	private static void manageUpdateRelations(DataProduct dataProduct, LinkedEntity relation, User user, boolean parents, boolean sons) {
+
+		if(sons) {
+			if(dataProduct.getDistribution()!=null) {
 				for(LinkedEntity le : dataProduct.getDistribution()) {
 					Distribution distribution = (Distribution) DistributionManager.getDistribution(le.getMetaId(), le.getInstanceId(), user).getListOfEntities().get(0);
 					System.out.println("DEST --> "+distribution);
 					distribution.getDataProduct().add(relation);
 					DistributionManager.updateDistribution(distribution, user, false, true);
 				}
+			}
 		}
-	
+
 	}
-	
+
 	private static void manageNewStateRelations(DataProduct dataProduct, LinkedEntity relation, User user, State newState, boolean parents, boolean sons) {
 
 		if(sons) {
@@ -282,7 +319,7 @@ public class DataProductManager {
 					DistributionManager.updateStateDistribution(distribution, user, newState, false, true);
 				}
 		}
-	
+
 	}
 
 }

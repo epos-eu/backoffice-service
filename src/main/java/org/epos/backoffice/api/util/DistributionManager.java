@@ -132,7 +132,7 @@ public class DistributionManager {
 
 		if(!ManagePermissions.checkPermissions(distribution, EntityTypeEnum.DISTRIBUTION, user)) 
 			return new ApiResponseMessage(ApiResponseMessage.ERROR, "You don't have auth on the groups of this instance");
-		
+
 		dbapi.setTransactionModeAuto(true);
 		dbapi.startTransaction();
 
@@ -178,7 +178,7 @@ public class DistributionManager {
 
 		distribution.setEditorId(user.getMetaId());
 		distribution.setFileProvenance("instance created with the backoffice");
-		
+
 
 		System.out.println("DISTR 2: "+distribution);
 
@@ -203,7 +203,7 @@ public class DistributionManager {
 
 		return new ApiResponseMessage(ApiResponseMessage.OK, reference);
 	}
-	
+
 	/**
 	 * 
 	 * @param distribution
@@ -237,7 +237,7 @@ public class DistributionManager {
 
 		return new ApiResponseMessage(ApiResponseMessage.OK, reference);
 	}
-	
+
 
 	/**
 	 * 
@@ -284,7 +284,7 @@ public class DistributionManager {
 			}
 		}
 	}
-	
+
 	private static void manageNewStateRelations(Distribution distribution, LinkedEntity relation, User user, State newState, boolean parents, boolean sons) {
 
 		System.out.println("*************\nManaging relation of: "+distribution);
