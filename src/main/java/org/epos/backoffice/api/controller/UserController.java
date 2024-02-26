@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.epos.backoffice.api.exception.ApiResponseMessage;
+import org.epos.backoffice.api.util.UserManager;
 import org.epos.backoffice.bean.BackofficeOperationType;
 import org.epos.backoffice.bean.ComputePermissionAbstract;
 import org.epos.backoffice.bean.RoleEnum;
@@ -32,220 +33,134 @@ import static org.epos.backoffice.bean.RoleEnum.ADMIN;
 import static org.epos.backoffice.bean.RoleEnum.VIEWER;
 
 @RestController
-public class UserController extends BackofficeAbstractController<Person> implements ApiDocTag {
+public class UserController extends MetadataAbstractController<Person> implements ApiDocTag {
 
-    private static final Logger log = LoggerFactory.getLogger(UserController.class);
+	private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
-    @org.springframework.beans.factory.annotation.Autowired
-    public UserController(ObjectMapper objectMapper, HttpServletRequest request) {
-        super(objectMapper, request, Person.class);
-    }
+	@org.springframework.beans.factory.annotation.Autowired
+	public UserController(ObjectMapper objectMapper, HttpServletRequest request) {
+		super(objectMapper, request, Person.class);
+	}
 
-    @RequestMapping(value = "/user",
-            produces = {"application/json"},
-            method = RequestMethod.PUT)
-    @ResponseBody
-    @Operation(summary = "Update User", description = "You can use this endpoint to update a User (more information about which fields are required, who has the permission and how to use it are into the BackOffice repository documentation)")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "The User is correctly updated.", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "400", description = "Bad request."),
-            @ApiResponse(responseCode = "401", description = "Token is missing or invalid"),
-            @ApiResponse(responseCode = "404", description = "Not found"),
-            @ApiResponse(responseCode = "415", description = "Wrong media type"),
-            @ApiResponse(responseCode = "500", description = "Error executing the request, the error may be, either in the gateway or the backoffice-service")
-    })
-    public ResponseEntity<?> put(
-            @RequestBody User body
-    ) {
-        User user = getUserFromSession();
+	@RequestMapping(value = "/user",
+			produces = {"application/json"},
+			method = RequestMethod.PUT)
+	@ResponseBody
+	@Operation(summary = "Update User", description = "You can use this endpoint to update a User (more information about which fields are required, who has the permission and how to use it are into the BackOffice repository documentation)")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "The User is correctly updated.", content = @Content(mediaType = "application/json")),
+			@ApiResponse(responseCode = "400", description = "Bad request."),
+			@ApiResponse(responseCode = "401", description = "Token is missing or invalid"),
+			@ApiResponse(responseCode = "404", description = "Not found"),
+			@ApiResponse(responseCode = "415", description = "Wrong media type"),
+			@ApiResponse(responseCode = "500", description = "Error executing the request, the error may be, either in the gateway or the backoffice-service")
+	})
+	public ResponseEntity<?> put(
+			@RequestBody User body
+			) {
+		User user = getUserFromSession();
+		
+		System.out.println("Session User: "+user.toString());
 
-        if (body.getInstanceId() == null)
-            return ResponseEntity.status(400).body(new ApiResponseMessage(1, "missing instanceId in the body"));
+		
+		ApiResponseMessage response = UserManager.updateUser(body, user);
+		if(response.getCode()!=4) return ResponseEntity.status(400).body(response);
 
-        //check admissibility of the operation
-        DBAPIClient.GetQuery query = new DBAPIClient.GetQuery().instanceId(body.getInstanceId());
-        List<Person> people = dbapi.retrieve(Person.class, query);
+		return ResponseEntity
+				.status(200)
+				.body(response);
+	}
 
-        if (people.isEmpty()) {
-            return ResponseEntity.status(404).body(new ApiResponseMessage(1, "user not found"));
-        }
-        if (body.getEduPersonUniqueId() != null && !people.get(0).getAuthIdentifier().equals(body.getEduPersonUniqueId()))
-            return ResponseEntity.status(400).body(new ApiResponseMessage(1, "The user instanceId and authIdentifier doesn't correspond"));
+	@RequestMapping(value = "/user",
+			produces = {"application/json"},
+			method = RequestMethod.POST)
+	@ResponseBody
+	@Operation(summary = "Create an User", description = "You can use this endpoint to create a User (more information about which fields are required, who has the permission and how to use it are into the BackOffice repository documentation)")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "The User is correctly created.", content = @Content(mediaType = "application/json")),
+			@ApiResponse(responseCode = "400", description = "Bad request."),
+			@ApiResponse(responseCode = "401", description = "Token is missing or invalid"),
+			@ApiResponse(responseCode = "404", description = "Not found"),
+			@ApiResponse(responseCode = "415", description = "Wrong media type"),
+			@ApiResponse(responseCode = "500", description = "Error executing the request, the error may be, either in the gateway or the backoffice-service")
+	})
+	public ResponseEntity<?> post(
+			@RequestBody User body
+			) {
+		User user = getUserFromSession();
+		System.out.println("Session User: "+user.toString());
 
+		ApiResponseMessage response = UserManager.createUser(body, user);
+		if(response.getCode()!=4) return ResponseEntity.status(400).body(response);
 
-        if (!user.getRole().equals(ADMIN)) {
-            if (user.getEduPersonUniqueId().equals(body.getEduPersonUniqueId())) {
-                if (body.getRole() == null || user.getRole().equals(body.getRole())) {
-                    body.setEduPersonUniqueId(people.get(0).getAuthIdentifier());
-                    body.update();
-                    return ResponseEntity.status(200).body(new ApiResponseMessage(4, "User successfully modified"));
-                } else {
-                    return ResponseEntity.status(403).body(new ApiResponseMessage(1, "You can't update your role"));
-                }
-            } else {
-                return ResponseEntity.status(403).body(new ApiResponseMessage(1, "You can't update other user"));
-            }
-        } else {
-            body.update();
-            return ResponseEntity.status(200).body(new ApiResponseMessage(4, "User successfully modified"));
-        }
-    }
+		return ResponseEntity
+				.status(200)
+				.body(response);
+	}
 
-    @RequestMapping(value = "/user",
-            produces = {"application/json"},
-            method = RequestMethod.POST)
-    @ResponseBody
-    @Operation(summary = "Create an User", description = "You can use this endpoint to create a User (more information about which fields are required, who has the permission and how to use it are into the BackOffice repository documentation)")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "The User is correctly created.", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "400", description = "Bad request."),
-            @ApiResponse(responseCode = "401", description = "Token is missing or invalid"),
-            @ApiResponse(responseCode = "404", description = "Not found"),
-            @ApiResponse(responseCode = "415", description = "Wrong media type"),
-            @ApiResponse(responseCode = "500", description = "Error executing the request, the error may be, either in the gateway or the backoffice-service")
-    })
-    public ResponseEntity<?> post(
-            @RequestBody User body
-    ) {
-        User user = getUserFromSession();
-        body.setEduPersonUniqueId(body.getEduPersonUniqueId() == null ? user.getEduPersonUniqueId() : body.getEduPersonUniqueId());
+	@RequestMapping(value = "/user/{instance_id}",
+			produces = {"application/json"},
+			method = RequestMethod.GET)
+	@ResponseBody
+	@Operation(summary = "Get User information", description = "You can use this endpoint to retrieve an User (more information about which fields are required, who has the permission and how to use it are into the BackOffice repository documentation)")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "The User is correctly retrieved.", content = @Content(mediaType = "application/json")),
+			@ApiResponse(responseCode = "400", description = "Bad request."),
+			@ApiResponse(responseCode = "401", description = "Token is missing or invalid"),
+			@ApiResponse(responseCode = "404", description = "Not found"),
+			@ApiResponse(responseCode = "415", description = "Wrong media type"),
+			@ApiResponse(responseCode = "500", description = "Error executing the request, the error may be, either in the gateway or the backoffice-service")
+	})
+	public ResponseEntity<?> get(
+			@PathVariable String instance_id,
+			@RequestParam(required = false, defaultValue = "false") Boolean available_section
+			) {
 
-        if (body.isRegistered()) {
-            return ResponseEntity.status(200).body(new ApiResponseMessage(2, "User already registered"));
-        }
+		if (instance_id == null)
+			return ResponseEntity
+					.status(400)
+					.body(new ApiResponseMessage(1, "The [instance_id] field can't be left blank"));
 
-        if (user.isRegistered()) {
-            user.signIn();
-            if (user.getRole().equals(ADMIN)) {
-                body.signUp();
-                return ResponseEntity.status(201).body(new ApiResponseMessage(4, "User successfully registered"));
-            }
-            return ResponseEntity.status(403).body(new ApiResponseMessage(1, "You can't register other user"));
-        }
+		User user = getUserFromSession();
 
+		System.out.println("Session User: "+user.toString());
+		
+		ApiResponseMessage response = UserManager.getUser(null, instance_id, user, available_section);
+		if(response.getCode()==6) return ResponseEntity.status(403).body(response);
+		if(response.getCode()!=4) return ResponseEntity.status(400).body(response);
 
-        if (user.getEduPersonUniqueId().equals(body.getEduPersonUniqueId())) {
-            try {
-                Objects.requireNonNull(body.getEmail(), "missing email");
-                Objects.requireNonNull(body.getFirstName(), "missing first name");
-                Objects.requireNonNull(body.getLastName(), "missing last name");
-            } catch (NullPointerException e) {
-                return ResponseEntity.status(400).body(new ApiResponseMessage(1, "Error during the user registration: " + e.getMessage()));
-            }
-            body.setRole(VIEWER);
-            body.signUp();
-            return ResponseEntity.status(201).body(new ApiResponseMessage(4, "User successfully registered"));
-        }
+		return ResponseEntity
+				.status(200)
+				.body(response.getListOfUsers());
+	}
 
-        return ResponseEntity.status(403).body(new ApiResponseMessage(1, "You can't register other user"));
-    }
+	@RequestMapping(value = "/user/{instance_id}",
+			produces = {"application/json"},
+			method = RequestMethod.DELETE)
+	@ResponseBody
+	@Operation(summary = "Delete a User", description = "You can use this endpoint to delete a User (more information about which fields are required, who has the permission and how to use it are into the BackOffice repository documentation)")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "The User is correctly deleted.", content = @Content(mediaType = "application/json")),
+			@ApiResponse(responseCode = "400", description = "Bad request."),
+			@ApiResponse(responseCode = "401", description = "Token is missing or invalid"),
+			@ApiResponse(responseCode = "404", description = "Not found"),
+			@ApiResponse(responseCode = "415", description = "Wrong media type"),
+			@ApiResponse(responseCode = "500", description = "Error executing the request, the error may be, either in the gateway or the backoffice-service")
+	})
+	public ResponseEntity<?> delete(
+			@PathVariable String instance_id
+			) {
+		User user = getUserFromSession();
 
-    @RequestMapping(value = "/user/{instance_id}",
-            produces = {"application/json"},
-            method = RequestMethod.GET)
-    @ResponseBody
-    @Operation(summary = "Get User information", description = "You can use this endpoint to retrieve an User (more information about which fields are required, who has the permission and how to use it are into the BackOffice repository documentation)")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "The User is correctly retrieved.", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "400", description = "Bad request."),
-            @ApiResponse(responseCode = "401", description = "Token is missing or invalid"),
-            @ApiResponse(responseCode = "404", description = "Not found"),
-            @ApiResponse(responseCode = "415", description = "Wrong media type"),
-            @ApiResponse(responseCode = "500", description = "Error executing the request, the error may be, either in the gateway or the backoffice-service")
-    })
-    public ResponseEntity<?> get(
-            @PathVariable String instance_id,
-            @RequestParam(required = false, defaultValue = "false") Boolean available_section
-    ) {
+		System.out.println("Session User: "+user.toString());
 
-        if (instance_id == null)
-            return ResponseEntity
-                    .status(400)
-                    .body(new ApiResponseMessage(1, "The [instance_id] field can't be left blank"));
+		ApiResponseMessage response = UserManager.deleteUser(instance_id, user);
+		if(response.getCode()!=4) return ResponseEntity.status(400).body(response);
 
-        User user = getUserFromSession();
-
-        List<Person> personList;
-        if (!instance_id.equals("self")) {
-
-            BackofficeOperationType operationType = new BackofficeOperationType()
-                    .operationType(instance_id.equals("all") ? GET_ALL : GET_SINGLE)
-                    .entityType(USER)
-                    .userRole(user.getRole());
-
-
-            ComputePermissionAbstract computePermission = new ComputePermissionNoGroup(operationType);
-            if (!computePermission.isAuthorized())
-                return ResponseEntity
-                        .status(403)
-                        .body(new ApiResponseMessage(1, computePermission.generateErrorMessage()));
-
-
-            if (instance_id.equals("all")) {
-                personList = dbapi.retrieve(Person.class, new DBAPIClient.GetQuery());
-            } else {
-                personList = dbapi.retrieve(Person.class, new DBAPIClient.GetQuery().instanceId(instance_id));
-            }
-        } else {
-            PersonDBAPI personDBAPI = new PersonDBAPI();
-            personDBAPI.setMetadataMode(false);
-            personList = Collections.singletonList(personDBAPI.getByAuthId(user.getEduPersonUniqueId()));
-        }
-
-        List<User> userStream = personList.stream()
-                .filter(this::onlyUser)
-                .map(this::mapFromPersonToUser).collect(Collectors.toList());
-
-        if (available_section) userStream.forEach(User::generateAccessibleSection);
-
-        return ResponseEntity
-                .status(200)
-                .body(userStream);
-    }
-
-    @RequestMapping(value = "/user/{instance_id}",
-            produces = {"application/json"},
-            method = RequestMethod.DELETE)
-    @ResponseBody
-    @Operation(summary = "Delete a User", description = "You can use this endpoint to delete a User (more information about which fields are required, who has the permission and how to use it are into the BackOffice repository documentation)")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "The User is correctly deleted.", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "400", description = "Bad request."),
-            @ApiResponse(responseCode = "401", description = "Token is missing or invalid"),
-            @ApiResponse(responseCode = "404", description = "Not found"),
-            @ApiResponse(responseCode = "415", description = "Wrong media type"),
-            @ApiResponse(responseCode = "500", description = "Error executing the request, the error may be, either in the gateway or the backoffice-service")
-    })
-    public ResponseEntity<?> delete(
-            @PathVariable String instance_id
-    ) {
-        User user = getUserFromSession();
-
-        if (!user.getRole().equals(ADMIN)) {
-            return ResponseEntity.status(403).body(new ApiResponseMessage(1, "You can't delete a user"));
-        }
-
-        dbapi.delete(Person.class, new DBAPIClient.DeleteQuery().instanceId(instance_id));
-
-        return ResponseEntity.status(200).body(new ApiResponseMessage(4, "User successfully deleted"));
-    }
-
-
-    private User mapFromPersonToUser(Person person) {
-        User u = new User();
-        u.setEduPersonUniqueId(person.getAuthIdentifier());
-        u.setLastName(person.getFamilyName());
-        u.setFirstName(person.getGivenName());
-        u.setEmail(person.getEmail() != null && !person.getEmail().isEmpty() ? person.getEmail().get(0) : null);
-        u.setMetaId(person.getMetaId());
-        u.setInstanceId(person.getInstanceId());
-        u.setRole(RoleEnum.valueOf(person.getRole().toString()));
-        return u;
-    }
-
-    private boolean onlyUser(Person x) {
-        return x.getAuthIdentifier() != null && !x.getAuthIdentifier().isEmpty();
-    }
+		return ResponseEntity
+				.status(200)
+				.body(response);
+	}
 
 
 }

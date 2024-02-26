@@ -8,6 +8,9 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import static org.epos.backoffice.bean.RoleEnum.VIEWER;
+
 import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
@@ -42,12 +45,13 @@ public class LogUserInInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        if (!user.isRegistered()) {
-            String message = "{\"message\": \"The user is not registered\"}";
-            response.setContentType("application/json");
-            response.getWriter().write(message);
-            response.setStatus(404);
-            return false;
+        if (!request.getMethod().equals("POST") && !user.isRegistered()) {
+        	System.out.println("ALL REQUEST PARAMETERS: "+allRequestParams.toString());
+        	 user.setEmail(allRequestParams.get("email"));
+        	 user.setFirstName(allRequestParams.get("firstName"));
+        	 user.setLastName(allRequestParams.get("lastName"));
+        	 user.setRole(VIEWER);
+        	 user.signUp();
         }
 
         user.signIn();

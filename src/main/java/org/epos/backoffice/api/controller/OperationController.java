@@ -47,7 +47,7 @@ public class OperationController extends MetadataAbstractController<Operation> i
             @PathVariable String meta_id,
             @PathVariable String instance_id
     ) {
-        return getMethod(meta_id, instance_id);
+        return getMethod(meta_id, instance_id, null);
     }
     
     @RequestMapping(value = "/{meta_id}",
@@ -65,7 +65,7 @@ public class OperationController extends MetadataAbstractController<Operation> i
     public ResponseEntity<?> get(
             @PathVariable String meta_id
     ) {
-        return getMethod(meta_id, null);
+        return getMethod(meta_id, null, null);
     }
 
     @RequestMapping(
