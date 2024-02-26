@@ -84,8 +84,6 @@ public class PersonManager {
 		List<Person> revertedList = new ArrayList<>();
 		list.forEach(e -> revertedList.add(0, e));
 		
-		System.out.println("THE LIST: "+list);
-		
 		if (list.isEmpty())
 			return new ApiResponseMessage(ApiResponseMessage.OK, new ArrayList<Person>());
 		
@@ -101,8 +99,6 @@ public class PersonManager {
 		if(instance_id == null) {
 			instance_id = "all";
 		}
-		
-		System.out.println(meta_id+" "+instance_id);
 
 		List<Person> list;
 		if (meta_id.equals("all")) {
@@ -123,8 +119,6 @@ public class PersonManager {
 
 		List<Person> revertedList = new ArrayList<>();
 		list.forEach(e -> revertedList.add(0, e));
-		
-		System.out.println("THE LIST: "+list);
 		
 		if (list.isEmpty())
 			return new ApiResponseMessage(ApiResponseMessage.OK, new ArrayList<Person>());

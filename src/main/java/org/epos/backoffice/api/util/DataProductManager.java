@@ -85,8 +85,6 @@ public class DataProductManager {
 		List<DataProduct> revertedList = new ArrayList<>();
 		list.forEach(e -> revertedList.add(0, e));
 
-		System.out.println("THE LIST: "+list);
-
 		if (list.isEmpty())
 			return new ApiResponseMessage(ApiResponseMessage.OK, new ArrayList<DataProduct>());
 
