@@ -1,5 +1,12 @@
 package org.epos.backoffice.bean;
 
+import java.sql.ResultSet;
+import java.sql.Statement;
+
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+
+import org.epos.handler.dbapi.service.DBService;
 import org.epos.handler.dbapi.util.HealtCheck;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
@@ -19,7 +26,14 @@ public class LivenessHealthIndicator implements HealthIndicator {
 	}
 
 	private int check() {
-		if(HealtCheck.isConnectedToDatabase()) return 1;
+
+		try {
+			EntityManager em = new DBService().getEntityManager();
+			em.createNativeQuery("select * from class_mapping cm").getResultList();
+		} catch (Exception ignored){
+			return 1;
+		}
 		return 0;
+
 	}
 }
