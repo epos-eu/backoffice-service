@@ -2,6 +2,8 @@ package org.epos.backoffice.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.epos.backoffice.api.exception.ApiResponseMessage;
+import org.epos.backoffice.api.util.CategoryManager;
+import org.epos.backoffice.api.util.CategorySchemeManager;
 import org.epos.backoffice.api.util.DataProductManager;
 import org.epos.backoffice.api.util.DistributionManager;
 import org.epos.backoffice.api.util.GroupFilter;
@@ -47,6 +49,8 @@ public abstract class MetadataAbstractController<T extends EPOSDataModelEntity> 
 		}
 
 		User user = getUserFromSession();
+		
+		System.out.println(user);
 
 		List<T> revertedList = new ArrayList<>();
 		List<T> list = new ArrayList<T>();
@@ -56,6 +60,8 @@ public abstract class MetadataAbstractController<T extends EPOSDataModelEntity> 
 		if(entityType.equals(Distribution.class)) list.addAll((Collection<? extends T>) DistributionManager.getDistribution(meta_id,instance_id, user).getListOfEntities());
 		if(entityType.equals(WebService.class)) list.addAll((Collection<? extends T>) WebServiceManager.getWebService(meta_id,instance_id, user).getListOfEntities());
 		if(entityType.equals(Operation.class)) list.addAll((Collection<? extends T>) OperationManager.getOperation(meta_id,instance_id, user).getListOfEntities());
+		if(entityType.equals(Category.class)) list.addAll((Collection<? extends T>) CategoryManager.getCategories(meta_id,instance_id, user).getListOfEntities());
+		if(entityType.equals(CategoryScheme.class)) list.addAll((Collection<? extends T>) CategorySchemeManager.getCategorySchemes(meta_id,instance_id, user).getListOfEntities());
 
 		list.forEach(e -> revertedList.add(0, e));
 
@@ -81,6 +87,8 @@ public abstract class MetadataAbstractController<T extends EPOSDataModelEntity> 
 		if(entityType.equals(Distribution.class)) done = DistributionManager.deleteDistribution(instance_id, user);
 		if(entityType.equals(WebService.class)) done = WebServiceManager.deleteWebService(instance_id, user);
 		if(entityType.equals(Operation.class)) done = OperationManager.deleteOperation(instance_id, user);
+		if(entityType.equals(Category.class)) done = CategoryManager.deleteCategory(instance_id, user);
+		if(entityType.equals(CategoryScheme.class)) done = CategorySchemeManager.deleteCategoryScheme(instance_id, user);
 
 		if(done) return ResponseEntity.status(200).body(new ApiResponseMessage(ApiResponseMessage.OK, "Instance deleted"));
 		else return ResponseEntity.status(400).body(new ApiResponseMessage(ApiResponseMessage.ERROR, "Instance not deleted"));
@@ -114,6 +122,18 @@ public abstract class MetadataAbstractController<T extends EPOSDataModelEntity> 
 			else return ResponseEntity.status(400).body(response.getMessage());
 		}
 
+		if(entityType.equals(Category.class)) {
+			ApiResponseMessage response = CategoryManager.createCategory((Category) body, user, true, true);
+			if(response.getCode()==ApiResponseMessage.OK) return ResponseEntity.status(201).body(response.getEntity());
+			else return ResponseEntity.status(400).body(response.getMessage());
+		}
+
+		if(entityType.equals(CategoryScheme.class)) {
+			ApiResponseMessage response = CategorySchemeManager.createCategoryScheme((CategoryScheme) body, user, true, true);
+			if(response.getCode()==ApiResponseMessage.OK) return ResponseEntity.status(201).body(response.getEntity());
+			else return ResponseEntity.status(400).body(response.getMessage());
+		}
+
 		return ResponseEntity.status(400).body(null);
 	}
 
@@ -139,6 +159,16 @@ public abstract class MetadataAbstractController<T extends EPOSDataModelEntity> 
 		}
 		if(entityType.equals(Operation.class)) {
 			ApiResponseMessage response = OperationManager.updateOperation((Operation) body, user, true, true);
+			if(response.getCode()==ApiResponseMessage.OK) return ResponseEntity.status(201).body(response.getEntity());
+			else return ResponseEntity.status(400).body(response.getMessage());
+		}
+		if(entityType.equals(Category.class)) {
+			ApiResponseMessage response = CategoryManager.updateCategory((Category) body, user, true, true);
+			if(response.getCode()==ApiResponseMessage.OK) return ResponseEntity.status(201).body(response.getEntity());
+			else return ResponseEntity.status(400).body(response.getMessage());
+		}
+		if(entityType.equals(CategoryScheme.class)) {
+			ApiResponseMessage response = CategorySchemeManager.updateCategoryScheme((CategoryScheme) body, user, true, true);
 			if(response.getCode()==ApiResponseMessage.OK) return ResponseEntity.status(201).body(response.getEntity());
 			else return ResponseEntity.status(400).body(response.getMessage());
 		}

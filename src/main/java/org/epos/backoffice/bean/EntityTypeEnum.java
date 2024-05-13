@@ -13,6 +13,8 @@ public enum EntityTypeEnum {
     WEBSERVICE("WebService"),
     OPERATION("Operation"),
     ORGANIZATION("Organization"),
+    CATEGORY("Category"),
+    CATEGORYSCHEME("CategoryScheme"),
     PERSON("Person");
 
     private static final Map<String, Class<? extends EPOSDataModelEntity>> mapEntityNameToClass;
@@ -29,7 +31,9 @@ public enum EntityTypeEnum {
                 Map.entry("service", Service.class),
                 Map.entry("softwaresourceapplication", SoftwareApplication.class),
                 Map.entry("softwaresourcecode", SoftwareSourceCode.class),
-                Map.entry("webservice", WebService.class)
+                Map.entry("webservice", WebService.class),
+                Map.entry("category", Category.class),
+                Map.entry("categoryscheme", CategoryScheme.class)
         );
     }
 
