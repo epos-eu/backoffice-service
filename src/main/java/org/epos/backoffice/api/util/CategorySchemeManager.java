@@ -1,46 +1,34 @@
 package org.epos.backoffice.api.util;
 
-import static org.epos.backoffice.bean.OperationTypeEnum.GET_ALL;
-import static org.epos.backoffice.bean.OperationTypeEnum.GET_SINGLE;
-import static org.epos.backoffice.bean.RoleEnum.ADMIN;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import javax.persistence.EntityManager;
+
 import org.epos.backoffice.api.exception.ApiResponseMessage;
-import org.epos.backoffice.bean.BackofficeOperationType;
-import org.epos.backoffice.bean.ComputePermissionAbstract;
-import org.epos.backoffice.bean.EntityTypeEnum;
+import org.epos.backoffice.api.exception.ConceptSchemeApiResponseMessage;
 import org.epos.backoffice.bean.User;
-import org.epos.backoffice.service.ComputePermissionNoGroup;
-import org.epos.eposdatamodel.DataProduct;
-import org.epos.eposdatamodel.Distribution;
-import org.epos.eposdatamodel.Category;
 import org.epos.eposdatamodel.CategoryScheme;
 import org.epos.eposdatamodel.LinkedEntity;
 import org.epos.eposdatamodel.State;
-import org.epos.eposdatamodel.WebService;
-import org.epos.handler.dbapi.DBAPIClient;
-import org.epos.handler.dbapi.DBAPIClient.DeleteQuery;
-import org.epos.handler.dbapi.DBAPIClient.SaveQuery;
-import org.epos.handler.dbapi.DBAPIClient.UpdateQuery;
-import org.epos.handler.dbapi.dbapiimplementation.DistributionDBAPI;
+import org.epos.handler.dbapi.dbapiimplementation.CategorySchemeDBAPI;
+import org.epos.handler.dbapi.service.DBService;
 
 public class CategorySchemeManager {
 
-	protected static DBAPIClient dbapi = new DBAPIClient();
+	protected static CategorySchemeDBAPI dbapi = new CategorySchemeDBAPI();
 
-	public static ApiResponseMessage getCategorySchemes(String meta_id, String instance_id, User user) {
+	public static ConceptSchemeApiResponseMessage getCategorySchemes(String meta_id, String instance_id, User user) {
 		//dbapi.setMetadataMode(false);
 		dbapi.setMetadataMode(false);
 		if (meta_id == null)
-			return new ApiResponseMessage(1, "The [meta_id] field can't be left blank");
+			return new ConceptSchemeApiResponseMessage(1, "The [meta_id] field can't be left blank");
 		if(instance_id == null) {
 			instance_id = "all";
 		}
-
+/*
 		BackofficeOperationType operationType = new BackofficeOperationType()
 				.operationType(meta_id.equals("all") ? GET_ALL : GET_SINGLE)
 				.entityType(CategoryScheme.class)
@@ -49,16 +37,16 @@ public class CategorySchemeManager {
 
 		ComputePermissionAbstract computePermission = new ComputePermissionNoGroup(operationType);
 		if (!computePermission.isAuthorized())
-			return new ApiResponseMessage(1, computePermission.generateErrorMessage());
+			return new ApiResponseMessage(1, computePermission.generateErrorMessage());*/
 
 		System.out.println(meta_id+" "+instance_id);
 
 		List<CategoryScheme> list;
 		if (meta_id.equals("all")) {
-			list = dbapi.retrieve(CategoryScheme.class, new DBAPIClient.GetQuery());	
+			list = dbapi.getAll();	
 		} else {
 			if(instance_id.equals("all")) {
-				list = dbapi.retrieve(CategoryScheme.class, new DBAPIClient.GetQuery());	
+				list = dbapi.getAll();	
 				list = list.stream()
 						.filter(
 								elem -> elem.getMetaId().equals(meta_id)
@@ -66,11 +54,11 @@ public class CategorySchemeManager {
 						.collect(Collectors.toList());
 
 			}else {
-				list = dbapi.retrieve(CategoryScheme.class, new DBAPIClient.GetQuery().instanceId(instance_id));
+				list = dbapi.getAll();
 			}
 		}
 
-		list = list.stream()
+		/*list = list.stream()
 				.filter(
 						elem -> user.getRole().equals(ADMIN) || elem.getState().equals(State.PUBLISHED) ||
 						(elem.getState().equals(State.DRAFT) && user.getMetaId().equals(elem.getEditorId()))
@@ -84,15 +72,15 @@ public class CategorySchemeManager {
 							return groupFilter.isOk();
 						}
 						)
-				.collect(Collectors.toList());
+				.collect(Collectors.toList());*/
 
 		List<CategoryScheme> revertedList = new ArrayList<>();
 		list.forEach(e -> revertedList.add(0, e));
 
 		if (list.isEmpty())
-			return new ApiResponseMessage(ApiResponseMessage.OK, new ArrayList<CategoryScheme>());
+			return new ConceptSchemeApiResponseMessage(ConceptSchemeApiResponseMessage.OK, new ArrayList<CategoryScheme>());
 
-		return new ApiResponseMessage(ApiResponseMessage.OK, list);
+		return new ConceptSchemeApiResponseMessage(ConceptSchemeApiResponseMessage.OK, list);
 	}
 
 	/**
@@ -101,7 +89,7 @@ public class CategorySchemeManager {
 	 * @param user
 	 * @return
 	 */
-	public static ApiResponseMessage createCategoryScheme(CategoryScheme categoryscheme, User user, boolean parents, boolean sons) {
+	public static ConceptSchemeApiResponseMessage createCategoryScheme(CategoryScheme categoryscheme, User user, boolean parents, boolean sons) {
 		/** ID MANAGEMENT 
 		 * if UID == NULL --> Generate a new UID
 		 * Brand new Category? --> InstanceId = null && InstanceChangeId == null
@@ -115,47 +103,27 @@ public class CategorySchemeManager {
 		categoryscheme.setInstanceId(null);
 		categoryscheme.setInstanceChangedId(null);
 
-		// Check if exists a version PUBLISHED or ARCHIVED if MetaId!=null
-		if (categoryscheme.getMetaId() != null) {
-			List<CategoryScheme> retrieved = dbapi.retrieve(CategoryScheme.class, new DBAPIClient.GetQuery().state(State.PUBLISHED).metaId(categoryscheme.getMetaId()));
-			if(retrieved.isEmpty())
-				retrieved = dbapi.retrieve(CategoryScheme.class, new DBAPIClient.GetQuery().state(State.ARCHIVED).metaId(categoryscheme.getMetaId()));
-			if(retrieved.isEmpty())
-				retrieved = dbapi.retrieve(CategoryScheme.class, new DBAPIClient.GetQuery().state(State.SUBMITTED).metaId(categoryscheme.getMetaId()));
-			if(!retrieved.isEmpty()) {
-				categoryscheme.setInstanceChangedId(retrieved.get(0).getInstanceId());
-			}	
-		}
-
 		categoryscheme.setState(State.DRAFT);
-		categoryscheme.setEditorId(user.getMetaId());
+		//categoryscheme.setEditorId(user.getMetaId());
 		categoryscheme.setFileProvenance("instance created with the backoffice");
 
-		if(!ManagePermissions.checkPermissions(categoryscheme, EntityTypeEnum.CATEGORYSCHEME, user)) 
-			return new ApiResponseMessage(ApiResponseMessage.ERROR, "You don't have auth on the groups of this instance");
-
-		dbapi.setTransactionModeAuto(true);
-		dbapi.startTransaction();
-
-		LinkedEntity reference;
-		try {
-
-			// save the entity and get the reference to it
-			reference = dbapi.create(categoryscheme);
-			categoryscheme.setInstanceId(reference.getInstanceId());
-			categoryscheme.setMetaId(reference.getMetaId());
-			//TODO: Parents?
-		} catch (Exception e) {
-			e.printStackTrace();
-			dbapi.rollbackTransaction();
-			return new ApiResponseMessage(ApiResponseMessage.ERROR, "Something went wrong during the persisting of the new instance: "+e.getMessage());
-		}
-
-		dbapi.closeTransaction(true);
-		dbapi.setTransactionModeAuto(true);
+		/*if(!ManagePermissions.checkPermissions(categoryscheme, EntityTypeEnum.CATEGORYSCHEME, user)) 
+			return new ApiResponseMessage(ApiResponseMessage.ERROR, "You don't have auth on the groups of this instance");*/
 
 
-		return new ApiResponseMessage(ApiResponseMessage.OK, reference);
+        EntityManager em = new DBService().getEntityManager();
+        em.getTransaction().begin();
+
+        LinkedEntity reference = dbapi.save(categoryscheme, em);
+
+        if (em.getTransaction().isActive()) {
+            em.getTransaction().commit();
+            em.getEntityManagerFactory().getCache().evictAll();
+        }
+        em.close();
+
+
+		return new ConceptSchemeApiResponseMessage(ConceptSchemeApiResponseMessage.OK, reference);
 	}
 
 	/**
@@ -164,38 +132,37 @@ public class CategorySchemeManager {
 	 * @param user
 	 * @return
 	 */
-	public static ApiResponseMessage updateCategoryScheme(CategoryScheme categoryscheme, User user, boolean parents, boolean sons) {
+	public static ConceptSchemeApiResponseMessage updateCategoryScheme(CategoryScheme categoryscheme, User user, boolean parents, boolean sons) {
 
 		if(categoryscheme.getState()!=null && (categoryscheme.getState().equals(State.ARCHIVED) || categoryscheme.getState().equals(State.PUBLISHED))) {
-			return new ApiResponseMessage(ApiResponseMessage.ERROR, "Unable to update a ARCHIVED or PUBLISHED instance");
+			return new ConceptSchemeApiResponseMessage(ConceptSchemeApiResponseMessage.ERROR, "Unable to update a ARCHIVED or PUBLISHED instance");
 		}
 		if (categoryscheme.getInstanceId() == null) {
-			return new ApiResponseMessage(ApiResponseMessage.ERROR, "InstanceId required");
+			return new ConceptSchemeApiResponseMessage(ConceptSchemeApiResponseMessage.ERROR, "InstanceId required");
 		}
 		if(categoryscheme.getInstanceChangedId() == null || categoryscheme.getInstanceChangedId().isEmpty())
 			categoryscheme.setInstanceChangedId(null);
 
-		categoryscheme.setEditorId(user.getMetaId());
+		//categoryscheme.setEditorId(user.getMetaId());
 		categoryscheme.setFileProvenance("instance created with the backoffice");
 
-		if(!ManagePermissions.checkPermissions(categoryscheme, EntityTypeEnum.CATEGORYSCHEME, user)) 
-			return new ApiResponseMessage(ApiResponseMessage.ERROR, "You don't have auth on the groups of this instance");
+		/*if(!ManagePermissions.checkPermissions(categoryscheme, EntityTypeEnum.CATEGORYSCHEME, user)) 
+			return new ApiResponseMessage(ApiResponseMessage.ERROR, "You don't have auth on the groups of this instance");*/
+		
+		
 
-		dbapi.setTransactionModeAuto(true);
-		dbapi.startTransaction();
-		LinkedEntity reference = null;
-		try {
-			reference = dbapi.createUpdate(categoryscheme, new SaveQuery().setInstanceId(categoryscheme.getInstanceId()));//dbapi.hardUpdate(Category);
-		} catch (Exception e) {
-			dbapi.rollbackTransaction();
-			return new ApiResponseMessage(ApiResponseMessage.ERROR, "Something went wrong during the persisting of the new instance: "+e.getMessage());
-		}
+        EntityManager em = new DBService().getEntityManager();
+        em.getTransaction().begin();
 
-		dbapi.closeTransaction(true);
-		dbapi.setTransactionModeAuto(true);
+        LinkedEntity reference = dbapi.hardUpdateWithLink(categoryscheme.getInstanceId(), categoryscheme, em);
 
+        if (em.getTransaction().isActive()) {
+            em.getTransaction().commit();
+            em.getEntityManagerFactory().getCache().evictAll();
+        }
+        em.close();
 
-		return new ApiResponseMessage(ApiResponseMessage.OK, reference);
+		return new ConceptSchemeApiResponseMessage(ConceptSchemeApiResponseMessage.OK, reference);
 	}
 	
 
@@ -205,19 +172,22 @@ public class CategorySchemeManager {
 	 * @return
 	 */
 	public static boolean deleteCategoryScheme(String instance_id, User user) {
-		List<CategoryScheme> list = dbapi.retrieve(CategoryScheme.class, new DBAPIClient.GetQuery().instanceId(instance_id));
+
+		List<CategoryScheme> list = List.of( dbapi.getByInstanceId(instance_id));
 
 		if (list.isEmpty()) return false;
 		CategoryScheme instance = list.get(0);
-		dbapi.setTransactionModeAuto(true);
-		dbapi.startTransaction();
 		
-	//TODO MANAGE RELATIONS
+		EntityManager em = new DBService().getEntityManager();
+        em.getTransaction().begin();
 
-		dbapi.delete(Category.class, new DeleteQuery().instanceId(instance.getInstanceId()));
+        dbapi.delete(instance.getInstanceId(), em);
 
-		dbapi.closeTransaction(true);
-		dbapi.setTransactionModeAuto(true);
+        if (em.getTransaction().isActive()) {
+            em.getTransaction().commit();
+            em.getEntityManagerFactory().getCache().evictAll();
+        }
+        em.close();
 
 		return true;
 	}

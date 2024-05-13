@@ -1,17 +1,31 @@
 package org.epos.backoffice.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+
+import org.epos.backoffice.api.controller.CategoryController.LocalDateAdapter;
+import org.epos.backoffice.api.util.CategorySchemeManager;
+import org.epos.backoffice.bean.User;
 import org.epos.eposdatamodel.CategoryScheme;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
+
+import java.lang.reflect.Type;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -21,16 +35,35 @@ import javax.servlet.http.HttpServletRequest;
         value = "/categoryschemes",
         produces = {"application/json"}
 )
-public class CategorySchemeController extends MetadataAbstractController<CategoryScheme> implements ApiDocTag{
+public class CategorySchemeController implements ApiDocTag{
 
 
     private static final Logger log = LoggerFactory.getLogger(CategorySchemeController.class);
 
-    @org.springframework.beans.factory.annotation.Autowired
-    public CategorySchemeController(ObjectMapper objectMapper, HttpServletRequest request) {
-        super(objectMapper, request, CategoryScheme.class);
-    }
 
+	protected final ObjectMapper objectMapper;
+	private final HttpServletRequest request;
+
+	protected Gson gson = new GsonBuilder()
+	        .setPrettyPrinting()
+	        .registerTypeAdapter(LocalDateTime.class, new LocalDateAdapter())
+	        .create();
+
+	@org.springframework.beans.factory.annotation.Autowired
+	public CategorySchemeController(ObjectMapper objectMapper, HttpServletRequest request) {
+		this.objectMapper = objectMapper;
+		this.request = request;
+	}
+
+	protected User getUserFromSession() {
+		return (User) request.getSession().getAttribute("user");
+	}
+	class LocalDateAdapter implements JsonSerializer<LocalDateTime> {
+
+	    public JsonElement serialize(LocalDateTime date, Type typeOfSrc, JsonSerializationContext context) {
+	        return new JsonPrimitive(date.format(DateTimeFormatter.ISO_DATE_TIME)); // "yyyy-mm-dd"
+	    }
+	}
     @RequestMapping(value = "/{meta_id}/{instance_id}",
             method = RequestMethod.GET)
     @ResponseBody
@@ -47,7 +80,15 @@ public class CategorySchemeController extends MetadataAbstractController<Categor
             @PathVariable String meta_id,
             @PathVariable String instance_id
     ) {
-        return getMethod("all", instance_id, null);
+    	List<CategoryScheme> list = new ArrayList<CategoryScheme>();
+		list = (List<CategoryScheme>) CategorySchemeManager.getCategorySchemes("all", instance_id, null).getListOfEntities();
+
+		if (list.isEmpty())
+			return ResponseEntity.status(404).body("[]");
+
+		return ResponseEntity
+				.status(200)
+				.body(list);
     }
     
     @RequestMapping(value = "/{meta_id}",
@@ -65,7 +106,15 @@ public class CategorySchemeController extends MetadataAbstractController<Categor
     public ResponseEntity<?> get(
             @PathVariable String meta_id
     ) {
-        return getMethod("all", null, null);
+    	List<CategoryScheme> list = new ArrayList<CategoryScheme>();
+		list = (List<CategoryScheme>) CategorySchemeManager.getCategorySchemes("all", null, null).getListOfEntities();
+		
+		if (list.isEmpty())
+			return ResponseEntity.status(404).body("[]");
+
+		return ResponseEntity
+				.status(200)
+				.body(list);
     }
 
     @RequestMapping(
@@ -85,7 +134,15 @@ public class CategorySchemeController extends MetadataAbstractController<Categor
     public ResponseEntity<?> post(
             @RequestBody CategoryScheme body
     ) {
-        return postMethod(body, true);
+    	List<CategoryScheme> list = new ArrayList<CategoryScheme>();
+		list = (List<CategoryScheme>) CategorySchemeManager.createCategoryScheme(body, null, false, false).getListOfEntities();
+
+		if (list.isEmpty())
+			return ResponseEntity.status(404).body("[]");
+
+		return ResponseEntity
+				.status(200)
+				.body(list);
     }
 
     @RequestMapping(
@@ -105,7 +162,15 @@ public class CategorySchemeController extends MetadataAbstractController<Categor
     public ResponseEntity<?> put(
             @RequestBody CategoryScheme body
     ) {
-        return updateMethod(body, true);
+    	List<CategoryScheme> list = new ArrayList<CategoryScheme>();
+		list = (List<CategoryScheme>) CategorySchemeManager.updateCategoryScheme(body, null, false, false).getListOfEntities();
+
+		if (list.isEmpty())
+			return ResponseEntity.status(404).body("[]");
+
+		return ResponseEntity
+				.status(200)
+				.body(list);
     }
 
 
@@ -124,7 +189,13 @@ public class CategorySchemeController extends MetadataAbstractController<Categor
     public ResponseEntity<?> delete(
             @PathVariable String instance_id
     ) {
-        return deleteMethod(instance_id);
+    	if(!CategorySchemeManager.deleteCategoryScheme(instance_id, null)) {
+    		return ResponseEntity.status(400).body("[]");
+    	} else {
+    		return ResponseEntity
+    				.status(200)
+    				.body("[]");
+    	}
     }
 
 }

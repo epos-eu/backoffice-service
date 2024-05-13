@@ -122,18 +122,6 @@ public abstract class MetadataAbstractController<T extends EPOSDataModelEntity> 
 			else return ResponseEntity.status(400).body(response.getMessage());
 		}
 
-		if(entityType.equals(Category.class)) {
-			ApiResponseMessage response = CategoryManager.createCategory((Category) body, user, true, true);
-			if(response.getCode()==ApiResponseMessage.OK) return ResponseEntity.status(201).body(response.getEntity());
-			else return ResponseEntity.status(400).body(response.getMessage());
-		}
-
-		if(entityType.equals(CategoryScheme.class)) {
-			ApiResponseMessage response = CategorySchemeManager.createCategoryScheme((CategoryScheme) body, user, true, true);
-			if(response.getCode()==ApiResponseMessage.OK) return ResponseEntity.status(201).body(response.getEntity());
-			else return ResponseEntity.status(400).body(response.getMessage());
-		}
-
 		return ResponseEntity.status(400).body(null);
 	}
 
@@ -162,16 +150,7 @@ public abstract class MetadataAbstractController<T extends EPOSDataModelEntity> 
 			if(response.getCode()==ApiResponseMessage.OK) return ResponseEntity.status(201).body(response.getEntity());
 			else return ResponseEntity.status(400).body(response.getMessage());
 		}
-		if(entityType.equals(Category.class)) {
-			ApiResponseMessage response = CategoryManager.updateCategory((Category) body, user, true, true);
-			if(response.getCode()==ApiResponseMessage.OK) return ResponseEntity.status(201).body(response.getEntity());
-			else return ResponseEntity.status(400).body(response.getMessage());
-		}
-		if(entityType.equals(CategoryScheme.class)) {
-			ApiResponseMessage response = CategorySchemeManager.updateCategoryScheme((CategoryScheme) body, user, true, true);
-			if(response.getCode()==ApiResponseMessage.OK) return ResponseEntity.status(201).body(response.getEntity());
-			else return ResponseEntity.status(400).body(response.getMessage());
-		}
+	
 
 		return ResponseEntity.status(400).body(null);
 	}
