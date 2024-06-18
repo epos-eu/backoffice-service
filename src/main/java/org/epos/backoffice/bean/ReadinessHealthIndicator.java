@@ -1,9 +1,7 @@
 package org.epos.backoffice.bean;
 
-import javax.persistence.EntityManager;
-
-import org.epos.handler.dbapi.service.DBService;
-import org.epos.handler.dbapi.util.HealtCheck;
+import dao.EposDataModelDAO;
+import model.User;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
@@ -22,10 +20,9 @@ public class ReadinessHealthIndicator implements HealthIndicator {
 	}
 
 	private int check() {
-
 		try {
-			EntityManager em = new DBService().getEntityManager();
-			em.createNativeQuery("select * from class_mapping cm").getResultList();
+			EposDataModelDAO dao = new EposDataModelDAO();
+			dao.getAllFromDB(User.class);
 		} catch (Exception ignored){
 			return 1;
 		}

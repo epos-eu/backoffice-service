@@ -2,8 +2,6 @@ package org.epos.backoffice.api.exception;
 
 import java.util.List;
 
-import org.epos.backoffice.bean.User;
-import org.epos.eposdatamodel.DataProduct;
 import org.epos.eposdatamodel.EPOSDataModelEntity;
 import org.epos.eposdatamodel.LinkedEntity;
 
@@ -21,7 +19,7 @@ public class ApiResponseMessage {
     String message;
     LinkedEntity entity;
     List<? extends EPOSDataModelEntity> listOfEntities;
-    List<User> listOfUsers;
+    List<model.User> listOfUsers;
 
 	public ApiResponseMessage() {
     }
@@ -110,7 +108,7 @@ public class ApiResponseMessage {
 	        this.listOfEntities = list;
 	}
 	
-	public ApiResponseMessage(int code, boolean userManagement, List<User> list) {
+	public ApiResponseMessage(int code, boolean userManagement, List<model.User> list) {
 		 this.code = code;
 	        switch (code) {
 	            case ERROR:
@@ -180,11 +178,11 @@ public class ApiResponseMessage {
     }
     
 
-    public List<User> getListOfUsers() {
+    public List<model.User> getListOfUsers() {
 		return listOfUsers;
 	}
 
-	public void setListOfUsers(List<User> listOfUsers) {
+	public void setListOfUsers(List<model.User> listOfUsers) {
 		this.listOfUsers = listOfUsers;
 	}
 

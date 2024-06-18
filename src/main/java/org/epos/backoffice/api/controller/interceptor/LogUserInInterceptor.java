@@ -1,6 +1,5 @@
 package org.epos.backoffice.api.controller.interceptor;
 
-import org.epos.backoffice.bean.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.HandlerInterceptor;

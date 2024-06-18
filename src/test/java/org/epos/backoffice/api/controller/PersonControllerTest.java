@@ -1,8 +1,6 @@
 package org.epos.backoffice.api.controller;
 
 import org.epos.eposdatamodel.Person;
-import org.epos.eposdatamodel.State;
-import org.epos.handler.dbapi.dbapiimplementation.PersonDBAPI;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -37,14 +35,4 @@ class PersonControllerTest {
                 .replaceAll("END;", "");
     }
 
-    @Test
-    public void test(){
-        Person p = new Person();
-        p.setUid("ciao");
-        p.setState(State.PLACEHOLDER);
-        p.setEditorId("ingestor");
-        javax.persistence.EntityManager entityManager = getEntityManager();
-        PersonDBAPI dbapi = new PersonDBAPI();
-        System.out.println(dbapi.getByUid("valerio.vinciarelli@epos-eric.eu", entityManager));
-    }
 }

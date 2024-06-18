@@ -110,27 +110,6 @@ public class DataProductController extends MetadataAbstractController<DataProduc
         return updateMethod(body, true);
     }
 
-    @RequestMapping(
-            value = "/{instance_id}",
-            method = RequestMethod.PUT
-    )
-    @ResponseBody
-    @Operation(summary = "Update DataProduct and related instances state", description = "You can use this endpoint to update the state of a DataProduct (more information about which fields are required, who has the permission and how to use it are into the BackOffice repository documentation)")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "The DataProduct instance is correctly updated.", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "400", description = "Bad request."),
-            @ApiResponse(responseCode = "401", description = "Token is missing or invalid"),
-            @ApiResponse(responseCode = "404", description = "Not found"),
-            @ApiResponse(responseCode = "415", description = "Wrong media type"),
-            @ApiResponse(responseCode = "500", description = "Error executing the request, the error may be, either in the gateway or the backoffice-service")
-    })
-    public ResponseEntity<?> put(
-            @PathVariable String instance_id,
-            @RequestBody StateWrapper body
-    ) {
-        return updateStateMethod(instance_id, body.getState(), body.getJustThisOne());
-    }
-
 
     @RequestMapping(value = "/{instance_id}",
             method = RequestMethod.DELETE)

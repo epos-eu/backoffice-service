@@ -5,7 +5,7 @@ import org.epos.eposdatamodel.EPOSDataModelEntity;
 
 import javax.servlet.http.HttpServletRequest;
 
-public abstract class AdministrativeMetadataAbstractController<T extends EPOSDataModelEntity> extends BackofficeAbstractController<T> {
+public abstract class AdministrativeMetadataAbstractController<T extends EPOSDataModelEntity> extends MetadataAbstractController<T> {
     public AdministrativeMetadataAbstractController(ObjectMapper objectMapper, HttpServletRequest request, Class<T> entityType) {
         super(objectMapper, request, entityType);
     }
