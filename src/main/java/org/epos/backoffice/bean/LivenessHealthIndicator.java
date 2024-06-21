@@ -24,6 +24,7 @@ public class LivenessHealthIndicator implements HealthIndicator {
 			EposDataModelDAO dao = new EposDataModelDAO();
 			dao.getAllFromDB(User.class);
 		} catch (Exception ignored){
+			System.out.println(ignored.getLocalizedMessage());
 			return 1;
 		}
 		return 0;

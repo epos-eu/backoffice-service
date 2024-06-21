@@ -100,6 +100,7 @@ public class UserController extends MetadataAbstractController<Person> implement
 			@RequestParam(required = false, defaultValue = "false") Boolean available_section
 			) {
 
+		System.out.println("REQUEST ARRIVED");
 		if (instance_id == null)
 			return ResponseEntity
 					.status(400)

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.epos.eposdatamodel.EPOSDataModelEntity;
 import org.epos.eposdatamodel.LinkedEntity;
+import org.epos.eposdatamodel.User;
 
 @javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2022-02-11T09:12:11.707Z[GMT]")
 public class ApiResponseMessage {
@@ -19,7 +20,7 @@ public class ApiResponseMessage {
     String message;
     LinkedEntity entity;
     List<? extends EPOSDataModelEntity> listOfEntities;
-    List<model.User> listOfUsers;
+    List<User> listOfUsers;
 
 	public ApiResponseMessage() {
     }
@@ -108,7 +109,7 @@ public class ApiResponseMessage {
 	        this.listOfEntities = list;
 	}
 	
-	public ApiResponseMessage(int code, boolean userManagement, List<model.User> list) {
+	public ApiResponseMessage(int code, boolean userManagement, List<User> list) {
 		 this.code = code;
 	        switch (code) {
 	            case ERROR:
@@ -178,11 +179,11 @@ public class ApiResponseMessage {
     }
     
 
-    public List<model.User> getListOfUsers() {
+    public List<User> getListOfUsers() {
 		return listOfUsers;
 	}
 
-	public void setListOfUsers(List<model.User> listOfUsers) {
+	public void setListOfUsers(List<User> listOfUsers) {
 		this.listOfUsers = listOfUsers;
 	}
 

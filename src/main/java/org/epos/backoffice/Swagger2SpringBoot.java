@@ -8,7 +8,6 @@ import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.epos.backoffice.configuration.LocalDateConverter;
 import org.epos.backoffice.configuration.LocalDateTimeConverter;
-import org.epos.backoffice.service.DBCacheHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.ExitCodeGenerator;
@@ -32,8 +31,6 @@ public class Swagger2SpringBoot implements CommandLineRunner {
         if (arg0.length > 0 && arg0[0].equals("exitcode")) {
             throw new ExitException();
         }
-
-        new DBCacheHandler().loadCache();
 
     }
 

@@ -20,19 +20,19 @@ public class UserManager {
 		if (instance_id == null)
 			return new ApiResponseMessage(ApiResponseMessage.ERROR, "The [instance_id] field can't be left blank");
 
-		List<model.User> personList;
+		List<User> personList;
 		if (!instance_id.equals("self")) {
 
 			if (instance_id.equals("all")) {
-				personList = (List<model.User>) UserGroupManagementAPI.retrieveUser(null);
+				personList = (List<User>) UserGroupManagementAPI.retrieveUser(null);
 			} else {
-				personList = (List<model.User>) UserGroupManagementAPI.retrieveUser(user);
+				personList = (List<User>) UserGroupManagementAPI.retrieveUser(user);
 			}
 		} else {
 			personList = Collections.singletonList(UserGroupManagementAPI.retrieveUser(null));
 		}
 
-		List<model.User> userStream = personList.stream()
+		List<User> userStream = personList.stream()
 				.filter(x -> x.getAuthIdentifier() != null && !x.getAuthIdentifier().isEmpty()).collect(Collectors.toList());
 		
 		System.out.println("STREAM: "+userStream.toString());
@@ -50,8 +50,6 @@ public class UserManager {
 	 * @return
 	 */
 	public static ApiResponseMessage createUser(User inputUser, User user) {
-
-
 
 		inputUser.setGivenname(inputUser.getGivenname() == null ? user.getGivenname() : inputUser.getGivenname());
 		inputUser.setFamilyname(inputUser.getFamilyname() == null ? user.getFamilyname() : inputUser.getFamilyname());

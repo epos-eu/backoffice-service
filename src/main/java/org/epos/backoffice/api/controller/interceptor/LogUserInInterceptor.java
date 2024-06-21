@@ -1,5 +1,6 @@
 package org.epos.backoffice.api.controller.interceptor;
 
+import org.epos.eposdatamodel.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -8,7 +9,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import static org.epos.backoffice.bean.RoleEnum.VIEWER;
 
 import java.io.IOException;
 import java.util.Map;
@@ -34,35 +34,11 @@ public class LogUserInInterceptor implements HandlerInterceptor {
             return false;
         }
 
-        User user = new User();
-        user.setEduPersonUniqueId(allRequestParams.get("userId"));
-
-        //for the signup endpoint
-        if (request.getMethod().equals("POST") && request.getRequestURI().equals(request.getContextPath() + "/user") && !user.isRegistered()) {
-            HttpSession session = request.getSession();
-            session.setAttribute("user", user);
-            return true;
-        }
-
-        if (!request.getMethod().equals("POST") && !user.isRegistered()) {
-        	System.out.println("ALL REQUEST PARAMETERS: "+allRequestParams.toString());
-        	 user.setEmail(allRequestParams.get("email"));
-        	 user.setFirstName(allRequestParams.get("firstName"));
-        	 user.setLastName(allRequestParams.get("lastName"));
-        	 user.setRole(VIEWER);
-        	 user.signUp();
-        }
-
-        user.signIn();
-
-        if (user.getRole() == null) {
-            String message = "{\"message\": \"The user doesn't have the role\"}";
-            response.setContentType("application/json");
-            response.getWriter().write(message);
-            response.setStatus(500);
-            return false;
-        }
-
+        User user = new User(allRequestParams.get("userId"),
+                allRequestParams.get("lastName"),
+                allRequestParams.get("firstName"),
+                allRequestParams.get("email")
+                );
 
         HttpSession session = request.getSession();
         session.setAttribute("user", user);
