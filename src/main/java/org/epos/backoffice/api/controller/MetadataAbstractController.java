@@ -31,15 +31,15 @@ public abstract class MetadataAbstractController<T extends EPOSDataModelEntity> 
 		}
 
 		User user = getUserFromSession();
-		
-		System.out.println(user);
 
 		List<T> revertedList = new ArrayList<>();
 		List<T> list = new ArrayList<T>();
 
 		if(!entityType.equals(User.class)) {
-			list.addAll(
-					(Collection<? extends T>) EPOSDataModelManager.getEPOSDataModelEposDataModelEntity(meta_id,instance_id,user,EntityNames.valueOf(entityType.getSimpleName().toUpperCase()),entityType).getListOfEntities());
+			List items = (List) EPOSDataModelManager.getEPOSDataModelEposDataModelEntity(meta_id,instance_id,user,EntityNames.valueOf(entityType.getSimpleName().toUpperCase()),entityType).getListOfEntities();
+			if(items!=null) {
+				list.addAll(items);
+			}
 		}
 
 		list.forEach(e -> revertedList.add(0, e));

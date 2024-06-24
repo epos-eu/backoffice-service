@@ -4,6 +4,7 @@ import org.epos.eposdatamodel.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.HandlerInterceptor;
+import usermanagementapis.UserGroupManagementAPI;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -34,11 +35,15 @@ public class LogUserInInterceptor implements HandlerInterceptor {
             return false;
         }
 
-        User user = new User(allRequestParams.get("userId"),
-                allRequestParams.get("lastName"),
-                allRequestParams.get("firstName"),
-                allRequestParams.get("email")
-                );
+        User user = UserGroupManagementAPI.retrieveUserById(allRequestParams.get("userId"));
+        if(user == null){
+
+            String message = "{\"message\": \"The user doesn't exists\"}";
+            response.setContentType("application/json");
+            response.getWriter().write(message);
+            response.setStatus(400);
+            return false;
+        }
 
         HttpSession session = request.getSession();
         session.setAttribute("user", user);

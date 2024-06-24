@@ -4,10 +4,25 @@ import abstractapis.AbstractAPI;
 import commonapis.*;
 import metadataapis.*;
 import model.*;
-import org.epos.eposdatamodel.User;
+import model.Address;
+import model.Category;
+import model.CategoryScheme;
+import model.Distribution;
+import model.Element;
+import model.Equipment;
+import model.Facility;
+import model.Identifier;
+import model.Mapping;
+import model.Operation;
+import model.Organization;
+import model.Person;
+import model.QuantitativeValue;
+import model.SoftwareApplication;
+import model.SoftwareSourceCode;
+import org.epos.eposdatamodel.*;
 import org.epos.backoffice.api.exception.ApiResponseMessage;
-import org.epos.eposdatamodel.EPOSDataModelEntity;
-import org.epos.eposdatamodel.LinkedEntity;
+import org.epos.eposdatamodel.User;
+import usermanagementapis.UserGroupManagementAPI;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,31 +32,34 @@ import java.util.stream.Collectors;
 public class EPOSDataModelManager {
 
     public static ApiResponseMessage getEPOSDataModelEposDataModelEntity(String meta_id, String instance_id, User user, EntityNames entityNames, Class clazz) {
-        AbstractAPI dbapi = retrieveAPI(entityNames.name(),clazz);
+
+        AbstractAPI dbapi = retrieveAPI(entityNames.name());
+        clazz = retrieveClass(entityNames.name());
         if (meta_id == null)
-            return new ApiResponseMessage(1, "The [meta_id] field can't be left blank");
+            return new ApiResponseMessage(ApiResponseMessage.ERROR, "The [meta_id] field can't be left blank");
         if(instance_id == null) {
             instance_id = "all";
         }
 
-		/*BackofficeOperationType operationType = new BackofficeOperationType()
-				.operationType(meta_id.equals("all") ? GET_ALL : GET_SINGLE)
-				.entityType(Category.class)
-				.userRole(user.getRole());
+        /**
+         * GET OPERATIONS ARE FREE FOR ALL ENTITIES EXCEPT PERSON CONTACTPOINT AND ORGANIZATIONS
+         * WHICH ARE ACCESSIBLE ONLY FOR ADMINS (isAdmin)
+         **/
+        System.out.println(user);
+        if((entityNames.equals(EntityNames.PERSON)
+                || entityNames.equals(EntityNames.ORGANIZATION)
+                || entityNames.equals(EntityNames.CONTACTPOINT)) && !user.getIsAdmin()){
+            return new ApiResponseMessage(ApiResponseMessage.UNAUTHORIZED, "A user which is not Admin can't access PERSON/ORGANIZATION/CONTACTPOINT entities due to privacy settings");
+        }
 
-
-		ComputePermissionAbstract computePermission = new ComputePermissionNoGroup(operationType);
-		if (!computePermission.isAuthorized())
-			return new ApiResponseMessage(1, computePermission.generateErrorMessage());*/
-
-        System.out.println(meta_id+" "+instance_id);
+        System.out.println(meta_id+" "+instance_id+" "+clazz);
 
         List<EPOSDataModelEntity> list;
         if (meta_id.equals("all")) {
-            list = dbapi.getDbaccess().getAllFromDB(clazz);
+            list = dbapi.retrieveAll();
         } else {
             if(instance_id.equals("all")) {
-                list = dbapi.getDbaccess().getAllFromDB(clazz);
+                list = dbapi.retrieveAll();
                 list = list.stream()
                         .filter(
                                 elem -> elem.getMetaId().equals(meta_id)
@@ -49,10 +67,9 @@ public class EPOSDataModelManager {
                         .collect(Collectors.toList());
 
             }else {
-                list = dbapi.getDbaccess().getOneFromDBByInstanceId(instance_id, clazz);
+                list = List.of((EPOSDataModelEntity)dbapi.retrieve(instance_id));
             }
         }
-
 
         List<EPOSDataModelEntity> revertedList = new ArrayList<>();
         list.forEach(e -> revertedList.add(0, e));
@@ -64,34 +81,49 @@ public class EPOSDataModelManager {
     }
 
     public static ApiResponseMessage createEposDataModelEntity(EPOSDataModelEntity obj, User user, EntityNames entityNames, Class clazz) {
-        AbstractAPI dbapi = retrieveAPI(entityNames.name(),clazz);
-        /** ID MANAGEMENT
-         * if UID == NULL --> Generate a new UID
-         * Brand new Category? --> InstanceId = null && InstanceChangeId == null
-         * New Category from existing one? --> InstanceChangeId == OLD InstanceId
-         *
-         **/
-        if(obj.getUid()==null) {
-            System.err.println("UID undefined, generating a new one");
-            obj.setUid(obj.getClass().getSimpleName().toLowerCase()+"/"+ UUID.randomUUID());
+        /** CHECK PERMISSIONS **/
+        Boolean isAccessibleByUser = false;
+
+        System.out.println(user.toString());
+        System.out.println(user.getIsAdmin());
+        if(!user.getIsAdmin()){
+            if(obj.getGroups()!=null && !obj.getGroups().isEmpty()){
+                for(Group group : obj.getGroups()){
+                    for(UserGroup group1 : user.getGroups()){
+                        if(group.getId().equals(group1.getGroupId())
+                                && (
+                                group1.getRole().equals(RoleType.ADMIN)
+                                        ||group1.getRole().equals(RoleType.REVIEWER)
+                                        ||group1.getRole().equals(RoleType.EDITOR))){
+                            isAccessibleByUser = true;
+                        }
+                    }
+                }
+            }
+        }else{
+            isAccessibleByUser = true;
         }
-        obj.setInstanceId(null);
-        obj.setInstanceChangedId(null);
+        if(isAccessibleByUser) {
+            AbstractAPI dbapi = retrieveAPI(entityNames.name());
+            clazz = retrieveClass(entityNames.name());
 
-        obj.setStatus(StatusType.DRAFT);
-        obj.setEditorId(user.getAuthIdentifier());
-        obj.setFileProvenance("instance created with the backoffice");
+            obj.setInstanceId(null);
+            obj.setInstanceChangedId(null);
 
-		/*if(!ManagePermissions.checkPermissions(category, EntityTypeEnum.CATEGORY, user))
-			return new ApiResponseMessage(ApiResponseMessage.ERROR, "You don't have auth on the groups of this instance");*/
+            obj.setStatus(StatusType.DRAFT);
+            obj.setEditorId(user.getAuthIdentifier());
+            obj.setFileProvenance("instance created with the backoffice");
 
-        LinkedEntity reference = dbapi.create(obj);
+            LinkedEntity reference = dbapi.create(obj);
 
-        return new ApiResponseMessage(ApiResponseMessage.OK, reference);
+            return new ApiResponseMessage(ApiResponseMessage.OK, reference);
+        }
+        return new ApiResponseMessage(ApiResponseMessage.UNAUTHORIZED, "The user can't manage this action");
     }
 
     public static ApiResponseMessage updateEposDataModelEntity(EPOSDataModelEntity obj, User user, EntityNames entityNames, Class clazz) {
-        AbstractAPI dbapi = retrieveAPI(entityNames.name(),clazz);
+        AbstractAPI dbapi = retrieveAPI(entityNames.name());
+        clazz = retrieveClass(entityNames.name());
 
         if(obj.getStatus()!=null && (obj.getStatus().equals(StatusType.ARCHIVED) || obj.getStatus().equals(StatusType.PUBLISHED))) {
             return new ApiResponseMessage(ApiResponseMessage.ERROR, "Unable to update a ARCHIVED or PUBLISHED instance");
@@ -116,7 +148,8 @@ public class EPOSDataModelManager {
     }
 
     public static boolean deleteEposDataModelEntity(String instance_id, User user, EntityNames entityNames, Class clazz) {
-        AbstractAPI dbapi = retrieveAPI(entityNames.name(),clazz);
+        AbstractAPI dbapi = retrieveAPI(entityNames.name());
+        clazz = retrieveClass(entityNames.name());
         List<EPOSDataModelEntity> list = dbapi.getDbaccess().getOneFromDBByInstanceId(instance_id, clazz);
 
         if (list.isEmpty()) return false;
@@ -127,8 +160,10 @@ public class EPOSDataModelManager {
         return true;
     }
 
-    private static AbstractAPI retrieveAPI(String entityType, Class<?> edmClass){
+
+    private static AbstractAPI retrieveAPI(String entityType){
         AbstractAPI api = null;
+        Class<?> edmClass = null;
 
         switch(EntityNames.valueOf(entityType)){
             case PERSON:
@@ -224,5 +259,83 @@ public class EPOSDataModelManager {
                 break;
         }
         return api;
+    }
+
+    private static Class retrieveClass(String entityType){
+
+        Class<?> edmClass = null;
+
+        switch(EntityNames.valueOf(entityType)){
+            case PERSON:
+                edmClass = Person.class;
+                break;
+            case MAPPING:
+                edmClass = Mapping.class;
+                break;
+            case CATEGORY:
+                edmClass = Category.class;
+                break;
+            case FACILITY:
+                edmClass = Facility.class;
+                break;
+            case EQUIPMENT:
+                edmClass = Equipment.class;
+                break;
+            case OPERATION:
+                edmClass = Operation.class;
+                break;
+            case WEBSERVICE:
+                edmClass = Webservice.class;
+                break;
+            case DATAPRODUCT:
+                edmClass = Dataproduct.class;
+                break;
+            case CONTACTPOINT:
+                edmClass = Contactpoint.class;
+                break;
+            case DISTRIBUTION:
+                edmClass = Distribution.class;
+                break;
+            case ORGANIZATION:
+                edmClass = Organization.class;
+                break;
+            case CATEGORYSCHEME:
+                edmClass = CategoryScheme.class;
+                break;
+            case SOFTWARESOURCECODE:
+                edmClass = SoftwareSourceCode.class;
+                break;
+            case SOFTWAREAPPLICATION:
+                edmClass = SoftwareApplication.class;
+                break;
+            case ADDRESS:
+                edmClass = Address.class;
+                break;
+            case ELEMENT:
+                edmClass = Element.class;
+                break;
+            case LOCATION:
+                edmClass = Spatial.class;
+                break;
+            case PERIODOFTIME:
+                edmClass = Temporal.class;
+                break;
+            case IDENTIFIER:
+                edmClass = Identifier.class;
+                break;
+            case QUANTITATIVEVALUE:
+                edmClass = QuantitativeValue.class;
+                break;
+            case DOCUMENTATION:
+                edmClass = Element.class;
+                break;
+            case PARAMETER:
+                edmClass = SoftwareapplicationParameters.class;
+                break;
+            case RELATION:
+                System.out.println("Relation empty case");
+                break;
+        }
+        return edmClass;
     }
 }

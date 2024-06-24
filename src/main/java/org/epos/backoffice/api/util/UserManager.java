@@ -14,7 +14,6 @@ import usermanagementapis.UserGroupManagementAPI;
 public class UserManager {
 
 
-
 	public static ApiResponseMessage getUser(String instance_id, User user, Boolean available_section) {
 
 		if (instance_id == null)
@@ -34,9 +33,6 @@ public class UserManager {
 
 		List<User> userStream = personList.stream()
 				.filter(x -> x.getAuthIdentifier() != null && !x.getAuthIdentifier().isEmpty()).collect(Collectors.toList());
-		
-		System.out.println("STREAM: "+userStream.toString());
-
 
 		if (userStream.isEmpty())
 			return new ApiResponseMessage(ApiResponseMessage.OK, new ArrayList<Person>());
@@ -51,14 +47,13 @@ public class UserManager {
 	 */
 	public static ApiResponseMessage createUser(User inputUser, User user) {
 
-		inputUser.setGivenname(inputUser.getGivenname() == null ? user.getGivenname() : inputUser.getGivenname());
-		inputUser.setFamilyname(inputUser.getFamilyname() == null ? user.getFamilyname() : inputUser.getFamilyname());
+		inputUser.setFirstName(inputUser.getFirstName() == null ? user.getFirstName() : inputUser.getFirstName());
+		inputUser.setLastName(inputUser.getLastName() == null ? user.getLastName() : inputUser.getLastName());
 		inputUser.setEmail(inputUser.getEmail() == null ? user.getEmail() : inputUser.getEmail());
 		inputUser.setAuthIdentifier(inputUser.getAuthIdentifier() == null ? user.getAuthIdentifier() : inputUser.getAuthIdentifier());
+		inputUser.setIsAdmin(inputUser.getIsAdmin() == null ? user.getIsAdmin() : inputUser.getIsAdmin());
 
-		System.out.println(inputUser);
-
-		UserGroupManagementAPI.createUser(inputUser);
+		if(UserGroupManagementAPI.createUser(inputUser)) return new ApiResponseMessage(ApiResponseMessage.OK, "User created successfully");
 
 		return new ApiResponseMessage(ApiResponseMessage.ERROR, "You can't register other user");
 	}
@@ -70,16 +65,22 @@ public class UserManager {
 	 */
 	public static ApiResponseMessage updateUser(User inputUser, User user) {
 
-		UserGroupManagementAPI.createUser(inputUser);
+		inputUser.setFirstName(inputUser.getFirstName() == null ? user.getFirstName() : inputUser.getFirstName());
+		inputUser.setLastName(inputUser.getLastName() == null ? user.getLastName() : inputUser.getLastName());
+		inputUser.setEmail(inputUser.getEmail() == null ? user.getEmail() : inputUser.getEmail());
+		inputUser.setAuthIdentifier(inputUser.getAuthIdentifier() == null ? user.getAuthIdentifier() : inputUser.getAuthIdentifier());
+		inputUser.setIsAdmin(inputUser.getIsAdmin() == null ? user.getIsAdmin() : inputUser.getIsAdmin());
 
-		return new ApiResponseMessage(4, "User successfully modified");
+		if(UserGroupManagementAPI.createUser(inputUser)) return new ApiResponseMessage(ApiResponseMessage.OK, "User updated successfully");
+
+		return new ApiResponseMessage(ApiResponseMessage.ERROR, "You can't update other user");
 	}
 
 	public static ApiResponseMessage deleteUser(String instance_id, User user) {
 
-		UserGroupManagementAPI.deleteUser(instance_id);
+		if(UserGroupManagementAPI.deleteUser(instance_id)) return new ApiResponseMessage(ApiResponseMessage.OK, "User deleted successfully");
 
-		return new ApiResponseMessage(4, "User successfully deleted");
+		return new ApiResponseMessage(ApiResponseMessage.ERROR, "You can't delete other user");
 	}
 
 }
