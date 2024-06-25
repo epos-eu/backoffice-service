@@ -23,6 +23,7 @@ public class LogUserInInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
 
+        System.out.println(request.toString());
         Map<String, String> allRequestParams = convertQueryParameterFromArrayStringToString(request);
         
         System.out.println(allRequestParams);

@@ -1,8 +1,10 @@
-package org.epos.backoffice.api.exception;
+package org.epos.backoffice.api.util;
 
 import java.util.List;
 
+import model.MetadataGroup;
 import org.epos.eposdatamodel.EPOSDataModelEntity;
+import org.epos.eposdatamodel.Group;
 import org.epos.eposdatamodel.LinkedEntity;
 import org.epos.eposdatamodel.User;
 
@@ -21,6 +23,8 @@ public class ApiResponseMessage {
     LinkedEntity entity;
     List<? extends EPOSDataModelEntity> listOfEntities;
     List<User> listOfUsers;
+
+    List<Group> listOfGroups;
 
 	public ApiResponseMessage() {
     }
@@ -137,6 +141,34 @@ public class ApiResponseMessage {
 	        this.listOfUsers = list;
 	}
 
+    public ApiResponseMessage(int code, boolean userManagement, boolean groupManagement, List<Group> list) {
+        this.code = code;
+        switch (code) {
+            case ERROR:
+                setType("error");
+                break;
+            case WARNING:
+                setType("warning");
+                break;
+            case INFO:
+                setType("info");
+                break;
+            case OK:
+                setType("ok");
+                break;
+            case TOO_BUSY:
+                setType("too busy");
+                break;
+            case UNAUTHORIZED:
+                setType("unauthorized");
+                break;
+            default:
+                setType("unknown");
+                break;
+        }
+        this.listOfGroups = list;
+    }
+
 
 	public int getCode() {
         return code;
@@ -186,6 +218,14 @@ public class ApiResponseMessage {
 	public void setListOfUsers(List<User> listOfUsers) {
 		this.listOfUsers = listOfUsers;
 	}
+
+    public List<Group> getListOfGroups() {
+        return listOfGroups;
+    }
+
+    public void setListOfGroups(List<Group> listOfUsers) {
+        this.listOfGroups = listOfGroups;
+    }
 
 	@Override
 	public String toString() {

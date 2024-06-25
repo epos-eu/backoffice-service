@@ -20,21 +20,18 @@ import model.QuantitativeValue;
 import model.SoftwareApplication;
 import model.SoftwareSourceCode;
 import org.epos.eposdatamodel.*;
-import org.epos.backoffice.api.exception.ApiResponseMessage;
 import org.epos.eposdatamodel.User;
-import usermanagementapis.UserGroupManagementAPI;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class EPOSDataModelManager {
 
     public static ApiResponseMessage getEPOSDataModelEposDataModelEntity(String meta_id, String instance_id, User user, EntityNames entityNames, Class clazz) {
 
-        AbstractAPI dbapi = retrieveAPI(entityNames.name());
-        clazz = retrieveClass(entityNames.name());
+        AbstractAPI dbapi = AbstractAPI.retrieveAPI(entityNames.name());
+        clazz = AbstractAPI.retrieveClass(entityNames.name());
         if (meta_id == null)
             return new ApiResponseMessage(ApiResponseMessage.ERROR, "The [meta_id] field can't be left blank");
         if(instance_id == null) {
@@ -104,8 +101,8 @@ public class EPOSDataModelManager {
             isAccessibleByUser = true;
         }
         if(isAccessibleByUser) {
-            AbstractAPI dbapi = retrieveAPI(entityNames.name());
-            clazz = retrieveClass(entityNames.name());
+            AbstractAPI dbapi = AbstractAPI.retrieveAPI(entityNames.name());
+            clazz = AbstractAPI.retrieveClass(entityNames.name());
 
             obj.setInstanceId(null);
             obj.setInstanceChangedId(null);
@@ -122,8 +119,8 @@ public class EPOSDataModelManager {
     }
 
     public static ApiResponseMessage updateEposDataModelEntity(EPOSDataModelEntity obj, User user, EntityNames entityNames, Class clazz) {
-        AbstractAPI dbapi = retrieveAPI(entityNames.name());
-        clazz = retrieveClass(entityNames.name());
+        AbstractAPI dbapi = AbstractAPI.retrieveAPI(entityNames.name());
+        clazz = AbstractAPI.retrieveClass(entityNames.name());
 
         if(obj.getStatus()!=null && (obj.getStatus().equals(StatusType.ARCHIVED) || obj.getStatus().equals(StatusType.PUBLISHED))) {
             return new ApiResponseMessage(ApiResponseMessage.ERROR, "Unable to update a ARCHIVED or PUBLISHED instance");
@@ -148,8 +145,8 @@ public class EPOSDataModelManager {
     }
 
     public static boolean deleteEposDataModelEntity(String instance_id, User user, EntityNames entityNames, Class clazz) {
-        AbstractAPI dbapi = retrieveAPI(entityNames.name());
-        clazz = retrieveClass(entityNames.name());
+        AbstractAPI dbapi = AbstractAPI.retrieveAPI(entityNames.name());
+        clazz = AbstractAPI.retrieveClass(entityNames.name());
         List<EPOSDataModelEntity> list = dbapi.getDbaccess().getOneFromDBByInstanceId(instance_id, clazz);
 
         if (list.isEmpty()) return false;
@@ -158,184 +155,5 @@ public class EPOSDataModelManager {
         dbapi.getDbaccess().deleteObject(instance.getInstanceId());
 
         return true;
-    }
-
-
-    private static AbstractAPI retrieveAPI(String entityType){
-        AbstractAPI api = null;
-        Class<?> edmClass = null;
-
-        switch(EntityNames.valueOf(entityType)){
-            case PERSON:
-                edmClass = Person.class;
-                api = new PersonAPI(entityType, edmClass);
-                break;
-            case MAPPING:
-                edmClass = Mapping.class;
-                api = new MappingAPI(entityType, edmClass);
-                break;
-            case CATEGORY:
-                edmClass = Category.class;
-                api = new CategoryAPI(entityType, edmClass);
-                break;
-            case FACILITY:
-                edmClass = Facility.class;
-                api = new FacilityAPI(entityType, edmClass);
-                break;
-            case EQUIPMENT:
-                edmClass = Equipment.class;
-                api = new EquipmentAPI(entityType, edmClass);
-                break;
-            case OPERATION:
-                edmClass = Operation.class;
-                api = new OperationAPI(entityType, edmClass);
-                break;
-            case WEBSERVICE:
-                edmClass = Webservice.class;
-                api = new WebServiceAPI(entityType, edmClass);
-                break;
-            case DATAPRODUCT:
-                edmClass = Dataproduct.class;
-                api = new DataProductAPI(entityType, edmClass);
-                break;
-            case CONTACTPOINT:
-                edmClass = Contactpoint.class;
-                api = new ContactPointAPI(entityType, edmClass);
-                break;
-            case DISTRIBUTION:
-                edmClass = Distribution.class;
-                api = new DistributionAPI(entityType, edmClass);
-                break;
-            case ORGANIZATION:
-                edmClass = Organization.class;
-                api = new OrganizationAPI(entityType, edmClass);
-                break;
-            case CATEGORYSCHEME:
-                edmClass = CategoryScheme.class;
-                api = new CategorySchemeAPI(entityType, edmClass);
-                break;
-            case SOFTWARESOURCECODE:
-                edmClass = SoftwareSourceCode.class;
-                api = new SoftwareSourceCodeAPI(entityType, edmClass);
-                break;
-            case SOFTWAREAPPLICATION:
-                edmClass = SoftwareApplication.class;
-                api = new SoftwareApplicationAPI(entityType, edmClass);
-                break;
-            case ADDRESS:
-                edmClass = Address.class;
-                api = new AddressAPI(entityType, edmClass);
-                break;
-            case ELEMENT:
-                edmClass = Element.class;
-                api = new ElementAPI(entityType, edmClass);
-                break;
-            case LOCATION:
-                edmClass = Spatial.class;
-                api = new SpatialAPI(entityType, edmClass);
-                break;
-            case PERIODOFTIME:
-                edmClass = Temporal.class;
-                api = new TemporalAPI(entityType, edmClass);
-                break;
-            case IDENTIFIER:
-                edmClass = Identifier.class;
-                api = new IdentifierAPI(entityType, edmClass);
-                break;
-            case QUANTITATIVEVALUE:
-                edmClass = QuantitativeValue.class;
-                api = new QuantitativeValueAPI(entityType, edmClass);
-                break;
-            case DOCUMENTATION:
-                edmClass = Element.class;
-                api = new DocumentationAPI(entityType, edmClass);
-                break;
-            case PARAMETER:
-                edmClass = SoftwareapplicationParameters.class;
-                api = new ParameterAPI(entityType, edmClass);
-                break;
-            case RELATION:
-                System.out.println("Relation empty case");
-                break;
-        }
-        return api;
-    }
-
-    private static Class retrieveClass(String entityType){
-
-        Class<?> edmClass = null;
-
-        switch(EntityNames.valueOf(entityType)){
-            case PERSON:
-                edmClass = Person.class;
-                break;
-            case MAPPING:
-                edmClass = Mapping.class;
-                break;
-            case CATEGORY:
-                edmClass = Category.class;
-                break;
-            case FACILITY:
-                edmClass = Facility.class;
-                break;
-            case EQUIPMENT:
-                edmClass = Equipment.class;
-                break;
-            case OPERATION:
-                edmClass = Operation.class;
-                break;
-            case WEBSERVICE:
-                edmClass = Webservice.class;
-                break;
-            case DATAPRODUCT:
-                edmClass = Dataproduct.class;
-                break;
-            case CONTACTPOINT:
-                edmClass = Contactpoint.class;
-                break;
-            case DISTRIBUTION:
-                edmClass = Distribution.class;
-                break;
-            case ORGANIZATION:
-                edmClass = Organization.class;
-                break;
-            case CATEGORYSCHEME:
-                edmClass = CategoryScheme.class;
-                break;
-            case SOFTWARESOURCECODE:
-                edmClass = SoftwareSourceCode.class;
-                break;
-            case SOFTWAREAPPLICATION:
-                edmClass = SoftwareApplication.class;
-                break;
-            case ADDRESS:
-                edmClass = Address.class;
-                break;
-            case ELEMENT:
-                edmClass = Element.class;
-                break;
-            case LOCATION:
-                edmClass = Spatial.class;
-                break;
-            case PERIODOFTIME:
-                edmClass = Temporal.class;
-                break;
-            case IDENTIFIER:
-                edmClass = Identifier.class;
-                break;
-            case QUANTITATIVEVALUE:
-                edmClass = QuantitativeValue.class;
-                break;
-            case DOCUMENTATION:
-                edmClass = Element.class;
-                break;
-            case PARAMETER:
-                edmClass = SoftwareapplicationParameters.class;
-                break;
-            case RELATION:
-                System.out.println("Relation empty case");
-                break;
-        }
-        return edmClass;
     }
 }

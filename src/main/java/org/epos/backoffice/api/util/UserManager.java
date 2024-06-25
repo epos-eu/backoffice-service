@@ -6,9 +6,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.epos.backoffice.api.exception.ApiResponseMessage;
+import model.RequestStatusType;
+import model.RoleType;
 import org.epos.eposdatamodel.Person;
 import org.epos.eposdatamodel.User;
+import org.epos.eposdatamodel.UserGroup;
 import usermanagementapis.UserGroupManagementAPI;
 
 public class UserManager {
@@ -23,12 +25,12 @@ public class UserManager {
 		if (!instance_id.equals("self")) {
 
 			if (instance_id.equals("all")) {
-				personList = (List<User>) UserGroupManagementAPI.retrieveUser(null);
+				personList = UserGroupManagementAPI.retrieveAllUsers();
 			} else {
 				personList = (List<User>) UserGroupManagementAPI.retrieveUser(user);
 			}
 		} else {
-			personList = Collections.singletonList(UserGroupManagementAPI.retrieveUser(null));
+			personList = Collections.singletonList(UserGroupManagementAPI.retrieveUser(user));
 		}
 
 		List<User> userStream = personList.stream()
@@ -56,6 +58,14 @@ public class UserManager {
 		if(UserGroupManagementAPI.createUser(inputUser)) return new ApiResponseMessage(ApiResponseMessage.OK, "User created successfully");
 
 		return new ApiResponseMessage(ApiResponseMessage.ERROR, "You can't register other user");
+	}
+
+	public static ApiResponseMessage addUserToGroup(String userId, String groupId, RoleType role, RequestStatusType statusType, User user) {
+
+		if(UserGroupManagementAPI.addUserToGroup(groupId,userId,role, statusType))
+			return new ApiResponseMessage(ApiResponseMessage.OK, "User added successfully");
+
+		return new ApiResponseMessage(ApiResponseMessage.ERROR, "You can't add the user to group");
 	}
 
 	/**

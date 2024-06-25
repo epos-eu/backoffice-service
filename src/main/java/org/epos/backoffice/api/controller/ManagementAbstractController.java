@@ -5,19 +5,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import metadataapis.EntityNames;
 import org.epos.backoffice.api.util.ApiResponseMessage;
 import org.epos.backoffice.api.util.EPOSDataModelManager;
-import org.epos.eposdatamodel.*;
+import org.epos.eposdatamodel.EPOSDataModelEntity;
+import org.epos.eposdatamodel.User;
 import org.springframework.http.ResponseEntity;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.List;
 
-
-import java.util.*;
-
-public abstract class MetadataAbstractController<T extends EPOSDataModelEntity> extends AbstractController<T> {
+public abstract class ManagementAbstractController<T> extends BasicController<T> {
 
 	protected static AbstractAPI dbapi;
 
-	public MetadataAbstractController(ObjectMapper objectMapper, HttpServletRequest request, Class<T> entityType) {
+	public ManagementAbstractController(ObjectMapper objectMapper, HttpServletRequest request, Class<T> entityType) {
 		super(objectMapper, request, entityType);
 	}
 	protected ResponseEntity<?> getMethod(String meta_id, String instance_id, Boolean available_section) {
