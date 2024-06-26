@@ -67,13 +67,11 @@ public class UserManager {
 	}
 
 	public static ApiResponseMessage addUserToGroup(AddUserToGroupBean userGroup, User user) {
-		System.out.println(userGroup.toString());
 		Boolean result = UserGroupManagementAPI.addUserToGroup(
 				userGroup.getGroupid(),
 				userGroup.getUserid(),
 				RoleType.valueOf(userGroup.getRole()),
 				RequestStatusType.valueOf(userGroup.getStatusType()));
-		System.out.println(result);
 		if(result!=null && result)
 			return new ApiResponseMessage(ApiResponseMessage.OK, "User added successfully");
 
