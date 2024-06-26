@@ -81,8 +81,6 @@ public class EPOSDataModelManager {
         /** CHECK PERMISSIONS **/
         Boolean isAccessibleByUser = false;
 
-        System.out.println(user.toString());
-        System.out.println(user.getIsAdmin());
         if(!user.getIsAdmin()){
             if(obj.getGroups()!=null && !obj.getGroups().isEmpty()){
                 for(Group group : obj.getGroups()){
@@ -107,7 +105,7 @@ public class EPOSDataModelManager {
             obj.setInstanceId(null);
             obj.setInstanceChangedId(null);
 
-            obj.setStatus(StatusType.DRAFT);
+            obj.setStatus(obj.getStatus()==null? StatusType.DRAFT : obj.getStatus());
             obj.setEditorId(user.getAuthIdentifier());
             obj.setFileProvenance("instance created with the backoffice");
 

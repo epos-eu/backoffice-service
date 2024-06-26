@@ -108,12 +108,7 @@ public class UserController extends ManagementAbstractController<User> implement
 		User user = getUserFromSession();
 		System.out.println("Session User: "+ user.toString());
 
-		ApiResponseMessage response = UserManager.addUserToGroup(
-				addUserToGroupBean.getGroupid(),
-				addUserToGroupBean.getUserid(),
-				addUserToGroupBean.getRole(),
-				addUserToGroupBean.getStatusType(),
-				user);
+		ApiResponseMessage response = UserManager.addUserToGroup(addUserToGroupBean, user);
 		if(response.getCode()!=4) return ResponseEntity.status(400).body(response);
 
 		return ResponseEntity

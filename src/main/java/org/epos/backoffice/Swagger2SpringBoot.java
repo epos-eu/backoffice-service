@@ -6,6 +6,8 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import model.RequestStatusType;
+import model.RoleType;
 import org.epos.backoffice.configuration.LocalDateConverter;
 import org.epos.backoffice.configuration.LocalDateTimeConverter;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +19,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import usermanagementapis.UserGroupManagementAPI;
 
 
 @SpringBootApplication

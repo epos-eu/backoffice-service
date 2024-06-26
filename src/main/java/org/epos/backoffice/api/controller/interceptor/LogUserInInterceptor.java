@@ -28,6 +28,11 @@ public class LogUserInInterceptor implements HandlerInterceptor {
         
         System.out.println(allRequestParams);
 
+        /** TODO: DELETE **/
+        /*if (!allRequestParams.containsKey("userId")) {
+            allRequestParams.put("userId", "admin");
+        }*/
+
         if (!allRequestParams.containsKey("userId")) {
             String message = "{\"message\": \"The user is not correctly logged in\"}";
             response.setContentType("application/json");

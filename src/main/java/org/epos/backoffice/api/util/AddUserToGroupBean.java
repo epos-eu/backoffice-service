@@ -9,8 +9,8 @@ public class AddUserToGroupBean {
 
     private String userid;
     private String groupid;
-    private RoleType role;
-    private RequestStatusType statusType;
+    private String role;
+    private String statusType;
 
     public AddUserToGroupBean(){}
 
@@ -30,19 +30,19 @@ public class AddUserToGroupBean {
         this.groupid = groupid;
     }
 
-    public RoleType getRole() {
+    public String getRole() {
         return role;
     }
 
-    public void setRole(RoleType role) {
+    public void setRole(String role) {
         this.role = role;
     }
 
-    public RequestStatusType getStatusType() {
+    public String getStatusType() {
         return statusType;
     }
 
-    public void setStatusType(RequestStatusType statusType) {
+    public void setStatusType(String statusType) {
         this.statusType = statusType;
     }
 
