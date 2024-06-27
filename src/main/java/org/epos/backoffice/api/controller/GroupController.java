@@ -5,8 +5,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import org.epos.backoffice.api.util.ApiResponseMessage;
-import org.epos.backoffice.api.util.GroupManager;
+import org.epos.backoffice.api.util.*;
 import org.epos.eposdatamodel.Group;
 import org.epos.eposdatamodel.User;
 import org.slf4j.Logger;
@@ -140,6 +139,60 @@ public class GroupController extends ManagementAbstractController<Group> impleme
 		System.out.println("Session User: "+user.toString());
 
 		ApiResponseMessage response = GroupManager.deleteGroup(instance_id, user);
+		if(response.getCode()!=4) return ResponseEntity.status(400).body(response);
+
+		return ResponseEntity
+				.status(200)
+				.body(response);
+	}
+
+	@RequestMapping(value = "/addUserToGroup",
+			produces = {"application/json"},
+			method = RequestMethod.POST)
+	@ResponseBody
+	@Operation(summary = "Add User to Group with permissions", description = "You can use this endpoint to create a User (more information about which fields are required, who has the permission and how to use it are into the BackOffice repository documentation)")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "The User is correctly created.", content = @Content(mediaType = "application/json")),
+			@ApiResponse(responseCode = "400", description = "Bad request."),
+			@ApiResponse(responseCode = "401", description = "Token is missing or invalid"),
+			@ApiResponse(responseCode = "404", description = "Not found"),
+			@ApiResponse(responseCode = "415", description = "Wrong media type"),
+			@ApiResponse(responseCode = "500", description = "Error executing the request, the error may be, either in the gateway or the backoffice-service")
+	})
+	public ResponseEntity<?> post(
+			@RequestBody AddUserToGroupBean addUserToGroupBean
+	) {
+		User user = getUserFromSession();
+		System.out.println("Session User: "+ user.toString());
+
+		ApiResponseMessage response = UserManager.addUserToGroup(addUserToGroupBean, user);
+		if(response.getCode()!=4) return ResponseEntity.status(400).body(response);
+
+		return ResponseEntity
+				.status(200)
+				.body(response);
+	}
+
+	@RequestMapping(value = "/addEntityToGroup",
+			produces = {"application/json"},
+			method = RequestMethod.POST)
+	@ResponseBody
+	@Operation(summary = "Add Entity to Group with permissions", description = "You can use this endpoint to add an Entity to a Group")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "The User is correctly created.", content = @Content(mediaType = "application/json")),
+			@ApiResponse(responseCode = "400", description = "Bad request."),
+			@ApiResponse(responseCode = "401", description = "Token is missing or invalid"),
+			@ApiResponse(responseCode = "404", description = "Not found"),
+			@ApiResponse(responseCode = "415", description = "Wrong media type"),
+			@ApiResponse(responseCode = "500", description = "Error executing the request, the error may be, either in the gateway or the backoffice-service")
+	})
+	public ResponseEntity<?> post(
+			@RequestBody AddEntityToGroupBean addEntityToGroupBean
+	) {
+		User user = getUserFromSession();
+		System.out.println("Session User: "+ user.toString());
+
+		ApiResponseMessage response = GroupManager.addEntityToGroup(addEntityToGroupBean, user);
 		if(response.getCode()!=4) return ResponseEntity.status(400).body(response);
 
 		return ResponseEntity

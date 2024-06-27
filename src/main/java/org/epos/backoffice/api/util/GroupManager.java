@@ -2,6 +2,8 @@ package org.epos.backoffice.api.util;
 
 
 import model.MetadataGroup;
+import model.RequestStatusType;
+import model.RoleType;
 import org.epos.eposdatamodel.Group;
 import org.epos.eposdatamodel.User;
 import usermanagementapis.UserGroupManagementAPI;
@@ -64,6 +66,16 @@ public class GroupManager {
 		if(UserGroupManagementAPI.deleteGroup(instance_id)) return new ApiResponseMessage(ApiResponseMessage.OK, "Group deleted successfully");
 
 		return new ApiResponseMessage(ApiResponseMessage.ERROR, "You can't delete other group");
+	}
+
+	public static ApiResponseMessage addEntityToGroup(AddEntityToGroupBean entityGroup, User user) {
+		Boolean result = UserGroupManagementAPI.addMetadataElementToGroup(
+				entityGroup.getMetaid(),
+				entityGroup.getGroupid());
+		if(result!=null && result)
+			return new ApiResponseMessage(ApiResponseMessage.OK, "User added successfully");
+
+		return new ApiResponseMessage(ApiResponseMessage.ERROR, "You can't add the user to group");
 	}
 
 }

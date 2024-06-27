@@ -21,6 +21,7 @@ import model.SoftwareApplication;
 import model.SoftwareSourceCode;
 import org.epos.eposdatamodel.*;
 import org.epos.eposdatamodel.User;
+import usermanagementapis.UserGroupManagementAPI;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,7 +70,15 @@ public class EPOSDataModelManager {
         }
 
         List<EPOSDataModelEntity> revertedList = new ArrayList<>();
-        list.forEach(e -> revertedList.add(0, e));
+        list.forEach(e -> {
+            for (Group group : UserGroupManagementAPI.retrieveAllGroups()) {
+                System.out.println(group.toString());
+                if(group.getEntities().contains(e.getMetaId())){
+                    e.getGroups().add(group);
+                }
+            }
+            revertedList.add(0, e);
+        });
 
         if (list.isEmpty())
             return new ApiResponseMessage(ApiResponseMessage.OK, new ArrayList<EPOSDataModelEntity>());
