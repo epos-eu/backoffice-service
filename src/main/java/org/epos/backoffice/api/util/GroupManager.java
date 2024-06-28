@@ -10,6 +10,7 @@ import usermanagementapis.UserGroupManagementAPI;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class GroupManager {
@@ -24,7 +25,8 @@ public class GroupManager {
 		if (instance_id.equals("all")) {
 			groupList = UserGroupManagementAPI.retrieveAllGroups();
 		} else {
-			groupList = List.of(UserGroupManagementAPI.retrieveGroupById(instance_id));
+			Group tempGroup = Optional.ofNullable(UserGroupManagementAPI.retrieveGroupById(instance_id)).orElse(null);
+			groupList = tempGroup!=null? List.of(tempGroup) : new ArrayList<>();
 		}
 
 
@@ -44,6 +46,8 @@ public class GroupManager {
 	 */
 	public static ApiResponseMessage createGroup(Group inputGroup, User user) {
 
+		if(!user.getIsAdmin()) return new ApiResponseMessage(ApiResponseMessage.UNAUTHORIZED, "You can't create groups");
+
 		if(UserGroupManagementAPI.createGroup(inputGroup)) return new ApiResponseMessage(ApiResponseMessage.OK, "Group created successfully");
 
 		return new ApiResponseMessage(ApiResponseMessage.ERROR, "You can't create a group");
@@ -56,6 +60,8 @@ public class GroupManager {
 	 */
 	public static ApiResponseMessage updateGroup(Group inputGroup, User user) {
 
+		if(!user.getIsAdmin()) return new ApiResponseMessage(ApiResponseMessage.UNAUTHORIZED, "You can't update groups");
+
 		if(UserGroupManagementAPI.createGroup(inputGroup)) return new ApiResponseMessage(ApiResponseMessage.OK, "Group updated successfully");
 
 		return new ApiResponseMessage(ApiResponseMessage.ERROR, "You can't update other group");
@@ -63,19 +69,25 @@ public class GroupManager {
 
 	public static ApiResponseMessage deleteGroup(String instance_id, User user) {
 
+		if(!user.getIsAdmin()) return new ApiResponseMessage(ApiResponseMessage.UNAUTHORIZED, "You can't delete groups");
+
 		if(UserGroupManagementAPI.deleteGroup(instance_id)) return new ApiResponseMessage(ApiResponseMessage.OK, "Group deleted successfully");
 
 		return new ApiResponseMessage(ApiResponseMessage.ERROR, "You can't delete other group");
 	}
 
 	public static ApiResponseMessage addEntityToGroup(AddEntityToGroupBean entityGroup, User user) {
+
+		if(!user.getIsAdmin()) return new ApiResponseMessage(ApiResponseMessage.UNAUTHORIZED, "You can't add entities to groups");
+
 		Boolean result = UserGroupManagementAPI.addMetadataElementToGroup(
 				entityGroup.getMetaid(),
 				entityGroup.getGroupid());
+
 		if(result!=null && result)
 			return new ApiResponseMessage(ApiResponseMessage.OK, "User added successfully");
 
-		return new ApiResponseMessage(ApiResponseMessage.ERROR, "You can't add the user to group");
+		return new ApiResponseMessage(ApiResponseMessage.ERROR, "Error on adding the entity to the group");
 	}
 
 }

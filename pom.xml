@@ -59,7 +59,7 @@
 		<dependency>
 			<groupId>org.epos-eu.ics-c</groupId>
 			<artifactId>db-api</artifactId>
-			<version>ref.0.0.55</version>
+			<version>ref.0.0.60</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/jakarta.persistence/jakarta.persistence-api -->
@@ -135,6 +135,22 @@
 			<version>2.10.1</version>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/org.testcontainers/junit-jupiter -->
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<version>1.19.8</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>1.19.8</version>
+			<scope>test</scope>
+		</dependency>
+
+
 	</dependencies>
 	<build>
 		<testSourceDirectory>src/test/java</testSourceDirectory>
@@ -149,7 +165,6 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.22.2</version>
 			</plugin>
-
 		</plugins>
 	</build>
 </project>

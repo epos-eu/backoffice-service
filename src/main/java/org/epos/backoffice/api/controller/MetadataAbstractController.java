@@ -21,7 +21,7 @@ public abstract class MetadataAbstractController<T extends EPOSDataModelEntity> 
 		super(objectMapper, request, entityType);
 	}
 	protected ResponseEntity<?> getMethod(String meta_id, String instance_id, Boolean available_section) {
-		dbapi = AbstractAPI.retrieveAPI(EntityNames.valueOf(entityType.getSimpleName().toUpperCase()).name());
+
 		if (meta_id == null)
 			return ResponseEntity
 					.status(400)
@@ -32,24 +32,14 @@ public abstract class MetadataAbstractController<T extends EPOSDataModelEntity> 
 
 		User user = getUserFromSession();
 
-		List<T> revertedList = new ArrayList<>();
-		List<T> list = new ArrayList<T>();
+		List items = EPOSDataModelManager.getEPOSDataModelEposDataModelEntity(meta_id,instance_id,user,EntityNames.valueOf(entityType.getSimpleName().toUpperCase()),entityType).getListOfEntities();
 
-		if(!entityType.equals(User.class)) {
-			List items = (List) EPOSDataModelManager.getEPOSDataModelEposDataModelEntity(meta_id,instance_id,user,EntityNames.valueOf(entityType.getSimpleName().toUpperCase()),entityType).getListOfEntities();
-			if(items!=null) {
-				list.addAll(items);
-			}
-		}
-
-		list.forEach(e -> revertedList.add(0, e));
-
-		if (list.isEmpty())
-			return ResponseEntity.status(404).body("[]");
+		if (items.isEmpty())
+			return ResponseEntity.status(404).body(new ArrayList<>());
 
 		return ResponseEntity
 				.status(200)
-				.body(gson.toJson(revertedList));
+				.body(items);
 	}
 
 

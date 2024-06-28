@@ -23,15 +23,16 @@ public class LogUserInInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
 
-        System.out.println(request.toString());
         Map<String, String> allRequestParams = convertQueryParameterFromArrayStringToString(request);
-        
-        System.out.println(allRequestParams);
+
 
         /** TODO: DELETE **/
-        /*if (!allRequestParams.containsKey("userId")) {
+        if (!allRequestParams.containsKey("userId")) {
             allRequestParams.put("userId", "admin");
-        }*/
+        }
+
+
+        System.out.println(allRequestParams);
 
         if (!allRequestParams.containsKey("userId")) {
             String message = "{\"message\": \"The user is not correctly logged in\"}";
@@ -42,6 +43,9 @@ public class LogUserInInterceptor implements HandlerInterceptor {
         }
 
         User user = UserGroupManagementAPI.retrieveUserById(allRequestParams.get("userId"));
+
+        System.out.println(user);
+
         if(user == null){
 
             String message = "{\"message\": \"The user doesn't exists\"}";

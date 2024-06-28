@@ -1,10 +1,7 @@
 package org.epos.backoffice.api.util;
 
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import abstractapis.AbstractAPI;
@@ -32,17 +29,19 @@ public class UserManager {
 			if (instance_id.equals("all")) {
 				personList = UserGroupManagementAPI.retrieveAllUsers();
 			} else {
-				personList = List.of(UserGroupManagementAPI.retrieveUser(user));
+				User tempUser = Optional.ofNullable(UserGroupManagementAPI.retrieveUserById(user.getAuthIdentifier())).orElse(null);
+				personList = tempUser!=null? List.of(tempUser) : new ArrayList<>();
 			}
 		} else {
-			personList = Collections.singletonList(UserGroupManagementAPI.retrieveUser(user));
+			User tempUser = Optional.ofNullable(UserGroupManagementAPI.retrieveUserById(user.getAuthIdentifier())).orElse(null);
+			personList = tempUser!=null? List.of(tempUser) : new ArrayList<>();
 		}
 
 		List<User> userStream = personList.stream()
 				.filter(x -> x.getAuthIdentifier() != null && !x.getAuthIdentifier().isEmpty()).collect(Collectors.toList());
 
 		if (userStream.isEmpty())
-			return new ApiResponseMessage(ApiResponseMessage.OK, new ArrayList<Person>());
+			return new ApiResponseMessage(ApiResponseMessage.OK, true, new ArrayList<User>());
 
 		return new ApiResponseMessage(ApiResponseMessage.OK, true, userStream);
 	}
@@ -53,6 +52,8 @@ public class UserManager {
 	 * @return
 	 */
 	public static ApiResponseMessage createUser(User inputUser, User user) {
+
+		if(!user.getIsAdmin()) return new ApiResponseMessage(ApiResponseMessage.ERROR, "You can't register other user");
 
 		inputUser.setFirstName(inputUser.getFirstName() == null ? user.getFirstName() : inputUser.getFirstName());
 		inputUser.setLastName(inputUser.getLastName() == null ? user.getLastName() : inputUser.getLastName());
@@ -67,6 +68,9 @@ public class UserManager {
 	}
 
 	public static ApiResponseMessage addUserToGroup(AddUserToGroupBean userGroup, User user) {
+
+		if(!user.getIsAdmin()) return new ApiResponseMessage(ApiResponseMessage.ERROR, "You can't add users to groups");
+
 		Boolean result = UserGroupManagementAPI.addUserToGroup(
 				userGroup.getGroupid(),
 				userGroup.getUserid(),
@@ -85,6 +89,8 @@ public class UserManager {
 	 */
 	public static ApiResponseMessage updateUser(User inputUser, User user) {
 
+		if(!user.getIsAdmin()) return new ApiResponseMessage(ApiResponseMessage.ERROR, "You can't update users");
+
 		inputUser.setFirstName(inputUser.getFirstName() == null ? user.getFirstName() : inputUser.getFirstName());
 		inputUser.setLastName(inputUser.getLastName() == null ? user.getLastName() : inputUser.getLastName());
 		inputUser.setEmail(inputUser.getEmail() == null ? user.getEmail() : inputUser.getEmail());
@@ -97,6 +103,8 @@ public class UserManager {
 	}
 
 	public static ApiResponseMessage deleteUser(String instance_id, User user) {
+
+		if(!user.getIsAdmin()) return new ApiResponseMessage(ApiResponseMessage.ERROR, "You can't delete users");
 
 		if(UserGroupManagementAPI.deleteUser(instance_id)) return new ApiResponseMessage(ApiResponseMessage.OK, "User deleted successfully");
 

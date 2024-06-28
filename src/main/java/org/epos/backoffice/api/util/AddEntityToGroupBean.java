@@ -13,7 +13,7 @@ public class AddEntityToGroupBean {
         return metaid;
     }
 
-    public void setMetaid(String userid) {
+    public void setMetaid(String metaid) {
         this.metaid = metaid;
     }
 
