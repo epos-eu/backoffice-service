@@ -85,9 +85,22 @@ public class GroupManager {
 				entityGroup.getGroupid());
 
 		if(result!=null && result)
-			return new ApiResponseMessage(ApiResponseMessage.OK, "User added successfully");
+			return new ApiResponseMessage(ApiResponseMessage.OK, "Entity added successfully to group");
 
 		return new ApiResponseMessage(ApiResponseMessage.ERROR, "Error on adding the entity to the group");
 	}
 
+    public static ApiResponseMessage removeEntityFromGroup(AddEntityToGroupBean addEntityToGroupBean, User user) {
+
+		if(!user.getIsAdmin()) return new ApiResponseMessage(ApiResponseMessage.UNAUTHORIZED, "You can't remove entities from groups");
+
+		Boolean result = UserGroupManagementAPI.removeMetadataElementFromGroup(
+				addEntityToGroupBean.getMetaid(),
+				addEntityToGroupBean.getGroupid());
+
+		if(result!=null && result)
+			return new ApiResponseMessage(ApiResponseMessage.OK, "Entity remove successfully from group");
+
+		return new ApiResponseMessage(ApiResponseMessage.ERROR, "Error on remove the entity from the group");
+    }
 }

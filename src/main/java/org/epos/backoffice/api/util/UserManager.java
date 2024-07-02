@@ -82,6 +82,21 @@ public class UserManager {
 		return new ApiResponseMessage(ApiResponseMessage.ERROR, "You can't add the user to group");
 	}
 
+
+	public static ApiResponseMessage removeUserFromGroup(RemoveUserFromGroupBean removeUserFromGroupBean, User user) {
+
+		if(!user.getIsAdmin()) return new ApiResponseMessage(ApiResponseMessage.ERROR, "You can't remove users from groups");
+
+		Boolean result = UserGroupManagementAPI.removeUserFromGroup(
+				removeUserFromGroupBean.getGroupid(),
+				removeUserFromGroupBean.getUserid());
+		if(result!=null && result)
+			return new ApiResponseMessage(ApiResponseMessage.OK, "User removed successfully from group");
+
+		return new ApiResponseMessage(ApiResponseMessage.ERROR, "You can't remove the user from group");
+
+	}
+
 	/**
 	 *
 	 * @param user

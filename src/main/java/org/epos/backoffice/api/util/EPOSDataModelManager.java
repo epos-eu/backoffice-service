@@ -2,6 +2,7 @@ package org.epos.backoffice.api.util;
 
 import abstractapis.AbstractAPI;
 import commonapis.*;
+import jakarta.persistence.EntityManagerFactory;
 import metadataapis.*;
 import model.*;
 import model.Address;
@@ -21,6 +22,7 @@ import model.SoftwareApplication;
 import model.SoftwareSourceCode;
 import org.epos.eposdatamodel.*;
 import org.epos.eposdatamodel.User;
+import org.epos.handler.dbapi.service.EntityManagerService;
 import usermanagementapis.UserGroupManagementAPI;
 
 import java.util.ArrayList;
@@ -32,7 +34,6 @@ public class EPOSDataModelManager {
     public static ApiResponseMessage getEPOSDataModelEposDataModelEntity(String meta_id, String instance_id, User user, EntityNames entityNames, Class clazz) {
 
         AbstractAPI dbapi = AbstractAPI.retrieveAPI(entityNames.name());
-        clazz = AbstractAPI.retrieveClass(entityNames.name());
         if (meta_id == null)
             return new ApiResponseMessage(ApiResponseMessage.ERROR, "The [meta_id] field can't be left blank");
         if(instance_id == null) {
@@ -144,6 +145,7 @@ public class EPOSDataModelManager {
             isAccessibleByUser = true;
         }
         if(isAccessibleByUser) {
+            System.out.println(obj.toString());
             AbstractAPI dbapi = AbstractAPI.retrieveAPI(entityNames.name());
 
             EPOSDataModelEntity eposDataModelEntity = (EPOSDataModelEntity) dbapi.retrieve(obj.getInstanceId());
@@ -162,6 +164,8 @@ public class EPOSDataModelManager {
             obj.setFileProvenance("instance created with the backoffice");
 
             LinkedEntity reference = dbapi.create(obj);
+
+            EntityManagerService.getInstance().getCache().evictAll();
 
             return new ApiResponseMessage(ApiResponseMessage.OK, reference);
         }

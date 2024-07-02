@@ -173,13 +173,41 @@ public class GroupController extends ManagementAbstractController<Group> impleme
 				.body(response);
 	}
 
+	@RequestMapping(value = "/removeUserFromGroup",
+			produces = {"application/json"},
+			method = RequestMethod.DELETE)
+	@ResponseBody
+	@Operation(summary = "Remove User from Group with permissions", description = "You can use this endpoint to remove a User from a group(more information about which fields are required, who has the permission and how to use it are into the BackOffice repository documentation)")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "The User is correctly created.", content = @Content(mediaType = "application/json")),
+			@ApiResponse(responseCode = "400", description = "Bad request."),
+			@ApiResponse(responseCode = "401", description = "Token is missing or invalid"),
+			@ApiResponse(responseCode = "404", description = "Not found"),
+			@ApiResponse(responseCode = "415", description = "Wrong media type"),
+			@ApiResponse(responseCode = "500", description = "Error executing the request, the error may be, either in the gateway or the backoffice-service")
+	})
+	public ResponseEntity<?> delete(
+			@RequestBody RemoveUserFromGroupBean removeUserFromGroupBean
+	) {
+		User user = getUserFromSession();
+		System.out.println("Session User: "+ user.toString());
+
+		ApiResponseMessage response = UserManager.removeUserFromGroup(removeUserFromGroupBean, user);
+		if(response.getCode()!=4) return ResponseEntity.status(400).body(response);
+
+		return ResponseEntity
+				.status(200)
+				.body(response);
+	}
+
+
 	@RequestMapping(value = "/addEntityToGroup",
 			produces = {"application/json"},
 			method = RequestMethod.POST)
 	@ResponseBody
 	@Operation(summary = "Add Entity to Group with permissions", description = "You can use this endpoint to add an Entity to a Group")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "The User is correctly created.", content = @Content(mediaType = "application/json")),
+			@ApiResponse(responseCode = "200", description = "The Entity is correctly created.", content = @Content(mediaType = "application/json")),
 			@ApiResponse(responseCode = "400", description = "Bad request."),
 			@ApiResponse(responseCode = "401", description = "Token is missing or invalid"),
 			@ApiResponse(responseCode = "404", description = "Not found"),
@@ -193,6 +221,32 @@ public class GroupController extends ManagementAbstractController<Group> impleme
 		System.out.println("Session User: "+ user.toString());
 
 		ApiResponseMessage response = GroupManager.addEntityToGroup(addEntityToGroupBean, user);
+		if(response.getCode()!=4) return ResponseEntity.status(400).body(response);
+
+		return ResponseEntity
+				.status(200)
+				.body(response);
+	}
+	@RequestMapping(value = "/removeEntityFromGroup",
+			produces = {"application/json"},
+			method = RequestMethod.DELETE)
+	@ResponseBody
+	@Operation(summary = "Remove Entity from Group with permissions", description = "You can use this endpoint to remove an Entity from a Group")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "The Entity is correctly removed.", content = @Content(mediaType = "application/json")),
+			@ApiResponse(responseCode = "400", description = "Bad request."),
+			@ApiResponse(responseCode = "401", description = "Token is missing or invalid"),
+			@ApiResponse(responseCode = "404", description = "Not found"),
+			@ApiResponse(responseCode = "415", description = "Wrong media type"),
+			@ApiResponse(responseCode = "500", description = "Error executing the request, the error may be, either in the gateway or the backoffice-service")
+	})
+	public ResponseEntity<?> delete(
+			@RequestBody AddEntityToGroupBean addEntityToGroupBean
+	) {
+		User user = getUserFromSession();
+		System.out.println("Session User: "+ user.toString());
+
+		ApiResponseMessage response = GroupManager.removeEntityFromGroup(addEntityToGroupBean, user);
 		if(response.getCode()!=4) return ResponseEntity.status(400).body(response);
 
 		return ResponseEntity

@@ -114,6 +114,33 @@ public class UserGroupManagementTest extends TestcontainersLifecycle {
 
     @Test
     @Order(6)
+    public void testAddSameUserToGroup() {
+        AddUserToGroupBean addUserToGroupBean = new AddUserToGroupBean();
+        addUserToGroupBean.setGroupid(group.getId());
+        addUserToGroupBean.setUserid(user.getAuthIdentifier());
+        addUserToGroupBean.setRole(RoleType.EDITOR.toString());
+        addUserToGroupBean.setStatusType(RequestStatusType.PENDING.toString());
+
+        UserManager.addUserToGroup(addUserToGroupBean,user);
+
+        Group retrieveGroup = GroupManager.getGroup(group.getId(), user, false).getListOfGroups().get(0);
+        User retrieveUser = UserManager.getUser(user.getAuthIdentifier(),user,false).getListOfUsers().get(0);
+
+        System.out.println(retrieveGroup);
+        System.out.println(retrieveUser);
+
+        assertAll(
+                () -> assertNotNull(retrieveGroup),
+                () -> assertEquals(1, retrieveGroup.getUsers().size()),
+                () -> assertEquals(retrieveGroup.getUsers().get(0), retrieveUser.getAuthIdentifier()),
+                () -> assertEquals(1, retrieveUser.getGroups().size()),
+                () -> assertEquals(retrieveUser.getGroups().get(0).getGroupId(), retrieveGroup.getId()),
+                () -> assertEquals(retrieveUser.getGroups().get(0).getRole(), RoleType.EDITOR)
+        );
+    }
+
+    @Test
+    @Order(7)
     public void testDeleteUser() {
         UserManager.deleteUser(user.getAuthIdentifier(), user);
 
@@ -122,7 +149,7 @@ public class UserGroupManagementTest extends TestcontainersLifecycle {
     }
 
     @Test
-    @Order(7)
+    @Order(8)
     public void testDeleteGroup() {
 
         GroupManager.deleteGroup(group.getId(), user);
@@ -132,7 +159,7 @@ public class UserGroupManagementTest extends TestcontainersLifecycle {
 
 
     @Test
-    @Order(8)
+    @Order(9)
     public void testCreateGroupWithoutName() {
         Group group = new Group(UUID.randomUUID().toString(), null, "Test Decription");
         GroupManager.createGroup(group, user);

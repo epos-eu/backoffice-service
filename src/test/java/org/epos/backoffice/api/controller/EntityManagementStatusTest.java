@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -64,9 +65,10 @@ public class EntityManagementStatusTest extends TestcontainersLifecycle {
 
     @Test
     @Order(3)
-    public void testUpdateStatusAddress() {
+    public void testUpdateStatusAddressToSubmitted() throws InterruptedException {
 
-        address.setStatus(StatusType.PUBLISHED);
+        address.setStatus(StatusType.SUBMITTED);
+
 
         ApiResponseMessage apiResponseMessage = EPOSDataModelManager.updateEposDataModelEntity(address, user, EntityNames.ADDRESS, Address.class);
 
@@ -74,12 +76,32 @@ public class EntityManagementStatusTest extends TestcontainersLifecycle {
 
         List<Address> addressList = (List<Address>) EPOSDataModelManager.getEPOSDataModelEposDataModelEntity(le.getMetaId(), le.getInstanceId(), user, EntityNames.ADDRESS, Address.class).getListOfEntities();
 
+        System.out.println(addressList.get(0).toString());
+        assertNotNull(addressList);
+        assertEquals(1,addressList.size());
+        assertEquals(StatusType.SUBMITTED,addressList.get(0).getStatus());
+    }
+
+    @Test
+    @Order(4)
+    public void testUpdateStatusAddressToPublished() throws InterruptedException {
+
+        address.setStatus(StatusType.PUBLISHED);
+
+
+        ApiResponseMessage apiResponseMessage = EPOSDataModelManager.updateEposDataModelEntity(address, user, EntityNames.ADDRESS, Address.class);
+
+        LinkedEntity le = apiResponseMessage.getEntity();
+
+        List<Address> addressList = (List<Address>) EPOSDataModelManager.getEPOSDataModelEposDataModelEntity(le.getMetaId(), le.getInstanceId(), user, EntityNames.ADDRESS, Address.class).getListOfEntities();
+
+        System.out.println(addressList.get(0).toString());
         assertNotNull(addressList);
         assertEquals(1,addressList.size());
         assertEquals(StatusType.PUBLISHED,addressList.get(0).getStatus());
     }
-
-    /*@Test
+/*
+    @Test
     @Order(4)
     public void testUpdateToDraft() {
 
