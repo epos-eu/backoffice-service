@@ -13,6 +13,9 @@
 	<artifactId>backoffice-service</artifactId>
 	<version>VERSION</version>
 	<name>Backoffice Service</name>
+	<packaging>jar</packaging>
+
+
 	<properties>
 		<java.version>17</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
