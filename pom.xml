@@ -14,7 +14,7 @@
 	<version>VERSION</version>
 	<name>Backoffice Service</name>
 	<properties>
-		<java.version>11</java.version>
+		<java.version>17</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
@@ -59,7 +59,7 @@
 		<dependency>
 			<groupId>org.epos-eu.ics-c</groupId>
 			<artifactId>db-api</artifactId>
-			<version>ref.0.0.69</version>
+			<version>ref.0.0.70</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/jakarta.persistence/jakarta.persistence-api -->
