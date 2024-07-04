@@ -201,7 +201,7 @@
 						<manifest>
 							<addClasspath>true</addClasspath>
 							<classpathPrefix>lib/</classpathPrefix>
-							<mainClass>org.epos.Swagger2SpringBoot</mainClass>
+							<mainClass>org.epos.backoffice.Swagger2SpringBoot</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
