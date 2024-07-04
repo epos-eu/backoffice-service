@@ -25,7 +25,6 @@ deploy:
   artifacts:
     paths:
       - target/*.jar
-      - target/libs
 
 docker-build:
   stage: package
