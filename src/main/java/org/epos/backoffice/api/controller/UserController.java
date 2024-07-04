@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-public class UserController extends ManagementAbstractController<User> implements ApiDocTag {
+public class UserController extends ManagementAbstractController<User> implements ApiUserGroupDocTag {
 
 	private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
