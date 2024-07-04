@@ -2,7 +2,7 @@ name: release and push to central
 on:
   push:
     branches:
-      - main
+      - refactoring
 jobs:
   build:
     runs-on: ubuntu-latest
