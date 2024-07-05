@@ -16,6 +16,7 @@ import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
@@ -23,6 +24,7 @@ import usermanagementapis.UserGroupManagementAPI;
 
 
 @SpringBootApplication
+@ComponentScan(basePackages = { "org.epos.backoffice", "org.epos.backoffice.api", "org.epos.backoffice.configuration"})
 public class Swagger2SpringBoot implements CommandLineRunner {
 
     public static void main(String[] args) {
@@ -35,15 +37,6 @@ public class Swagger2SpringBoot implements CommandLineRunner {
             throw new ExitException();
         }
 
-    }
-
-    @Bean
-    public OpenAPI customOpenAPI(@Value("${springdoc.version}") String appVersion) {
-        return new OpenAPI()
-                .components(new Components().addSecuritySchemes("basicScheme",
-                        new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("basic")))
-                .info(new Info().title("BACKOFFICE API").version(appVersion)
-                        .license(new License().name("Apache 2.0").url("http://springdoc.org")));
     }
 
     @Configuration

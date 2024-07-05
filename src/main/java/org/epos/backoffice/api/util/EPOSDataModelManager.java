@@ -1,25 +1,8 @@
 package org.epos.backoffice.api.util;
 
 import abstractapis.AbstractAPI;
-import commonapis.*;
-import jakarta.persistence.EntityManagerFactory;
 import metadataapis.*;
 import model.*;
-import model.Address;
-import model.Category;
-import model.CategoryScheme;
-import model.Distribution;
-import model.Element;
-import model.Equipment;
-import model.Facility;
-import model.Identifier;
-import model.Mapping;
-import model.Operation;
-import model.Organization;
-import model.Person;
-import model.QuantitativeValue;
-import model.SoftwareApplication;
-import model.SoftwareSourceCode;
 import org.epos.eposdatamodel.*;
 import org.epos.eposdatamodel.User;
 import org.epos.handler.dbapi.service.EntityManagerService;
@@ -164,8 +147,6 @@ public class EPOSDataModelManager {
             obj.setFileProvenance("instance created with the backoffice");
 
             LinkedEntity reference = dbapi.create(obj);
-
-            EntityManagerService.getInstance().getCache().evictAll();
 
             return new ApiResponseMessage(ApiResponseMessage.OK, reference);
         }
