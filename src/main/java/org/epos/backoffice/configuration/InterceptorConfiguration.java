@@ -15,15 +15,24 @@ public class InterceptorConfiguration implements WebMvcConfigurer {
                 List.of(
                         "/user/**",
                         "/group/**",
-                        "/categoryscheme/**",
+                        "/address/**",
                         "/category/**",
+                        "/categoryscheme/**",
+                        "/contactpoint/**",
                         "/dataproduct/**",
                         "/distribution/**",
-                        "/webservice/**",
-                        "/contactpoint/**",
+                        "/documentation/**",
+                        "/element/**",
+                        "/identifier/**",
+                        "/legalname/**",
+                        "/location/**",
+                        "/mapping/**",
                         "/operation/**",
                         "/organization/**",
-                        "/person/**"
+                        "/parameter/**",
+                        "/periodoftime/**",
+                        "/person/**",
+                        "/webservice/**"
                 )
         );
     }
