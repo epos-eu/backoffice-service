@@ -159,12 +159,11 @@ public class EPOSDataModelManager {
     public static boolean deleteEposDataModelEntity(String instance_id, User user, EntityNames entityNames, Class clazz) {
         AbstractAPI dbapi = AbstractAPI.retrieveAPI(entityNames.name());
         clazz = AbstractAPI.retrieveClass(entityNames.name());
-        List<EPOSDataModelEntity> list = dbapi.getDbaccess().getOneFromDBByInstanceId(instance_id, clazz);
+        List list = dbapi.getDbaccess().getOneFromDBByInstanceId(instance_id, clazz);
 
         if (list.isEmpty()) return false;
-        EPOSDataModelEntity instance = list.get(0);
 
-        dbapi.getDbaccess().deleteObject(instance.getInstanceId());
+        dbapi.getDbaccess().deleteObject(list.get(0));
 
         return true;
     }
