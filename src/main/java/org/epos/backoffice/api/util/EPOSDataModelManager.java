@@ -46,7 +46,10 @@ public class EPOSDataModelManager {
                         .collect(Collectors.toList());
 
             }else {
-                list = List.of((EPOSDataModelEntity)dbapi.retrieve(instance_id));
+                list = new ArrayList<>();
+                EPOSDataModelEntity entity = (EPOSDataModelEntity) dbapi.retrieve(instance_id);
+                if(entity!=null) list.add(entity);
+                //list = List.of((EPOSDataModelEntity)dbapi.retrieve(instance_id));
             }
         }
 
