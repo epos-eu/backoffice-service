@@ -4,10 +4,7 @@ import abstractapis.AbstractAPI;
 import metadataapis.EntityNames;
 import org.epos.backoffice.api.util.EPOSDataModelManager;
 import org.epos.backoffice.api.util.UserManager;
-import org.epos.eposdatamodel.Identifier;
-import org.epos.eposdatamodel.LinkedEntity;
-import org.epos.eposdatamodel.User;
-import org.epos.eposdatamodel.WebService;
+import org.epos.eposdatamodel.*;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
@@ -75,6 +72,32 @@ public class EntityManagementComplexTest extends TestcontainersLifecycle {
                 () -> assertEquals(webservice.getName(), retrievedWebservice.getName()),
                 () -> assertEquals(webservice.getDescription(), retrievedWebservice.getDescription())
         );
+    }
+
+    @Test
+    @Order(3)
+    public void testCreateAndGetOperationAndMapping() {
+
+        Mapping mapping = new Mapping();
+        mapping.setInstanceId(UUID.randomUUID().toString());
+        mapping.setMetaId(UUID.randomUUID().toString());
+        mapping.setUid(UUID.randomUUID().toString());
+        mapping.setLabel("test");
+
+        LinkedEntity mappingLe = EPOSDataModelManager.createEposDataModelEntity(mapping, user, EntityNames.MAPPING, Mapping.class).getEntity();
+
+        Operation operation = new Operation();
+        operation.setInstanceId(UUID.randomUUID().toString());
+        operation.setMetaId(UUID.randomUUID().toString());
+        operation.setUid(UUID.randomUUID().toString());
+        operation.setMapping(List.of(mappingLe));
+        operation.setMethod("GET");
+
+        LinkedEntity operationLe = EPOSDataModelManager.createEposDataModelEntity(operation, user, EntityNames.OPERATION, Operation.class).getEntity();
+
+        Operation retrievedOperation = (Operation) EPOSDataModelManager.getEPOSDataModelEposDataModelEntity(operationLe.getMetaId(), operationLe.getInstanceId(), user, EntityNames.OPERATION, Operation.class).getListOfEntities().get(0);
+
+        System.out.println(retrievedOperation);
     }
 
 }
