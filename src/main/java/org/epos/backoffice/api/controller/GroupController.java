@@ -146,7 +146,7 @@ public class GroupController extends ManagementAbstractController<Group> impleme
 				.body(response);
 	}
 
-	@RequestMapping(value = "/addUserToGroup",
+	@RequestMapping(value = "/group/addUserToGroup",
 			produces = {"application/json"},
 			method = RequestMethod.POST)
 	@ResponseBody
@@ -173,7 +173,7 @@ public class GroupController extends ManagementAbstractController<Group> impleme
 				.body(response);
 	}
 
-	@RequestMapping(value = "/updateUserInGroup",
+	@RequestMapping(value = "/group/updateUserInGroup",
 			produces = {"application/json"},
 			method = RequestMethod.PUT)
 	@ResponseBody
@@ -200,7 +200,7 @@ public class GroupController extends ManagementAbstractController<Group> impleme
 				.body(response);
 	}
 
-	@RequestMapping(value = "/removeUserFromGroup",
+	@RequestMapping(value = "/group/removeUserFromGroup",
 			produces = {"application/json"},
 			method = RequestMethod.DELETE)
 	@ResponseBody
@@ -228,7 +228,7 @@ public class GroupController extends ManagementAbstractController<Group> impleme
 	}
 
 
-	@RequestMapping(value = "/addEntityToGroup",
+	@RequestMapping(value = "/group/addEntityToGroup",
 			produces = {"application/json"},
 			method = RequestMethod.POST)
 	@ResponseBody
@@ -255,7 +255,7 @@ public class GroupController extends ManagementAbstractController<Group> impleme
 				.body(response);
 	}
 
-	@RequestMapping(value = "/removeEntityFromGroup",
+	@RequestMapping(value = "/group/removeEntityFromGroup",
 			produces = {"application/json"},
 			method = RequestMethod.DELETE)
 	@ResponseBody
