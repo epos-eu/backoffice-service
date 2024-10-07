@@ -97,7 +97,7 @@ public class UserGroupManagementTest extends TestcontainersLifecycle {
         UserManager.addUserToGroup(addUserToGroupBean,user);
 
         Group retrieveGroup = GroupManager.getGroup(group.getId(), user, false).getListOfGroups().get(0);
-        User retrieveUser = UserManager.getUser(user.getAuthIdentifier(),user,false).getListOfUsers().get(0);
+        User retrieveUser = UserManager.getUser(user.getAuthIdentifier(),user,true).getListOfUsers().get(0);
 
         System.out.println(retrieveGroup);
         System.out.println(retrieveUser);
