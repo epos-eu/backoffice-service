@@ -13,6 +13,7 @@ import model.RoleType;
 import org.epos.eposdatamodel.Person;
 import org.epos.eposdatamodel.User;
 import org.epos.eposdatamodel.UserGroup;
+import org.epos.handler.dbapi.service.EntityManagerService;
 import usermanagementapis.UserGroupManagementAPI;
 
 public class UserManager {
@@ -61,8 +62,12 @@ public class UserManager {
 		inputUser.setAuthIdentifier(inputUser.getAuthIdentifier() == null ? user.getAuthIdentifier() : inputUser.getAuthIdentifier());
 		inputUser.setIsAdmin(inputUser.getIsAdmin() == null ? user.getIsAdmin() : inputUser.getIsAdmin());
 
-		if (UserGroupManagementAPI.createUser(inputUser))
+		if (UserGroupManagementAPI.createUser(inputUser)) {
+
+			EntityManagerService.getInstance().getCache().evictAll();
+
 			return new ApiResponseMessage(ApiResponseMessage.OK, "User created successfully");
+		}
 
 		return new ApiResponseMessage(ApiResponseMessage.ERROR, "You can't register other user");
 	}
@@ -76,6 +81,9 @@ public class UserManager {
 				userGroup.getUserid(),
 				RoleType.valueOf(userGroup.getRole()),
 				RequestStatusType.valueOf(userGroup.getStatusType()));
+
+		EntityManagerService.getInstance().getCache().evictAll();
+
 		if(result!=null && result)
 			return new ApiResponseMessage(ApiResponseMessage.OK, "User added successfully");
 
@@ -90,6 +98,9 @@ public class UserManager {
 		Boolean result = UserGroupManagementAPI.removeUserFromGroup(
 				removeUserFromGroupBean.getGroupid(),
 				removeUserFromGroupBean.getUserid());
+
+		EntityManagerService.getInstance().getCache().evictAll();
+
 		if(result!=null && result)
 			return new ApiResponseMessage(ApiResponseMessage.OK, "User removed successfully from group");
 
@@ -112,7 +123,12 @@ public class UserManager {
 		inputUser.setAuthIdentifier(inputUser.getAuthIdentifier() == null ? user.getAuthIdentifier() : inputUser.getAuthIdentifier());
 		inputUser.setIsAdmin(inputUser.getIsAdmin() == null ? user.getIsAdmin() : inputUser.getIsAdmin());
 
-		if(UserGroupManagementAPI.createUser(inputUser)) return new ApiResponseMessage(ApiResponseMessage.OK, "User updated successfully");
+		if(UserGroupManagementAPI.createUser(inputUser)) {
+
+			EntityManagerService.getInstance().getCache().evictAll();
+
+			return new ApiResponseMessage(ApiResponseMessage.OK, "User updated successfully");
+		}
 
 		return new ApiResponseMessage(ApiResponseMessage.ERROR, "You can't update other user");
 	}
@@ -121,7 +137,12 @@ public class UserManager {
 
 		if(!user.getIsAdmin()) return new ApiResponseMessage(ApiResponseMessage.ERROR, "You can't delete users");
 
-		if(UserGroupManagementAPI.deleteUser(instance_id)) return new ApiResponseMessage(ApiResponseMessage.OK, "User deleted successfully");
+		if(UserGroupManagementAPI.deleteUser(instance_id)){
+
+			EntityManagerService.getInstance().getCache().evictAll();
+
+			return new ApiResponseMessage(ApiResponseMessage.OK, "User deleted successfully");
+		}
 
 		return new ApiResponseMessage(ApiResponseMessage.ERROR, "You can't delete other user");
 	}

@@ -1,6 +1,7 @@
 package org.epos.backoffice.api.util;
 
 import abstractapis.AbstractAPI;
+import dao.EposDataModelDAO;
 import metadataapis.*;
 import model.*;
 import org.epos.eposdatamodel.*;
@@ -102,6 +103,8 @@ public class EPOSDataModelManager {
 
             LinkedEntity reference = dbapi.create(obj, null);
 
+            EntityManagerService.getInstance().getCache().evictAll();
+
             return new ApiResponseMessage(ApiResponseMessage.OK, reference);
         }
         return new ApiResponseMessage(ApiResponseMessage.UNAUTHORIZED, "The user can't manage this action");
@@ -150,6 +153,8 @@ public class EPOSDataModelManager {
 
             LinkedEntity reference = dbapi.create(obj, null);
 
+            EntityManagerService.getInstance().getCache().evictAll();
+
             return new ApiResponseMessage(ApiResponseMessage.OK, reference);
         }
         return new ApiResponseMessage(ApiResponseMessage.UNAUTHORIZED, "The user can't manage this action");
@@ -163,6 +168,8 @@ public class EPOSDataModelManager {
         if (list.isEmpty()) return false;
 
         dbapi.getDbaccess().deleteObject(list.get(0));
+
+        EntityManagerService.getInstance().getCache().evictAll();
 
         return true;
     }

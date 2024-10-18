@@ -6,6 +6,7 @@ import model.RequestStatusType;
 import model.RoleType;
 import org.epos.eposdatamodel.Group;
 import org.epos.eposdatamodel.User;
+import org.epos.handler.dbapi.service.EntityManagerService;
 import usermanagementapis.UserGroupManagementAPI;
 
 import java.util.ArrayList;
@@ -48,7 +49,12 @@ public class GroupManager {
 
 		if(!user.getIsAdmin()) return new ApiResponseMessage(ApiResponseMessage.UNAUTHORIZED, "You can't create groups");
 
-		if(UserGroupManagementAPI.createGroup(inputGroup)) return new ApiResponseMessage(ApiResponseMessage.OK, "Group created successfully");
+		if(UserGroupManagementAPI.createGroup(inputGroup)){
+
+			EntityManagerService.getInstance().getCache().evictAll();
+
+			return new ApiResponseMessage(ApiResponseMessage.OK, "Group created successfully");
+		}
 
 		return new ApiResponseMessage(ApiResponseMessage.ERROR, "You can't create a group");
 	}
@@ -62,7 +68,12 @@ public class GroupManager {
 
 		if(!user.getIsAdmin()) return new ApiResponseMessage(ApiResponseMessage.UNAUTHORIZED, "You can't update groups");
 
-		if(UserGroupManagementAPI.createGroup(inputGroup)) return new ApiResponseMessage(ApiResponseMessage.OK, "Group updated successfully");
+		if(UserGroupManagementAPI.createGroup(inputGroup)){
+
+			EntityManagerService.getInstance().getCache().evictAll();
+
+			return new ApiResponseMessage(ApiResponseMessage.OK, "Group updated successfully");
+		}
 
 		return new ApiResponseMessage(ApiResponseMessage.ERROR, "You can't update other group");
 	}
@@ -71,7 +82,12 @@ public class GroupManager {
 
 		if(!user.getIsAdmin()) return new ApiResponseMessage(ApiResponseMessage.UNAUTHORIZED, "You can't delete groups");
 
-		if(UserGroupManagementAPI.deleteGroup(instance_id)) return new ApiResponseMessage(ApiResponseMessage.OK, "Group deleted successfully");
+		if(UserGroupManagementAPI.deleteGroup(instance_id)) {
+
+			EntityManagerService.getInstance().getCache().evictAll();
+
+			return new ApiResponseMessage(ApiResponseMessage.OK, "Group deleted successfully");
+		}
 
 		return new ApiResponseMessage(ApiResponseMessage.ERROR, "You can't delete other group");
 	}
@@ -83,6 +99,8 @@ public class GroupManager {
 		Boolean result = UserGroupManagementAPI.addMetadataElementToGroup(
 				entityGroup.getMetaid(),
 				entityGroup.getGroupid());
+
+		EntityManagerService.getInstance().getCache().evictAll();
 
 		if(result!=null && result)
 			return new ApiResponseMessage(ApiResponseMessage.OK, "Entity added successfully to group");
@@ -97,6 +115,8 @@ public class GroupManager {
 		Boolean result = UserGroupManagementAPI.removeMetadataElementFromGroup(
 				addEntityToGroupBean.getMetaid(),
 				addEntityToGroupBean.getGroupid());
+
+		EntityManagerService.getInstance().getCache().evictAll();
 
 		if(result!=null && result)
 			return new ApiResponseMessage(ApiResponseMessage.OK, "Entity remove successfully from group");
