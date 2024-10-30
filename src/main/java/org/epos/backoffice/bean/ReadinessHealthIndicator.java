@@ -1,7 +1,7 @@
 package org.epos.backoffice.bean;
 
 import dao.EposDataModelDAO;
-import model.User;
+import model.MetadataUser;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
@@ -22,7 +22,7 @@ public class ReadinessHealthIndicator implements HealthIndicator {
 	private int check() {
 		try {
 			EposDataModelDAO dao = new EposDataModelDAO();
-			dao.getAllFromDB(User.class);
+			dao.getAllFromDB(MetadataUser.class);
 		} catch (Exception ignored){
 			System.out.println(ignored.getLocalizedMessage());
 			return 1;

@@ -22,7 +22,7 @@ public class LocationManagementTest extends TestcontainersLifecycle {
         location.setLocation("POLYGON");
 
         AbstractAPI api = AbstractAPI.retrieveAPI(EntityNames.LOCATION.name());
-        api.create(location, null);
+        api.create(location, null,null,null);
     }
 
 }

@@ -101,7 +101,7 @@ public class EPOSDataModelManager {
             obj.setEditorId(user.getAuthIdentifier());
             obj.setFileProvenance("instance created with the backoffice");
 
-            LinkedEntity reference = dbapi.create(obj, obj.getStatus());
+            LinkedEntity reference = dbapi.create(obj, obj.getStatus(),null,null);
 
             EntityManagerService.getInstance().getCache().evictAll();
 
@@ -151,7 +151,7 @@ public class EPOSDataModelManager {
             obj.setEditorId(user.getAuthIdentifier());
             obj.setFileProvenance("instance created with the backoffice");
 
-            LinkedEntity reference = dbapi.create(obj, obj.getStatus());
+            LinkedEntity reference = dbapi.create(obj, obj.getStatus(),null,null);
 
             EntityManagerService.getInstance().getCache().evictAll();
 
@@ -162,12 +162,8 @@ public class EPOSDataModelManager {
 
     public static boolean deleteEposDataModelEntity(String instance_id, User user, EntityNames entityNames, Class clazz) {
         AbstractAPI dbapi = AbstractAPI.retrieveAPI(entityNames.name());
-        clazz = AbstractAPI.retrieveClass(entityNames.name());
-        List list = dbapi.getDbaccess().getOneFromDBByInstanceId(instance_id, clazz);
 
-        if (list.isEmpty()) return false;
-
-        dbapi.getDbaccess().deleteObject(list.get(0));
+        dbapi.delete(instance_id);
 
         EntityManagerService.getInstance().getCache().evictAll();
 
