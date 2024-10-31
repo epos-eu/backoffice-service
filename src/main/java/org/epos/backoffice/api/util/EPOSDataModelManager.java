@@ -94,8 +94,8 @@ public class EPOSDataModelManager {
             AbstractAPI dbapi = AbstractAPI.retrieveAPI(entityNames.name());
             clazz = AbstractAPI.retrieveClass(entityNames.name());
 
-            obj.setInstanceId(null);
-            obj.setInstanceChangedId(null);
+            if(obj.getInstanceId() != null)
+                obj.setInstanceChangedId(obj.getInstanceId());
 
             obj.setStatus(obj.getStatus()==null? StatusType.DRAFT : obj.getStatus());
             obj.setEditorId(user.getAuthIdentifier());
