@@ -101,7 +101,7 @@ public class EPOSDataModelManager {
             obj.setEditorId(user.getAuthIdentifier());
             obj.setFileProvenance("instance created with the backoffice");
 
-            LinkedEntity reference = dbapi.create(obj, obj.getStatus(),null,null);
+            LinkedEntity reference = dbapi.create(obj, null,null,null);
 
             EntityManagerService.getInstance().getCache().evictAll();
 
@@ -151,7 +151,7 @@ public class EPOSDataModelManager {
             obj.setEditorId(user.getAuthIdentifier());
             obj.setFileProvenance("instance created with the backoffice");
 
-            LinkedEntity reference = dbapi.create(obj, obj.getStatus(),null,null);
+            LinkedEntity reference = dbapi.create(obj, null,null,null);
 
             EntityManagerService.getInstance().getCache().evictAll();
 
