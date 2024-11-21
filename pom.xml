@@ -142,10 +142,10 @@
 			<version>2.3.1</version>
 		</dependency>
 
-		<dependency>
+		<dependency>	
 			<groupId>org.epos-eu.ics-c</groupId>
 			<artifactId>db-api</artifactId>
-			<version>3.0.52</version>
+			<version>3.0.58</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test -->
