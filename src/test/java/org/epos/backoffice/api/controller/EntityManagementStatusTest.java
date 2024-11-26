@@ -100,25 +100,24 @@ public class EntityManagementStatusTest extends TestcontainersLifecycle {
         assertEquals(1,addressList.size());
         assertEquals(StatusType.PUBLISHED,addressList.get(0).getStatus());
     }
-/*
+
     @Test
-    @Order(4)
-    public void testUpdateToDraft() {
+    @Order(5)
+    public void testUpdateStatusAddressToArchived() throws InterruptedException {
 
-        System.out.println(address);
-
-        address.setStatus(StatusType.DRAFT);
+        address.setStatus(StatusType.ARCHIVED);
 
 
         ApiResponseMessage apiResponseMessage = EPOSDataModelManager.updateEposDataModelEntity(address, user, EntityNames.ADDRESS, Address.class);
 
-        System.out.println(apiResponseMessage);
-
         LinkedEntity le = apiResponseMessage.getEntity();
 
-        List<Address> addressList = (List<Address>) EPOSDataModelManager.getEPOSDataModelEposDataModelEntity(le.getMetaId(), null, user, EntityNames.ADDRESS, Address.class).getListOfEntities();
+        List<Address> addressList = (List<Address>) EPOSDataModelManager.getEPOSDataModelEposDataModelEntity(le.getMetaId(), le.getInstanceId(), user, EntityNames.ADDRESS, Address.class).getListOfEntities();
 
+        System.out.println(addressList.get(0).toString());
         assertNotNull(addressList);
-        assertEquals(2,addressList.size());
-    }*/
+        assertEquals(1,addressList.size());
+        assertEquals(StatusType.ARCHIVED,addressList.get(0).getStatus());
+    }
+
 }

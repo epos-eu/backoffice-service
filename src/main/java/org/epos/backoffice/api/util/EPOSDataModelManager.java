@@ -103,7 +103,7 @@ public class EPOSDataModelManager {
 
             LinkedEntity reference = dbapi.create(obj, null,null,null);
 
-            EntityManagerService.getInstance().getCache().evictAll();
+                EntityManagerService.getInstance().getCache().evictAll();
 
             return new ApiResponseMessage(ApiResponseMessage.OK, reference);
         }
@@ -133,13 +133,12 @@ public class EPOSDataModelManager {
             isAccessibleByUser = true;
         }
         if(isAccessibleByUser) {
-            System.out.println(obj.toString());
             AbstractAPI dbapi = AbstractAPI.retrieveAPI(entityNames.name());
 
             EPOSDataModelEntity eposDataModelEntity = (EPOSDataModelEntity) dbapi.retrieve(obj.getInstanceId());
 
-            if(eposDataModelEntity.getStatus()==null || eposDataModelEntity.getStatus().equals(StatusType.ARCHIVED) || eposDataModelEntity.getStatus().equals(StatusType.PUBLISHED)) {
-                return new ApiResponseMessage(ApiResponseMessage.ERROR, "Unable to update a ARCHIVED or PUBLISHED instance");
+            if(eposDataModelEntity.getStatus()==null && obj.getStatus()!=null && (obj.getStatus().equals(StatusType.ARCHIVED) || obj.getStatus().equals(StatusType.DISCARDED))) {
+                return new ApiResponseMessage(ApiResponseMessage.ERROR, "Unable to update a  PUBLISHED instance");
             }
             if (obj.getInstanceId() == null) {
                 return new ApiResponseMessage(ApiResponseMessage.ERROR, "InstanceId required");
