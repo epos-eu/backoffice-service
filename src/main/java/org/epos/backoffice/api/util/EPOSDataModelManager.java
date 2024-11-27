@@ -154,6 +154,15 @@ public class EPOSDataModelManager {
             if(!eposDataModelEntity.getStatus().equals(obj.getStatus())){
                 eposDataModelEntity.setStatus(obj.getStatus());
                 obj = eposDataModelEntity;
+
+                if(eposDataModelEntity.getStatus().equals(StatusType.PUBLISHED)){
+                    // Get the published instance of the entity and swap into archived status
+                    dbapi.retrieveAll().stream().filter(item-> ((EPOSDataModelEntity) item).getStatus().equals(StatusType.PUBLISHED) && ((EPOSDataModelEntity) item).getMetaId().equals(eposDataModelEntity.getMetaId()))
+                            .forEach(item -> {
+                                ((EPOSDataModelEntity) item).setStatus(StatusType.ARCHIVED);
+                                dbapi.create(item, null,null,null);
+                            });
+                }
             }
 
             LinkedEntity reference = dbapi.create(obj, null,null,null);
