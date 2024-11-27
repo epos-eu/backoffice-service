@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import org.epos.eposdatamodel.Parameter;
+import org.epos.eposdatamodel.SoftwareApplicationParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -18,14 +18,14 @@ import javax.servlet.http.HttpServletRequest;
         value = "/parameter",
         produces = {"application/json"}
 )
-public class ParameterController extends MetadataAbstractController<Parameter> implements ApiDocTag{
+public class ParameterController extends MetadataAbstractController<SoftwareApplicationParameter> implements ApiDocTag{
 
 
     private static final Logger log = LoggerFactory.getLogger(ParameterController.class);
 
     @org.springframework.beans.factory.annotation.Autowired
     public ParameterController(ObjectMapper objectMapper, HttpServletRequest request) {
-        super(objectMapper, request, Parameter.class);
+        super(objectMapper, request, SoftwareApplicationParameter.class);
     }
 
     @RequestMapping(value = "/{meta_id}/{instance_id}",
@@ -83,7 +83,7 @@ public class ParameterController extends MetadataAbstractController<Parameter> i
             @ApiResponse(responseCode = "500", description = "Error executing the request, the error may be, either in the gateway or the backoffice-service")
     })
     public ResponseEntity<?> post(
-            @RequestBody Parameter body
+            @RequestBody SoftwareApplicationParameter body
     ) {
         return postMethod(body, false);
     }
@@ -103,7 +103,7 @@ public class ParameterController extends MetadataAbstractController<Parameter> i
             @ApiResponse(responseCode = "500", description = "Error executing the request, the error may be, either in the gateway or the backoffice-service")
     })
     public ResponseEntity<?> put(
-            @RequestBody Parameter body
+            @RequestBody SoftwareApplicationParameter body
     ) {
         return updateMethod(body, false);
     }
