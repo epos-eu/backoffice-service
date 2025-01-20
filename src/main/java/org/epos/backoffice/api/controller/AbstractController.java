@@ -34,9 +34,9 @@ public abstract class AbstractController<T extends EPOSDataModelEntity> {
 		this.entityType = entityType;
 	}
 
-	protected User getUserFromSession() {
-		return (User) request.getSession().getAttribute("user");
-	}
+			protected User getUserFromSession() {
+				return (User) request.getSession().getAttribute("user");
+			}
 	class LocalDateAdapter implements JsonSerializer<LocalDateTime> {
 
 	    public JsonElement serialize(LocalDateTime date, Type typeOfSrc, JsonSerializationContext context) {
