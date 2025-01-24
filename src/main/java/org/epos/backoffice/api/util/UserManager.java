@@ -25,16 +25,14 @@ public class UserManager {
 			return new ApiResponseMessage(ApiResponseMessage.ERROR, "The [instance_id] field can't be left blank");
 
 		List<User> personList;
-		if (!instance_id.equals("self")) {
-
-			if (instance_id.equals("all")) {
-				personList = UserGroupManagementAPI.retrieveAllUsers();
-			} else {
-				User tempUser = Optional.ofNullable(UserGroupManagementAPI.retrieveUserById(user.getAuthIdentifier())).orElse(null);
-				personList = tempUser!=null? List.of(tempUser) : new ArrayList<>();
-			}
+		if(instance_id.equals("self")){
+			User tempUser = UserGroupManagementAPI.retrieveUserById(user.getAuthIdentifier());
+			personList = tempUser!=null? List.of(tempUser) : new ArrayList<>();
+		}
+		else if(instance_id.equals("all")){
+			personList = UserGroupManagementAPI.retrieveAllUsers();
 		} else {
-			User tempUser = Optional.ofNullable(UserGroupManagementAPI.retrieveUserById(user.getAuthIdentifier())).orElse(null);
+			User tempUser = UserGroupManagementAPI.retrieveUserById(instance_id);
 			personList = tempUser!=null? List.of(tempUser) : new ArrayList<>();
 		}
 
