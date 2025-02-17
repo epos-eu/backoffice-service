@@ -53,9 +53,11 @@ public class EPOSDataModelManager {
             }
         }
 
+        List<Group> currentGroups = UserGroupManagementAPI.retrieveAllGroups();
+
         List<EPOSDataModelEntity> revertedList = new ArrayList<>();
         list.forEach(e -> {
-            for (Group group : UserGroupManagementAPI.retrieveAllGroups()) {
+            for (Group group : currentGroups) {
                 if(group.getEntities().contains(e.getMetaId())){
                     e.getGroups().add(group);
                 }
