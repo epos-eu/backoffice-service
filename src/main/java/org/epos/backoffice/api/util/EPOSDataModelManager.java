@@ -59,7 +59,7 @@ public class EPOSDataModelManager {
         list.forEach(e -> {
             for (Group group : currentGroups) {
                 if(group.getEntities().contains(e.getMetaId())){
-                    e.getGroups().add(group);
+                    e.getGroups().add(group.getId());
                 }
             }
             revertedList.add(0, e);
@@ -77,9 +77,9 @@ public class EPOSDataModelManager {
 
         if(!user.getIsAdmin()){
             if(obj.getGroups()!=null && !obj.getGroups().isEmpty()){
-                for(Group group : obj.getGroups()){
+                for(String groupid : obj.getGroups()){
                     for(UserGroup group1 : user.getGroups()){
-                        if(group.getId().equals(group1.getGroupId())
+                        if(groupid.equals(group1.getGroupId())
                                 && (
                                 group1.getRole().equals(RoleType.ADMIN)
                                         ||group1.getRole().equals(RoleType.REVIEWER)
@@ -119,9 +119,9 @@ public class EPOSDataModelManager {
 
         if(!user.getIsAdmin()){
             if(obj.getGroups()!=null && !obj.getGroups().isEmpty()){
-                for(Group group : obj.getGroups()){
+                for(String groupid : obj.getGroups()){
                     for(UserGroup group1 : user.getGroups()){
-                        if(group.getId().equals(group1.getGroupId())
+                        if(groupid.equals(group1.getGroupId())
                                 && (
                                 group1.getRole().equals(RoleType.ADMIN)
                                         ||group1.getRole().equals(RoleType.REVIEWER)

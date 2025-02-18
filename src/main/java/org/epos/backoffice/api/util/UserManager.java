@@ -78,7 +78,7 @@ public class UserManager {
 				userGroup.getGroupid(),
 				userGroup.getUserid(),
 				RoleType.valueOf(userGroup.getRole()),
-				RequestStatusType.valueOf(userGroup.getStatusType()));
+				RequestStatusType.valueOf(userGroup.getStatusType().toUpperCase()));
 
 		EntityManagerService.getInstance().getCache().evictAll();
 
