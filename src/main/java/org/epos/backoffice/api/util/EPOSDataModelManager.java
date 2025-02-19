@@ -55,7 +55,9 @@ public class EPOSDataModelManager {
 
 
         List<String> userGroups = user.getGroups().stream().map(UserGroup::getGroupId).collect(Collectors.toList());
-        List<Group> currentGroups = UserGroupManagementAPI.retrieveAllGroups().stream().filter(item -> userGroups.contains(item.getId())).collect(Collectors.toList());
+        List<Group> currentGroups = UserGroupManagementAPI.retrieveAllGroups();
+
+        if(userGroups.isEmpty()) userGroups.add(UserGroupManagementAPI.retrieveGroupByName("ALL").getId());
 
         List<EPOSDataModelEntity> revertedList = new ArrayList<>();
         list.forEach(e -> {
@@ -108,9 +110,21 @@ public class EPOSDataModelManager {
             obj.setEditorId(user.getAuthIdentifier());
             obj.setFileProvenance("instance created with the backoffice");
 
+            String allGroupId = UserGroupManagementAPI.retrieveGroupByName("ALL").getId();
+            if(obj.getGroups()==null || obj.getGroups().isEmpty()) obj.setGroups(List.of(allGroupId));
+            if(obj.getGroups()!=null && !obj.getGroups().contains(allGroupId)) obj.getGroups().add(allGroupId);
+
             LinkedEntity reference = dbapi.create(obj, null,null,null);
 
-                EntityManagerService.getInstance().getCache().evictAll();
+            System.out.println("Insert -> "+obj.getGroups());
+
+            if(obj.getGroups()!=null && !obj.getGroups().isEmpty()){
+                for(String groupid : obj.getGroups()){
+                    UserGroupManagementAPI.addMetadataElementToGroup(reference.getMetaId(), groupid);
+                }
+            }
+
+            EntityManagerService.getInstance().getCache().evictAll();
 
             return new ApiResponseMessage(ApiResponseMessage.OK, reference);
         }
