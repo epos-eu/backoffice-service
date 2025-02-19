@@ -2,11 +2,16 @@ package org.epos.backoffice.api.controller;
 
 import abstractapis.AbstractAPI;
 import metadataapis.EntityNames;
+import model.RequestStatusType;
+import model.RoleType;
+import org.epos.backoffice.api.util.AddUserToGroupBean;
 import org.epos.backoffice.api.util.EPOSDataModelManager;
+import org.epos.backoffice.api.util.GroupManager;
 import org.epos.backoffice.api.util.UserManager;
 import org.epos.eposdatamodel.*;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import usermanagementapis.UserGroupManagementAPI;
 
 import java.util.List;
 import java.util.UUID;
@@ -16,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class EntityManagementComplexTest extends TestcontainersLifecycle {
 
     static User user = null;
+    static Group group = null;
 
     @Test
     @Order(1)
@@ -31,10 +37,36 @@ public class EntityManagementComplexTest extends TestcontainersLifecycle {
         assertEquals(user.getFirstName(), retrieveUser.getFirstName());
         assertEquals(user.getEmail(), retrieveUser.getEmail());
     }
-
     @Test
     @Order(2)
+    public void testCreateGroup() {
+        group = new Group(UUID.randomUUID().toString(), "Test Group", "Test Description");
+        GroupManager.createGroup(group, user);
+
+        AddUserToGroupBean addUserToGroupBean = new AddUserToGroupBean();
+        addUserToGroupBean.setGroupid(group.getId());
+        addUserToGroupBean.setUserid(user.getAuthIdentifier());
+        addUserToGroupBean.setRole(RoleType.ADMIN.toString());
+        addUserToGroupBean.setStatusType(RequestStatusType.ACCEPTED.toString());
+
+        UserManager.addUserToGroup(addUserToGroupBean,user);
+
+        Group retrieveGroup = UserGroupManagementAPI.retrieveGroupById(group.getId());
+
+        System.out.println("retrieveGroup = " + retrieveGroup);
+
+        assertNotNull(retrieveGroup);
+        assertEquals(group.getId(), retrieveGroup.getId());
+        assertEquals(group.getName(), retrieveGroup.getName());
+        assertEquals(group.getDescription(), retrieveGroup.getDescription());
+    }
+
+    @Test
+    @Order(3)
     public void testCreateAndGet() {
+
+        Group retrieveGroup = UserGroupManagementAPI.retrieveGroupById(group.getId());
+        System.out.println("retrieveGroup = " + retrieveGroup);
 
         Identifier identifier = new Identifier();
         identifier.setInstanceId(UUID.randomUUID().toString());
@@ -42,6 +74,7 @@ public class EntityManagementComplexTest extends TestcontainersLifecycle {
         identifier.setUid(UUID.randomUUID().toString());
         identifier.setType("TYPE");
         identifier.setIdentifier("012345678900");
+        identifier.setGroups(List.of(group.getId()));
 
         LinkedEntity identifierLe = EPOSDataModelManager.createEposDataModelEntity(identifier, user, EntityNames.IDENTIFIER, Identifier.class).getEntity();
 
@@ -52,6 +85,7 @@ public class EntityManagementComplexTest extends TestcontainersLifecycle {
         webservice.setDescription("Test description");
         webservice.setName("Test name");
         webservice.setIdentifier(List.of(identifierLe));
+        webservice.setGroups(List.of(group.getId()));
 
         LinkedEntity webserviceLe = EPOSDataModelManager.createEposDataModelEntity(webservice, user, EntityNames.WEBSERVICE, WebService.class).getEntity();
 
@@ -75,7 +109,7 @@ public class EntityManagementComplexTest extends TestcontainersLifecycle {
     }
 
     @Test
-    @Order(3)
+    @Order(4)
     public void testCreateAndGetOperationAndMapping() {
 
         Mapping mapping = new Mapping();
@@ -83,6 +117,7 @@ public class EntityManagementComplexTest extends TestcontainersLifecycle {
         mapping.setMetaId(UUID.randomUUID().toString());
         mapping.setUid(UUID.randomUUID().toString());
         mapping.setLabel("test");
+        mapping.setGroups(List.of(group.getId()));
 
         LinkedEntity mappingLe = EPOSDataModelManager.createEposDataModelEntity(mapping, user, EntityNames.MAPPING, Mapping.class).getEntity();
 
@@ -92,6 +127,7 @@ public class EntityManagementComplexTest extends TestcontainersLifecycle {
         operation.setUid(UUID.randomUUID().toString());
         operation.setMapping(List.of(mappingLe));
         operation.setMethod("GET");
+        operation.setGroups(List.of(group.getId()));
 
         LinkedEntity operationLe = EPOSDataModelManager.createEposDataModelEntity(operation, user, EntityNames.OPERATION, Operation.class).getEntity();
 

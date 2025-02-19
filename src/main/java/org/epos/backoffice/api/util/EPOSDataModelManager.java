@@ -53,8 +53,7 @@ public class EPOSDataModelManager {
             }
         }
 
-
-        List<String> userGroups = user.getGroups().stream().map(UserGroup::getGroupId).collect(Collectors.toList());
+        List<String> userGroups = UserGroupManagementAPI.retrieveUserById(user.getAuthIdentifier()).getGroups().stream().map(UserGroup::getGroupId).collect(Collectors.toList());
         List<Group> currentGroups = UserGroupManagementAPI.retrieveAllGroups();
 
         if(userGroups.isEmpty()) userGroups.add(UserGroupManagementAPI.retrieveGroupByName("ALL").getId());
@@ -112,11 +111,8 @@ public class EPOSDataModelManager {
 
             String allGroupId = UserGroupManagementAPI.retrieveGroupByName("ALL").getId();
             if(obj.getGroups()==null || obj.getGroups().isEmpty()) obj.setGroups(List.of(allGroupId));
-            if(obj.getGroups()!=null && !obj.getGroups().contains(allGroupId)) obj.getGroups().add(allGroupId);
 
             LinkedEntity reference = dbapi.create(obj, null,null,null);
-
-            System.out.println("Insert -> "+obj.getGroups());
 
             if(obj.getGroups()!=null && !obj.getGroups().isEmpty()){
                 for(String groupid : obj.getGroups()){
