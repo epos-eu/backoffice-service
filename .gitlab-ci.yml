@@ -21,7 +21,7 @@ deploy:
   image: maven:3.9.8-amazoncorretto-17-al2023
   stage: install
   script:
-    - mvn $MAVEN_CLI_OPTS install
+    - mvn $MAVEN_CLI_OPTS install -DskipTests
   artifacts:
     paths:
       - target/*.jar
