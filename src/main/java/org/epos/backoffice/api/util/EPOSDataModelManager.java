@@ -59,6 +59,7 @@ public class EPOSDataModelManager {
         list.forEach(e -> {
             for (Group group : currentGroups) {
                 if(group.getEntities().contains(e.getMetaId())){
+                    if(e.getGroups()==null) e.setGroups(new ArrayList<>());
                     e.getGroups().add(group.getId());
                 }
             }
