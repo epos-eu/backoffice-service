@@ -34,7 +34,7 @@ public abstract class MetadataAbstractController<T extends EPOSDataModelEntity> 
 
 		List items = EPOSDataModelManager.getEPOSDataModelEposDataModelEntity(meta_id,instance_id,user,EntityNames.valueOf(entityType.getSimpleName().toUpperCase()),entityType).getListOfEntities();
 
-		if (items.isEmpty())
+		if (items!=null && items.isEmpty())
 			return ResponseEntity.status(404).body(new ArrayList<>());
 
 		return ResponseEntity

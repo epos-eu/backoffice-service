@@ -53,23 +53,27 @@ public class EPOSDataModelManager {
             }
         }
 
-        List<Group> currentGroups = UserGroupManagementAPI.retrieveAllGroups();
+
+        List<String> userGroups = user.getGroups().stream().map(UserGroup::getGroupId).collect(Collectors.toList());
+        List<Group> currentGroups = UserGroupManagementAPI.retrieveAllGroups().stream().filter(item -> userGroups.contains(item.getId())).collect(Collectors.toList());
 
         List<EPOSDataModelEntity> revertedList = new ArrayList<>();
         list.forEach(e -> {
+            boolean isUserGroup = false;
             for (Group group : currentGroups) {
                 if(group.getEntities().contains(e.getMetaId())){
                     if(e.getGroups()==null) e.setGroups(new ArrayList<>());
                     e.getGroups().add(group.getId());
+                    if(userGroups.contains(group.getId())) isUserGroup = true;
                 }
             }
-            revertedList.add(0, e);
+            if(isUserGroup) revertedList.add(0, e);
         });
 
-        if (list.isEmpty())
+        if (revertedList.isEmpty())
             return new ApiResponseMessage(ApiResponseMessage.OK, new ArrayList<EPOSDataModelEntity>());
 
-        return new ApiResponseMessage(ApiResponseMessage.OK, list);
+        return new ApiResponseMessage(ApiResponseMessage.OK, revertedList);
     }
 
     public static ApiResponseMessage createEposDataModelEntity(EPOSDataModelEntity obj, User user, EntityNames entityNames, Class clazz) {
