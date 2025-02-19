@@ -27,8 +27,7 @@ public class AddEntityToGroupBean {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof AddEntityToGroupBean)) return false;
         AddEntityToGroupBean that = (AddEntityToGroupBean) o;
         return Objects.equals(metaid, that.metaid) && Objects.equals(groupid, that.groupid);
     }

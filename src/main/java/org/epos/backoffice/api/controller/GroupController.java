@@ -165,6 +165,8 @@ public class GroupController extends ManagementAbstractController<Group> impleme
 		User user = getUserFromSession();
 		System.out.println("Session User: "+ user.toString());
 
+		System.out.println(addUserToGroupBean.toString());
+
 		ApiResponseMessage response = UserManager.addUserToGroup(addUserToGroupBean, user);
 		if(response.getCode()!=4) return ResponseEntity.status(400).body(response);
 
@@ -246,6 +248,8 @@ public class GroupController extends ManagementAbstractController<Group> impleme
 	) {
 		User user = getUserFromSession();
 		System.out.println("Session User: "+ user.toString());
+
+		System.out.println(addEntityToGroupBean.toString());
 
 		ApiResponseMessage response = GroupManager.addEntityToGroup(addEntityToGroupBean, user);
 		if(response.getCode()!=4) return ResponseEntity.status(400).body(response);
