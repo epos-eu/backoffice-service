@@ -56,19 +56,15 @@ public class EPOSDataModelManager {
         List<String> userGroups = UserGroupManagementAPI.retrieveUserById(user.getAuthIdentifier()).getGroups().stream().map(UserGroup::getGroupId).collect(Collectors.toList());
         List<Group> currentGroups = UserGroupManagementAPI.retrieveAllGroups();
 
+
         if(userGroups.isEmpty()) userGroups.add(UserGroupManagementAPI.retrieveGroupByName("ALL").getId());
 
         List<EPOSDataModelEntity> revertedList = new ArrayList<>();
         list.forEach(e -> {
-            boolean isUserGroup = false;
-            for (Group group : currentGroups) {
-                if(group.getEntities().contains(e.getMetaId())){
-                    if(e.getGroups()==null) e.setGroups(new ArrayList<>());
-                    e.getGroups().add(group.getId());
-                    if(userGroups.contains(group.getId())) isUserGroup = true;
-                }
+            if(UserGroupManagementAPI.checkIfMetaIdAndUserIdAreInSameGroup(e.getMetaId(),user.getAuthIdentifier())){
+                e.setGroups(UserGroupManagementAPI.retrieveShortGroupsFromMetaId(e.getMetaId()));
+                revertedList.add(0, e);
             }
-            if(isUserGroup) revertedList.add(0, e);
         });
 
         if (revertedList.isEmpty())
