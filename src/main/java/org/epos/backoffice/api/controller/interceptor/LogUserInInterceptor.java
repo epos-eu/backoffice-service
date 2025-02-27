@@ -47,12 +47,22 @@ public class LogUserInInterceptor implements HandlerInterceptor {
         System.out.println(user);
 
         if(user == null){
+            user = new User();
+            user.setAuthIdentifier(allRequestParams.get("userId"));
+            user.setEmail(allRequestParams.get("email"));
+            user.setFirstName(allRequestParams.get("firstName"));
+            user.setLastName(allRequestParams.get("lastName"));
+            if(UserGroupManagementAPI.createUser(user)){
+                user = UserGroupManagementAPI.retrieveUserById(allRequestParams.get("userId"));
+            } else {
+                String message = "{\"message\": \"The user doesn't exists\"}";
+                response.setContentType("application/json");
+                response.getWriter().write(message);
+                response.setStatus(400);
+                return false;
+            }
 
-            String message = "{\"message\": \"The user doesn't exists\"}";
-            response.setContentType("application/json");
-            response.getWriter().write(message);
-            response.setStatus(400);
-            return false;
+
         }
 
         HttpSession session = request.getSession();
