@@ -52,6 +52,7 @@ public class LogUserInInterceptor implements HandlerInterceptor {
             user.setEmail(allRequestParams.get("email"));
             user.setFirstName(allRequestParams.get("firstName"));
             user.setLastName(allRequestParams.get("lastName"));
+            user.setIsAdmin(false);
             if(UserGroupManagementAPI.createUser(user)){
                 user = UserGroupManagementAPI.retrieveUserById(allRequestParams.get("userId"));
             } else {
