@@ -204,7 +204,7 @@ public class GroupController extends ManagementAbstractController<Group> impleme
 
 	@RequestMapping(value = "/group/removeUserFromGroup",
 			produces = {"application/json"},
-			method = RequestMethod.DELETE)
+			method = RequestMethod.POST)
 	@ResponseBody
 	@Operation(summary = "Remove User from Group with permissions", description = "You can use this endpoint to remove a User from a group(more information about which fields are required, who has the permission and how to use it are into the BackOffice repository documentation)")
 	@ApiResponses(value = {
@@ -220,6 +220,7 @@ public class GroupController extends ManagementAbstractController<Group> impleme
 	) {
 		User user = getUserFromSession();
 		System.out.println("Session User: "+ user.toString());
+		System.out.println("DEBUG: "+removeUserFromGroupBean);
 
 		ApiResponseMessage response = UserManager.removeUserFromGroup(removeUserFromGroupBean, user);
 		if(response.getCode()!=4) return ResponseEntity.status(400).body(response);
@@ -261,7 +262,7 @@ public class GroupController extends ManagementAbstractController<Group> impleme
 
 	@RequestMapping(value = "/group/removeEntityFromGroup",
 			produces = {"application/json"},
-			method = RequestMethod.DELETE)
+			method = RequestMethod.POST)
 	@ResponseBody
 	@Operation(summary = "Remove Entity from Group with permissions", description = "You can use this endpoint to remove an Entity from a Group")
 	@ApiResponses(value = {
