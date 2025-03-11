@@ -168,19 +168,21 @@ public class EPOSDataModelManager {
             if(!eposDataModelEntity.getStatus().equals(obj.getStatus())){
                 eposDataModelEntity.setStatus(obj.getStatus());
                 obj = eposDataModelEntity;
-
-                if(eposDataModelEntity.getStatus().equals(StatusType.PUBLISHED)){
-                    // Get the published instance of the entity and swap into archived status
-                    Optional entity = dbapi.retrieveAllWithStatus(StatusType.PUBLISHED).stream().filter(item-> ((EPOSDataModelEntity) item).getMetaId().equals(eposDataModelEntity.getMetaId())).findFirst();
-                    if(entity.isPresent()){
-                        EPOSDataModelEntity item = (EPOSDataModelEntity) entity.get();
-                        item.setStatus(StatusType.ARCHIVED);
-                        dbapi.create(item, null,null,null);
-                    }
-                }
             }
 
             LinkedEntity reference = dbapi.create(obj, null,null,null);
+
+            if(eposDataModelEntity.getStatus().equals(StatusType.PUBLISHED)){
+                // Get the published instance of the entity and swap into archived status
+                Optional entity = dbapi.retrieveAllWithStatus(StatusType.PUBLISHED).stream()
+                        .filter(item-> ((EPOSDataModelEntity) item).getMetaId().equals(reference.getMetaId())
+                                && !((EPOSDataModelEntity) item).getInstanceId().equals(reference.getInstanceId())).findFirst();
+                if(entity.isPresent()){
+                    EPOSDataModelEntity item = (EPOSDataModelEntity) entity.get();
+                    item.setStatus(StatusType.ARCHIVED);
+                    dbapi.create(item, null,null,null);
+                }
+            }
 
             EntityManagerService.getInstance().getCache().evictAll();
 
