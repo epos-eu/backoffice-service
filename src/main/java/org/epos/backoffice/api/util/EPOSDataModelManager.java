@@ -11,6 +11,7 @@ import usermanagementapis.UserGroupManagementAPI;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class EPOSDataModelManager {
@@ -170,11 +171,12 @@ public class EPOSDataModelManager {
 
                 if(eposDataModelEntity.getStatus().equals(StatusType.PUBLISHED)){
                     // Get the published instance of the entity and swap into archived status
-                    dbapi.retrieveAll().stream().filter(item-> ((EPOSDataModelEntity) item).getStatus().equals(StatusType.PUBLISHED) && ((EPOSDataModelEntity) item).getMetaId().equals(eposDataModelEntity.getMetaId()))
-                            .forEach(item -> {
-                                ((EPOSDataModelEntity) item).setStatus(StatusType.ARCHIVED);
-                                dbapi.create(item, null,null,null);
-                            });
+                    Optional entity = dbapi.retrieveAllWithStatus(StatusType.PUBLISHED).stream().filter(item-> ((EPOSDataModelEntity) item).getMetaId().equals(eposDataModelEntity.getMetaId())).findFirst();
+                    if(entity.isPresent()){
+                        EPOSDataModelEntity item = (EPOSDataModelEntity) entity.get();
+                        item.setStatus(StatusType.ARCHIVED);
+                        dbapi.create(item, null,null,null);
+                    }
                 }
             }
 
