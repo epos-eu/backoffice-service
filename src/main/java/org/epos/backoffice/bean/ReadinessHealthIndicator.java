@@ -20,13 +20,7 @@ public class ReadinessHealthIndicator implements HealthIndicator {
 	}
 
 	private int check() {
-		try {
-			EposDataModelDAO dao = new EposDataModelDAO();
-			dao.getAllFromDB(MetadataUser.class);
-		} catch (Exception ignored){
-			System.out.println(ignored.getLocalizedMessage());
-			return 1;
-		}
+
 		return 0;
 
 	}

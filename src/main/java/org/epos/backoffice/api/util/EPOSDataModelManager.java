@@ -1,7 +1,6 @@
 package org.epos.backoffice.api.util;
 
 import abstractapis.AbstractAPI;
-import dao.EposDataModelDAO;
 import metadataapis.*;
 import model.*;
 import org.epos.eposdatamodel.*;
