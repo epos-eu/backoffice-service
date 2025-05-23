@@ -6,7 +6,6 @@ import metadataapis.*;
 import model.*;
 import org.epos.eposdatamodel.*;
 import org.epos.eposdatamodel.User;
-import org.epos.handler.dbapi.service.EntityManagerService;
 import usermanagementapis.UserGroupManagementAPI;
 
 import java.util.ArrayList;
@@ -117,8 +116,6 @@ public class EPOSDataModelManager {
                 }
             }
 
-            EntityManagerService.getInstance().getCache().evictAll();
-
             return new ApiResponseMessage(ApiResponseMessage.OK, reference);
         }
         return new ApiResponseMessage(ApiResponseMessage.UNAUTHORIZED, "The user can't manage this action");
@@ -184,8 +181,6 @@ public class EPOSDataModelManager {
                 }
             }
 
-            EntityManagerService.getInstance().getCache().evictAll();
-
             return new ApiResponseMessage(ApiResponseMessage.OK, reference);
         }
         return new ApiResponseMessage(ApiResponseMessage.UNAUTHORIZED, "The user can't manage this action");
@@ -195,8 +190,6 @@ public class EPOSDataModelManager {
         AbstractAPI dbapi = AbstractAPI.retrieveAPI(entityNames.name());
 
         dbapi.delete(instance_id);
-
-        EntityManagerService.getInstance().getCache().evictAll();
 
         return true;
     }

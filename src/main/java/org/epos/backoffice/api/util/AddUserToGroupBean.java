@@ -1,8 +1,5 @@
 package org.epos.backoffice.api.util;
 
-import model.RequestStatusType;
-import model.RoleType;
-
 import java.util.Objects;
 
 public class AddUserToGroupBean {

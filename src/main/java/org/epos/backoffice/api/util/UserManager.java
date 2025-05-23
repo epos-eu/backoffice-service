@@ -4,16 +4,9 @@ package org.epos.backoffice.api.util;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import abstractapis.AbstractAPI;
-import dao.EposDataModelDAO;
-import model.MetadataGroup;
-import model.MetadataGroupUser;
 import model.RequestStatusType;
 import model.RoleType;
-import org.epos.eposdatamodel.Person;
 import org.epos.eposdatamodel.User;
-import org.epos.eposdatamodel.UserGroup;
-import org.epos.handler.dbapi.service.EntityManagerService;
 import usermanagementapis.UserGroupManagementAPI;
 
 public class UserManager {
@@ -61,9 +54,6 @@ public class UserManager {
 		inputUser.setIsAdmin(inputUser.getIsAdmin() == null ? user.getIsAdmin() : inputUser.getIsAdmin());
 
 		if (UserGroupManagementAPI.createUser(inputUser)) {
-
-			EntityManagerService.getInstance().getCache().evictAll();
-
 			return new ApiResponseMessage(ApiResponseMessage.OK, "User created successfully");
 		}
 
@@ -80,8 +70,6 @@ public class UserManager {
 				RoleType.valueOf(userGroup.getRole()),
 				RequestStatusType.valueOf(userGroup.getStatusType()));
 
-		EntityManagerService.getInstance().getCache().evictAll();
-
 		if(result!=null && result)
 			return new ApiResponseMessage(ApiResponseMessage.OK, "User added successfully");
 
@@ -96,8 +84,6 @@ public class UserManager {
 		Boolean result = UserGroupManagementAPI.removeUserFromGroup(
 				removeUserFromGroupBean.getGroupid(),
 				removeUserFromGroupBean.getUserid());
-
-		EntityManagerService.getInstance().getCache().evictAll();
 
 		if(result!=null && result)
 			return new ApiResponseMessage(ApiResponseMessage.OK, "User removed successfully from group");
@@ -123,8 +109,6 @@ public class UserManager {
 
 		if(UserGroupManagementAPI.createUser(inputUser)) {
 
-			EntityManagerService.getInstance().getCache().evictAll();
-
 			return new ApiResponseMessage(ApiResponseMessage.OK, "User updated successfully");
 		}
 
@@ -136,8 +120,6 @@ public class UserManager {
 		if(!user.getIsAdmin()) return new ApiResponseMessage(ApiResponseMessage.ERROR, "You can't delete users");
 
 		if(UserGroupManagementAPI.deleteUser(instance_id)){
-
-			EntityManagerService.getInstance().getCache().evictAll();
 
 			return new ApiResponseMessage(ApiResponseMessage.OK, "User deleted successfully");
 		}
