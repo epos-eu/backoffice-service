@@ -43,7 +43,6 @@ public class CacheInvalidationController extends MetadataAbstractController<Addr
             @ApiResponse(responseCode = "500", description = "Error executing the request, the error may be, either in the gateway or the backoffice-service")
     })
     public ResponseEntity<?> post(
-            @PathVariable String pattern
     ) {
         EposDataModelDAO.clearAllCaches();
         return new ResponseEntity<>(HttpStatus.OK);
