@@ -1,6 +1,7 @@
 package org.epos.backoffice.api.util;
 
 import abstractapis.AbstractAPI;
+import dao.EposDataModelDAO;
 import metadataapis.*;
 import model.*;
 import org.epos.eposdatamodel.*;
@@ -73,6 +74,9 @@ public class EPOSDataModelManager {
     }
 
     public static ApiResponseMessage createEposDataModelEntity(EPOSDataModelEntity obj, User user, EntityNames entityNames, Class clazz) {
+
+        EposDataModelDAO.clearAllCaches();
+
         /** CHECK PERMISSIONS **/
         Boolean isAccessibleByUser = false;
 
@@ -121,6 +125,8 @@ public class EPOSDataModelManager {
     }
 
     public static ApiResponseMessage updateEposDataModelEntity(EPOSDataModelEntity obj, User user, EntityNames entityNames, Class clazz) {
+
+        EposDataModelDAO.clearAllCaches();
 
         /** CHECK PERMISSIONS **/
         Boolean isAccessibleByUser = false;
@@ -186,6 +192,8 @@ public class EPOSDataModelManager {
     }
 
     public static boolean deleteEposDataModelEntity(String instance_id, User user, EntityNames entityNames, Class clazz) {
+        EposDataModelDAO.clearAllCaches();
+
         AbstractAPI dbapi = AbstractAPI.retrieveAPI(entityNames.name());
 
         dbapi.delete(instance_id);

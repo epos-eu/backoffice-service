@@ -1,5 +1,6 @@
 package org.epos.backoffice.api.util;
 
+import dao.EposDataModelDAO;
 import org.epos.eposdatamodel.Group;
 import org.epos.eposdatamodel.User;
 import usermanagementapis.UserGroupManagementAPI;
@@ -41,6 +42,7 @@ public class GroupManager {
 	 * @return
 	 */
 	public static ApiResponseMessage createGroup(Group inputGroup, User user) {
+		EposDataModelDAO.clearAllCaches();
 
 		if(!user.getIsAdmin()) return new ApiResponseMessage(ApiResponseMessage.UNAUTHORIZED, "You can't create groups");
 
@@ -58,6 +60,7 @@ public class GroupManager {
 	 * @return
 	 */
 	public static ApiResponseMessage updateGroup(Group inputGroup, User user) {
+		EposDataModelDAO.clearAllCaches();
 
 		if(!user.getIsAdmin()) return new ApiResponseMessage(ApiResponseMessage.UNAUTHORIZED, "You can't update groups");
 
@@ -70,6 +73,7 @@ public class GroupManager {
 	}
 
 	public static ApiResponseMessage deleteGroup(String instance_id, User user) {
+		EposDataModelDAO.clearAllCaches();
 
 		if(!user.getIsAdmin()) return new ApiResponseMessage(ApiResponseMessage.UNAUTHORIZED, "You can't delete groups");
 
