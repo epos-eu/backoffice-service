@@ -19,7 +19,6 @@
 		<java.version>21</java.version>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
-		<springdoc-version>1.8.0</springdoc-version>
 		<spring-boot.version>3.5.0</spring-boot.version>
 	</properties>
 	<parent>
