@@ -2,44 +2,36 @@ package org.epos.backoffice.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import org.epos.backoffice.api.exception.ApiResponseMessage;
+import model.RequestStatusType;
+import model.RoleType;
+import org.epos.backoffice.api.util.AddUserToGroupBean;
+import org.epos.backoffice.api.util.ApiResponseMessage;
 import org.epos.backoffice.api.util.UserManager;
-import org.epos.backoffice.bean.BackofficeOperationType;
-import org.epos.backoffice.bean.ComputePermissionAbstract;
-import org.epos.backoffice.bean.RoleEnum;
-import org.epos.backoffice.bean.User;
-import org.epos.backoffice.service.ComputePermissionNoGroup;
-import org.epos.eposdatamodel.Person;
-import org.epos.handler.dbapi.DBAPIClient;
-import org.epos.handler.dbapi.dbapiimplementation.PersonDBAPI;
+import org.epos.eposdatamodel.User;
+import org.epos.eposdatamodel.UserGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
-import static org.epos.backoffice.bean.EntityTypeEnum.USER;
-import static org.epos.backoffice.bean.OperationTypeEnum.GET_ALL;
-import static org.epos.backoffice.bean.OperationTypeEnum.GET_SINGLE;
-import static org.epos.backoffice.bean.RoleEnum.ADMIN;
-import static org.epos.backoffice.bean.RoleEnum.VIEWER;
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
-public class UserController extends MetadataAbstractController<Person> implements ApiDocTag {
+public class UserController extends ManagementAbstractController<User> implements ApiUserGroupDocTag {
 
 	private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
 	@org.springframework.beans.factory.annotation.Autowired
 	public UserController(ObjectMapper objectMapper, HttpServletRequest request) {
-		super(objectMapper, request, Person.class);
+		super(objectMapper, request, User.class);
 	}
 
 	@RequestMapping(value = "/user",
@@ -62,7 +54,6 @@ public class UserController extends MetadataAbstractController<Person> implement
 		
 		System.out.println("Session User: "+user.toString());
 
-		
 		ApiResponseMessage response = UserManager.updateUser(body, user);
 		if(response.getCode()!=4) return ResponseEntity.status(400).body(response);
 
@@ -125,7 +116,7 @@ public class UserController extends MetadataAbstractController<Person> implement
 
 		System.out.println("Session User: "+user.toString());
 		
-		ApiResponseMessage response = UserManager.getUser(null, instance_id, user, available_section);
+		ApiResponseMessage response = UserManager.getUser(instance_id, user, available_section);
 		if(response.getCode()==6) return ResponseEntity.status(403).body(response);
 		if(response.getCode()!=4) return ResponseEntity.status(400).body(response);
 

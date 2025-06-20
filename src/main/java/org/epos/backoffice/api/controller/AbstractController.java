@@ -8,30 +8,14 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
-import org.epos.backoffice.api.exception.ApiResponseMessage;
-import org.epos.backoffice.api.util.GroupFilter;
-import org.epos.backoffice.bean.BackofficeOperationType;
-import org.epos.backoffice.bean.ComputePermissionAbstract;
-import org.epos.backoffice.bean.User;
-import org.epos.backoffice.service.ComputePermissionNoGroup;
 import org.epos.eposdatamodel.EPOSDataModelEntity;
-import org.epos.eposdatamodel.State;
-import org.epos.handler.dbapi.DBAPIClient;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.epos.eposdatamodel.User;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.epos.backoffice.bean.OperationTypeEnum.GET_ALL;
-import static org.epos.backoffice.bean.OperationTypeEnum.GET_SINGLE;
-import static org.epos.backoffice.bean.RoleEnum.ADMIN;
 
 public abstract class AbstractController<T extends EPOSDataModelEntity> {
 
@@ -50,9 +34,9 @@ public abstract class AbstractController<T extends EPOSDataModelEntity> {
 		this.entityType = entityType;
 	}
 
-	protected User getUserFromSession() {
-		return (User) request.getSession().getAttribute("user");
-	}
+			protected User getUserFromSession() {
+				return (User) request.getSession().getAttribute("user");
+			}
 	class LocalDateAdapter implements JsonSerializer<LocalDateTime> {
 
 	    public JsonElement serialize(LocalDateTime date, Type typeOfSrc, JsonSerializationContext context) {

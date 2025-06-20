@@ -5,17 +5,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import org.epos.backoffice.bean.StateWrapper;
 import org.epos.eposdatamodel.Organization;
-import org.epos.eposdatamodel.Organization;
-import org.epos.eposdatamodel.WebService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 
 @RestController
@@ -23,7 +19,7 @@ import javax.servlet.http.HttpServletRequest;
         value = "/organization",
         produces = {"application/json"}
 )
-public class OrganizationController extends ScientificMetadataAbstractController<Organization> implements ApiDocTag {
+public class OrganizationController extends MetadataAbstractController<Organization> implements ApiDocTag {
 
 
     private static final Logger log = LoggerFactory.getLogger(OrganizationController.class);
@@ -50,7 +46,7 @@ public class OrganizationController extends ScientificMetadataAbstractController
             @PathVariable String meta_id,
             @PathVariable String instance_id
     ) {
-        return getMethod(meta_id, instance_id);
+        return getMethod(meta_id, instance_id, null);
     }
     
     @RequestMapping(value = "/{meta_id}",
@@ -69,7 +65,7 @@ public class OrganizationController extends ScientificMetadataAbstractController
     public ResponseEntity<?> get(
             @PathVariable String meta_id
     ) {
-        return getMethod(meta_id, null);
+        return getMethod(meta_id, null,null);
     }
 
     @RequestMapping(value = "",
@@ -110,28 +106,6 @@ public class OrganizationController extends ScientificMetadataAbstractController
     ) {
         return updateMethod(body, false);
     }
-
-    @RequestMapping(
-            value = "/{instance_id}",
-            method = RequestMethod.PUT
-    )
-    @Operation(summary = "Update Organization instance state", description = "You can use this endpoint to update the state of a Organization (more information about which fields are required, who has the permission and how to use it are into the BackOffice repository documentation)")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "The Organization instance is correctly updated.", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "400", description = "Bad request."),
-            @ApiResponse(responseCode = "401", description = "Token is missing or invalid"),
-            @ApiResponse(responseCode = "404", description = "Not found"),
-            @ApiResponse(responseCode = "415", description = "Wrong media type"),
-            @ApiResponse(responseCode = "500", description = "Error executing the request, the error may be, either in the gateway or the backoffice-service")
-    })
-    @ResponseBody
-    public ResponseEntity<?> put(
-            @PathVariable String instance_id,
-            @RequestBody StateWrapper body
-    ) {
-        return updateStateMethod(instance_id, body.getState(), true);
-    }
-
 
     @RequestMapping(value = "/{instance_id}",
             method = RequestMethod.DELETE)

@@ -13,7 +13,7 @@ public class LocalDateTimeConverter implements Converter<String, LocalDateTime> 
 
     @Override
     public LocalDateTime convert(String source) {
-        if (source == null || source.isEmpty()) {
+        if(source == null || source.isEmpty()) {
             return null;
         }
         return LocalDateTime.parse(source, this.formatter);

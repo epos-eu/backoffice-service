@@ -1,15 +1,15 @@
 package org.epos.backoffice.api.controller.interceptor;
 
-import org.epos.backoffice.bean.User;
+import org.epos.eposdatamodel.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.HandlerInterceptor;
+import usermanagementapis.UserGroupManagementAPI;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
-import static org.epos.backoffice.bean.RoleEnum.VIEWER;
 
 import java.io.IOException;
 import java.util.Map;
@@ -24,7 +24,14 @@ public class LogUserInInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
 
         Map<String, String> allRequestParams = convertQueryParameterFromArrayStringToString(request);
-        
+
+
+        /** TODO: DELETE **/
+        if (!allRequestParams.containsKey("userId")) {
+            allRequestParams.put("userId", "admin");
+        }
+
+
         System.out.println(allRequestParams);
 
         if (!allRequestParams.containsKey("userId")) {
@@ -35,35 +42,29 @@ public class LogUserInInterceptor implements HandlerInterceptor {
             return false;
         }
 
-        User user = new User();
-        user.setEduPersonUniqueId(allRequestParams.get("userId"));
+        User user = UserGroupManagementAPI.retrieveUserById(allRequestParams.get("userId"));
 
-        //for the signup endpoint
-        if (request.getMethod().equals("POST") && request.getRequestURI().equals(request.getContextPath() + "/user") && !user.isRegistered()) {
-            HttpSession session = request.getSession();
-            session.setAttribute("user", user);
-            return true;
+        System.out.println(user);
+
+        if(user == null){
+            user = new User();
+            user.setAuthIdentifier(allRequestParams.get("userId"));
+            user.setEmail(allRequestParams.get("email"));
+            user.setFirstName(allRequestParams.get("firstName"));
+            user.setLastName(allRequestParams.get("lastName"));
+            user.setIsAdmin(true); //SWITCH when possible to false
+            if(UserGroupManagementAPI.createUser(user)){
+                user = UserGroupManagementAPI.retrieveUserById(allRequestParams.get("userId"));
+            } else {
+                String message = "{\"message\": \"The user doesn't exists\"}";
+                response.setContentType("application/json");
+                response.getWriter().write(message);
+                response.setStatus(400);
+                return false;
+            }
+
+
         }
-
-        if (!request.getMethod().equals("POST") && !user.isRegistered()) {
-        	System.out.println("ALL REQUEST PARAMETERS: "+allRequestParams.toString());
-        	 user.setEmail(allRequestParams.get("email"));
-        	 user.setFirstName(allRequestParams.get("firstName"));
-        	 user.setLastName(allRequestParams.get("lastName"));
-        	 user.setRole(VIEWER);
-        	 user.signUp();
-        }
-
-        user.signIn();
-
-        if (user.getRole() == null) {
-            String message = "{\"message\": \"The user doesn't have the role\"}";
-            response.setContentType("application/json");
-            response.getWriter().write(message);
-            response.setStatus(500);
-            return false;
-        }
-
 
         HttpSession session = request.getSession();
         session.setAttribute("user", user);

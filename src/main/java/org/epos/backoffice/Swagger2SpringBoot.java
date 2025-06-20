@@ -1,6 +1,5 @@
 package org.epos.backoffice;
 
-
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -8,8 +7,6 @@ import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.epos.backoffice.configuration.LocalDateConverter;
 import org.epos.backoffice.configuration.LocalDateTimeConverter;
-import org.epos.backoffice.service.DBCacheHandler;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.boot.SpringApplication;
@@ -17,37 +14,26 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
-
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @SpringBootApplication
 public class Swagger2SpringBoot implements CommandLineRunner {
 
     public static void main(String[] args) {
-        new SpringApplication(Swagger2SpringBoot.class).run(args);
+        SpringApplication.run(Swagger2SpringBoot.class, args);
     }
 
     @Override
-    public void run(String... arg0) {
-        if (arg0.length > 0 && arg0[0].equals("exitcode")) {
+    public void run(String... args) {
+        if (args.length > 0 && "exitcode".equals(args[0])) {
             throw new ExitException();
         }
-
-        new DBCacheHandler().loadCache();
-
     }
 
-    @Bean
-    public OpenAPI customOpenAPI(@Value("${springdoc.version}") String appVersion) {
-        return new OpenAPI()
-                .components(new Components().addSecuritySchemes("basicScheme",
-                        new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("basic")))
-                .info(new Info().title("BACKOFFICE API").version(appVersion)
-                        .license(new License().name("Apache 2.0").url("http://springdoc.org")));
-    }
-
+    // Se vuoi puoi anche spostare questa classe in un file separato, più pulito
     @Configuration
-    static class CustomDateConfig extends WebMvcConfigurerAdapter {
+    static class CustomDateConfig implements WebMvcConfigurer {
+
         @Override
         public void addFormatters(FormatterRegistry registry) {
             registry.addConverter(new LocalDateConverter("yyyy-MM-dd"));
@@ -55,13 +41,12 @@ public class Swagger2SpringBoot implements CommandLineRunner {
         }
     }
 
-    class ExitException extends RuntimeException implements ExitCodeGenerator {
+    static class ExitException extends RuntimeException implements ExitCodeGenerator {
         private static final long serialVersionUID = 1L;
 
         @Override
         public int getExitCode() {
             return 10;
         }
-
     }
 }

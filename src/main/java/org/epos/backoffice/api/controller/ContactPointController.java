@@ -12,14 +12,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping(
         value = "/contactpoint",
         produces = {"application/json"}
 )
-public class ContactPointController extends ScientificMetadataAbstractController<ContactPoint> implements ApiDocTag{
+public class ContactPointController extends MetadataAbstractController<ContactPoint> implements ApiDocTag{
 
 
     private static final Logger log = LoggerFactory.getLogger(ContactPointController.class);
@@ -46,7 +46,7 @@ public class ContactPointController extends ScientificMetadataAbstractController
             @PathVariable String meta_id,
             @PathVariable String instance_id
     ) {
-        return getMethod(meta_id, instance_id);
+        return getMethod(meta_id, instance_id,null);
     }
     
     @RequestMapping(value = "/{meta_id}",
@@ -65,7 +65,7 @@ public class ContactPointController extends ScientificMetadataAbstractController
     public ResponseEntity<?> get(
             @PathVariable String meta_id
     ) {
-        return getMethod(meta_id, null);
+        return getMethod(meta_id, null,null);
     }
 
 
